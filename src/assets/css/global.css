@@ -1,0 +1,286 @@
+  /* 公共TAb */
+  .menuView {
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    padding: 10px 0;
+    
+  }
+  .menuView .menuItem {
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    padding: 0 18px;
+    line-height: 44px;
+    color: #28282d;
+    font-size: 15px;
+    cursor: pointer;
+    
+  }
+  .menuView .menuItem.select {
+    color: #28282d;
+  }
+  .menuView .menuItem.select:after {
+    position: absolute;
+    content: '';
+    left: 0;
+    right: 0;
+    bottom: 3px;
+    width: 24px;
+    height: 2px;
+    background: #dc670b;
+    margin: auto;
+  }
+  
+  .btn-audio {
+    cursor: pointer;
+  }
+  .topView {
+    display: flex;
+    top: 0;
+    right: 0;
+    padding: 35px 20px 10px 40px;
+    height: 85px;
+    line-height: 40px;
+  }
+  .topView > .tView {
+    line-height: 40px;
+    height: 40px;
+    font-size: 24px;
+    color: #28282D;
+    margin-right: 32px;
+
+  }
+  .topView > .tView p {
+    line-height: 20px;
+  }
+  .topView > .tView p:last-child {
+    font-size: 16px;
+    padding-top: 5px;
+  }
+  .topView > .btn-back{
+    position: absolute;
+    top: 35px;
+    left: 15px;
+    width: 40px;
+    height: 40px;
+    background-image: url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_NavBack.png);
+    background-position: left center;
+    background-size: 28px;
+    background-repeat: no-repeat;
+  }
+  .topView .one > .el-select input {
+    width: 132px;
+    padding: 0 15px 0 0;
+    line-height: 40px;
+    font-size: 24px;
+    color: #28282d;
+    text-align: left;
+    border: none;
+  }
+
+  .set_page {
+    position: absolute;
+    background: #fff;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    bottom: 0;
+    top: 100%;
+    z-index: 201;
+    transition: 1s;
+    opacity: 0;
+  }
+
+  .set_page.activePage {
+    top: 0;
+    opacity: 1;
+  }
+
+  .set_page_right {
+    position: absolute;
+    background: #fff;
+    width: 100%;
+    height: 100%;
+    left: 100%;
+    bottom: 0;
+    top: 0;
+    z-index: 201;
+    transition: 1s;
+    opacity: 0;
+  }
+
+  .set_page_right.activePage {
+    left: 0;
+    opacity: 1;
+  }
+
+  .searchResView {
+    position: relative;
+    right: 0;
+    top: 0;
+    padding-top: 85px;
+    background: transparent;
+    
+  }
+  .searchResView .topSearchView {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    right: 0;
+    margin: auto;
+    width: 400px;
+    background: #fff;
+    height: 44px;
+    display: flex;
+    border-radius: 6px;
+    overflow: hidden;
+   
+  }
+  .searchResView .topSearchView .el-select input{
+    line-height: 34px;
+    border: none;
+    font-size: 15px;
+    color: #28282d;
+    border-right: 0.5px solid rgba(220, 220, 220, 0.7);
+  }
+  .searchResView .topSearchView .inputView {
+    display: flex;
+    position: relative;
+    flex: 1;
+    padding-right: 44px;
+  }
+  .searchResView .topSearchView .inputView .el-select {
+    margin-top: 5px;
+    width: 80px;
+    height: 34px;
+    display: inline-block;
+    position: relative;
+  }
+  .searchResView .topSearchView .inputView input {
+    flex: 1;
+    padding: 10px 15px;
+    font-size: 15px;
+    line-height: 24px;
+    border: none;
+    background: #fff;
+  }
+  .searchResView .topSearchView .inputView .btn-close {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    right: 0;
+    top: 0;
+    background: transparent
+      url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_InputClean.png)
+      center / 18px no-repeat;
+  }
+  .searchResView .topSearchView button {
+    width: 70px;
+    height: 44px;
+    padding: 0;
+    line-height: 44px;
+    font-family: PingFangSC-Semibold;
+    font-size: 16px;
+    color: #fff;
+    background: #d4d4d5;
+  }
+  .searchResView .topSearchView button.search {
+    background: #28282d;
+  }
+
+  .el-dialog__headerbtn {
+    top: 15px;
+  }
+  .el-dialog__headerbtn .el-dialog__close {
+    border-radius: 100%;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+  }
+  .el-dialog__headerbtn:hover .el-dialog__close {
+    background-color: rgba(214, 103, 102, 1);
+    color: #ffffff;
+  }
+
+  .carView {
+    position: absolute;
+    overflow: auto;
+    min-height: 200px;
+    width: 100%;
+    background: #fff;
+}
+
+.carView .popView-headerView  {
+  line-height: 40px;
+  font-size: 24px;
+  padding: 35px 0 10px 0;
+  color: #333333;
+  text-align: center;
+}
+
+.carView  .listView {
+  overflow-x: hidden;
+  overflow-y: auto;
+  background: #fff;
+}
+
+.carView  .listView > .listItem {
+  position: relative;
+  display: flex;
+  padding: 16px 15px;
+}
+
+.carView  .listView > .listItem > .imgView {
+  width: 98px;
+  height: 98px;
+  border-radius: 6px;
+  margin-right: 15px;
+  overflow: hidden;
+}
+
+.carView  .listView > .listItem > .imgView img{
+  width: 98px;
+  height: 98px;
+}
+.carView  .listView > .listItem > .btn-del {
+  position: absolute;
+  top: 7px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  background: #fff url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Delete.png) right center / 28px no-repeat;
+}
+
+.carView  .listView > .listItem > .textView{
+  width: 100%;
+}
+.carView  .listView > .listItem > .textView > .nameView {
+  line-height: 22px;
+  font-size: 15px;
+  height: 44px;
+  overflow: hidden;
+  color: #28282D;
+  padding-right: 40px;
+}
+.carView  .listView > .listItem > .textView > .bView {
+  display: flex;
+  margin-top: 15px;
+  line-height: 36px;
+  height: 36px;
+}
+
+.carView  .listView > .listItem > .textView > .bView > .cntView {
+  margin-top: 2px;
+  height: 36px;
+  line-height: 36px;
+  font-size: 14px;
+  color: #8A8A8A;
+}
+
+.carView  .listView > .listItem > .textView > .bView > .priceView {
+  flex: 1;
+  font-size: 15px;
+  color: #FF5E56;
+  text-align: right;
+}

@@ -1,0 +1,119 @@
+<template>
+  <div id="prolist">
+    <div class="topView">
+      <button class="btn-close btn-audio" @click="back"></button>
+      <div class="tView">
+        <p>库存量统计</p>
+        <p>{{date}}</p>
+      </div>
+      <el-input placeholder="请输入产品编号/名称/统计类别" v-model="searchtxt">
+        <i slot="prefix" class="el-input__icon el-icon-search"></i>
+      </el-input>
+      <i class="el-icon-date" @click="openDate"></i>
+      <el-dialog :visible.sync="dialogVisible" :modal="false" style="height:0;margin-top:10%">
+        <el-date-picker v-model="date" type="date" ref="date" value-format="yyyy年MM月dd日"></el-date-picker>
+      </el-dialog>
+    </div>
+    <div class="bomView">
+      <el-table :data="tableData" stripe style="width: 100%">
+        <el-table-column prop="date" label="产品编号" width="180"></el-table-column>
+        <el-table-column prop="name" label="产品名称" width="180"></el-table-column>
+        <el-table-column prop="address" label="统计类别"></el-table-column>
+        <el-table-column prop="address" label="数量"></el-table-column>
+        <el-table-column prop="address" label="进货单价"></el-table-column>
+        <el-table-column prop="address" label="成本单价"></el-table-column>
+        <el-table-column prop="address" label="产品规格"></el-table-column>
+        <el-table-column prop="address" label="单位换算"></el-table-column>
+      </el-table>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  components: {},
+  props: {},
+  data () {
+    return {
+      item: 1,
+      tableData: [1, 2, 3],
+      add: false,
+      dialogVisible: false,
+      date: '',
+      searchtxt: ''
+    }
+  },
+  watch: {},
+  computed: {},
+  methods: {
+    back () {
+      this.$emit('close')
+    },
+    formatDate (date) {
+      var y = date.getFullYear()
+      var m = date.getMonth() + 1
+      m = m < 10 ? '0' + m : m
+      var d = date.getDate()
+      d = d < 10 ? ('0' + d) : d
+      return y + '年' + m + '月' + d + '日'
+    },
+    openDate () {
+      this.dialogVisible = true
+      this.$nextTick(() => {
+        this.$refs.date.focus()
+      })
+    }
+  },
+  created () {
+    let a = this.formatDate(new Date())
+    this.date = a
+  },
+  mounted () { }
+}
+</script>
+
+<style lang="scss" scoped>
+#prolist {
+  height: 100%;
+  .topView {
+    width: 100%;
+    display: flex;
+    padding: 35px 20px 10px 20px;
+    border-bottom: 0.5px solid rgba(220, 220, 220, 0.7);
+    height: 85px;
+    line-height: 40px;
+    background: #fff;
+    text-align: center;
+    .btn-close {
+      width: 40px;
+      height: 40px;
+      background: transparent
+        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_X_Black.png)
+        left center / 24px no-repeat;
+    }
+    .tView {
+      flex: 1;
+      font-size: 24px;
+      color: #28282d;
+      p {
+        line-height: 20px;
+        &:last-child {
+          font-size: 16px;
+          padding-top: 5px;
+        }
+      }
+    }
+    .el-input {
+      width: 300px;
+    }
+    .el-icon-date {
+      font-size: 30px;
+      margin-left: 20px;
+      cursor: pointer;
+    }
+  }
+  .bomView {
+    padding: 0 20px;
+  }
+}
+</style>

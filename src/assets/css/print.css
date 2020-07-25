@@ -1,0 +1,86 @@
+#printContent {
+  position: relative;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 260px;
+  min-height: 300px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+}
+#print-bcView {
+  box-sizing: border-box;
+  text-align: center;
+  min-width: 160px;
+  padding: 5px 0;
+  width: 100%;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+#printContent .header {
+  border-bottom: 1px solid #333;
+}
+#printContent .listView {
+  margin-top: 0;
+  border-bottom: 1px solid #333;
+}
+
+#print-bcView div {
+  overflow: hidden;
+}
+#printContent .otherInfoView {
+  padding-top: 5px;
+  padding-bottom: 35px;
+  text-align: left;
+}
+#printContent h4 {
+  font-weight: 200;
+  font-size: 13px;
+  line-height: 18px;
+  margin: 0;
+}
+#printContent table tbody tr {
+  background: none;
+  height: auto;
+  line-height: 15px;
+  margin-bottom: 5px;
+}
+#printContent table tr td {
+  display: block;
+  float: left;
+}
+#printContent .listView table tr td:nth-child(1) {
+  width: 58%;
+  text-align: left;
+  padding: 3px 0;
+}
+.print-58 {
+  width: 180px !important;
+}
+.print-58 table {
+  width: 220px !important;
+}
+/* #printContent .textScale {
+  transform-origin: left center;
+  transform: scale(0.833333333);
+  -ms-transform-origin: left center;
+  -ms-transform: scale(0.833333333);
+  -webkit-transform-origin: left center;
+  -webkit-transform: scale(0.833333333);
+} */
+#printContent  table {
+  display: table;
+  border-collapse: separate;
+  box-sizing: border-box;
+  border-spacing: 2px;
+  border-color: grey;
+}
+#printContent tbody {
+  display: table-row-group;
+  vertical-align: middle;
+  border-color: inherit;
+}
+
+  
