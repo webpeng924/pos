@@ -5,16 +5,16 @@
         <button class="btn-back btn-audio" @click="$emit('close')"></button>
         <div class="tView">会员卡详情</div>
       </div>
-      <div class="infoView" @click="show=1">
+      <div class="infoView" @click="show = 1">
         <div class="photoView">
           <div class="imgView">
             <img :src="userinfo.avatar" alt />
           </div>
         </div>
         <div class="textView one-txt-cut">
-          <div class="nameView">{{userinfo.name}}</div>
+          <div class="nameView">{{ userinfo.name }}</div>
           <div class="mobileView">
-            {{userinfo.mobile}}
+            {{ userinfo.mobile }}
             <button class="btn-audio btn-copy"></button>
           </div>
         </div>
@@ -26,11 +26,39 @@
       <div class="menuView listView">
         <!-- <div class="menuItem btn-audio" @click="$message('暂未开放')">资格权益</div>
         <div class="menuItem btn-audio" @click="$message('暂未开放')">储值权益</div>-->
-        <div class="menuItem btn-audio" @click="show=2;name='品项信息';getcicardInfo()">品项信息</div>
-        <div class="menuItem btn-audio" @click="show=2;name='套餐信息';cikalist=[]">套餐信息</div>
+        <div
+          class="menuItem btn-audio"
+          @click="
+            show = 2;
+            name = '品项信息';
+            getcicardInfo();
+          "
+        >品项信息</div>
+        <div
+          class="menuItem btn-audio"
+          @click="
+            show = 2;
+            name = '套餐信息';
+            cikalist = [];
+          "
+        >套餐信息</div>
         <div class="menuItem btn-audio" @click="$message('暂未开放')">抵用券信息</div>
-        <div class="menuItem btn-audio" @click="show=3;name='充值记录';getlist(1)">充值记录</div>
-        <div class="menuItem btn-audio" @click="show=3;name='消费记录';getlist(2)">消费记录</div>
+        <div
+          class="menuItem btn-audio"
+          @click="
+            show = 3;
+            name = '充值记录';
+            getlist(1);
+          "
+        >充值记录</div>
+        <div
+          class="menuItem btn-audio"
+          @click="
+            show = 3;
+            name = '消费记录';
+            getlist(2);
+          "
+        >消费记录</div>
         <!-- <div class="menuItem btn-audio">数据分析</div> -->
         <!-- <div class="menuItem btn-audio">沟通记录</div> -->
         <!-- <div class="menuItem btn-audio">产品寄存</div> -->
@@ -44,7 +72,7 @@
         </button>
       </div>-->
     </div>
-    <div class="contentView" v-show="show==1">
+    <div class="contentView" v-show="show == 1">
       <div class="memberCardInfoView">
         <div class="titleView">会员信息</div>
         <div class="baseInfoView">
@@ -57,8 +85,8 @@
             <div class="subView cardInfoView">
               <div class="textView">
                 <div class="customerView">
-                  <label class="label-name">{{userinfo.name}}</label>
-                  <label class="label-mobile">{{userinfo.mobile}}</label>
+                  <label class="label-name">{{ userinfo.name }}</label>
+                  <label class="label-mobile">{{ userinfo.mobile }}</label>
                 </div>
                 <div class="cardIdView">No.1234568</div>
               </div>
@@ -69,11 +97,11 @@
             <div class="subView remarkView">
               <div class="leftView">会员备注：</div>
               <div class="valView">
-                {{remark?remark:'暂无备注'}}
+                {{ remark ? remark : "暂无备注" }}
                 <img
                   src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Edit_Green.png"
                   class="img-edit"
-                  @click="showMemo=true"
+                  @click="showMemo = true"
                 />
               </div>
             </div>
@@ -82,7 +110,7 @@
         <div class="accInfoView">
           <div class="accItem">
             <div class="valueView balanceView">
-              <label>{{userinfo.balance}}</label>
+              <label>{{ userinfo.balance }}</label>
             </div>
             <div class="nameView">储值账户</div>
           </div>
@@ -100,11 +128,11 @@
           <div class="contentView">
             <div class="subView">
               <div class="leftView">上次到店</div>
-              <div class="valView">{{userinfo.last_time}}</div>
+              <div class="valView">{{ userinfo.last_time }}</div>
             </div>
             <div class="subView">
               <div class="leftView">到店次数</div>
-              <div class="valView">{{userinfo.instore_count}}</div>
+              <div class="valView">{{ userinfo.instore_count }}</div>
             </div>
             <!-- <div class="subView">
               <div class="leftView">真实消费</div>
@@ -112,7 +140,7 @@
             </div>-->
             <div class="subView">
               <div class="leftView">消费总金额</div>
-              <div class="valView">{{userinfo.total_pay}}</div>
+              <div class="valView">{{ userinfo.total_pay }}</div>
             </div>
             <!-- <div class="subView">
               <div class="leftView">客单价</div>
@@ -124,24 +152,28 @@
         <button class="btn-expandArchive"></button>
       </div>
     </div>
-    <div class="contentView" v-show="show==2">
-      <div class="subTView">{{name}}</div>
+    <div class="contentView" v-show="show == 2">
+      <div class="subTView">{{ name }}</div>
       <div class="listView" style="height: 884px;">
         <div class="memberEquityView">
           <div class="menuView">
-            <div class="menuItem" :class="{select:sign==1}" @click="sign=1">可用</div>
-            <div class="menuItem" :class="{select:sign==2}" @click="sign=2">已用</div>
+            <div class="menuItem" :class="{ select: sign == 1 }" @click="sign = 1">可用</div>
+            <div class="menuItem" :class="{ select: sign == 2 }" @click="sign = 2">已用</div>
+
+            <el-button type="warning" class="menuBtn" @click="menuDialog=true">购买次卡</el-button>
           </div>
-          <el-table ref="Table" :data="cikalist" style="width: 100%" height="800px">
+          <el-table ref="Table" :data="cikalist" style="width: 100%">
             <el-table-column type="index" width="50"></el-table-column>
             <el-table-column prop="itemname" label="名称" width="180"></el-table-column>
             <!-- <el-table-column prop="name" label="有效期" width="150"></el-table-column> -->
             <el-table-column prop="first_count" label="购买次数"></el-table-column>
             <!-- <el-table-column prop="address" label="赠送次数"></el-table-column> -->
             <el-table-column label="使用次数">
-              <template
-                slot-scope="scope"
-              >{{Number(scope.row.first_count)-Number(scope.row.rest_count)}}</template>
+              <template slot-scope="scope">
+                {{
+                Number(scope.row.first_count) - Number(scope.row.rest_count)
+                }}
+              </template>
             </el-table-column>
             <el-table-column prop="rest_count" label="剩余次数"></el-table-column>
           </el-table>
@@ -152,16 +184,24 @@
         </div>
       </div>
     </div>
-    <div class="contentView" v-show="show==3">
-      <div class="subTView">{{name}}</div>
+    <div class="contentView" v-show="show == 3">
+      <div class="subTView">{{ name }}</div>
       <div class="listView" style="height: 884px;">
         <el-table ref="Table" :data="tableData" style="width: 100%" height="100%">
           <el-table-column width="50"></el-table-column>
           <el-table-column prop="itemname" label="日期" width="150">
-            <template slot-scope="scope">{{scope.row.dateline|time}}</template>
+            <template slot-scope="scope">
+              {{
+              scope.row.dateline | time
+              }}
+            </template>
           </el-table-column>
           <el-table-column prop="pay_sn" label="单号" width="180" show-overflow-tooltip>
-            <template slot-scope="scope">{{scope.row.pay_sn?scope.row.pay_sn:scope.row.order_no}}</template>
+            <template slot-scope="scope">
+              {{
+              scope.row.pay_sn ? scope.row.pay_sn : scope.row.order_no
+              }}
+            </template>
           </el-table-column>
           <el-table-column label="账户">储值账户</el-table-column>
           <el-table-column prop="type" label="类别"></el-table-column>
@@ -186,89 +226,123 @@
         <el-button @click="showMemo = false" style="background-color:#dc670b;color:#fff">保 存</el-button>
       </span>
     </el-dialog>
+    <!-- 次卡弹窗 -->
+    <el-dialog
+      title="次卡列表"
+      :visible.sync="menuDialog"
+      width="70%"
+      center
+      :modal-append-to-body="false"
+    >
+      <el-table ref="cardTable" :data="cardList" style="width: 100%">
+        <el-table-column width="55">
+          <el-checkbox v-model="checked"></el-checkbox>
+        </el-table-column>
+        <el-table-column label="日期">
+          <template slot-scope="scope">{{ scope.row.date }}</template>
+        </el-table-column>
+        <el-table-column prop="name" label="姓名"></el-table-column>
+        <el-table-column prop="address" label="地址" show-overflow-tooltip></el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import moment from 'moment'
+import moment from "moment";
 export default {
   components: {},
-  props: ['choose'],
+  props: ["choose"],
   data () {
     return {
+      menuDialog: false,
       show: 1,
-      name: '',
+      name: "",
       showMemo: false,
-      remark: '',
-      userinfo: '',
+      remark: "",
+      userinfo: "",
       sign: 1,
-      storeid: sessionStorage.getItem('storeid'),
+      storeid: sessionStorage.getItem("storeid"),
       tableData: [],
       cikalist: [],
-      member_id: ''
-    }
+      member_id: "",
+      cardList: [{
+        date: '2016-05-03',
+        name: '王小虎',
+        address: '上海市普陀区金沙江路 1518 弄'
+      }, {
+        date: '2016-05-02',
+        name: '王小虎',
+        address: '上海市普陀区金沙江路 1518 弄'
+      }]
+    };
   },
   watch: {
     sign (val) {
-      this.getcicardInfo()
-    },
+      this.getcicardInfo();
+    }
   },
   filters: {
     time (value) {
-      return moment.unix(value).format('YYYY-MM-DD')
+      return moment.unix(value).format("YYYY-MM-DD");
     }
   },
   computed: {},
   methods: {
     async getInfo (id) {
-      const res = await this.$axios.get('/api?datatype=get_one_member', {
+      const res = await this.$axios.get("/api?datatype=get_one_member", {
         params: {
           storeid: this.storeid,
           member_id: id
         }
-      })
+      });
       if (res.data.code == 1) {
-        this.userinfo = res.data.data
+        this.userinfo = res.data.data;
         if (this.userinfo.last_time != null) {
-          this.userinfo.last_time = moment.unix(this.userinfo.last_time).format('YYYY-MM-DD')
+          this.userinfo.last_time = moment
+            .unix(this.userinfo.last_time)
+            .format("YYYY-MM-DD");
         }
       }
     },
     async getcicardInfo () {
-      const res = await this.$axios.get('/api?datatype=get_card_memberitem', {
+      const res = await this.$axios.get("/api?datatype=get_card_memberitem", {
         params: {
           storeid: this.storeid,
           member_id: this.member_id,
           sign: this.sign
         }
-      })
+      });
       if (res.data.code == 1) {
-        this.cikalist = res.data.data
-        this.$message.success('加载完成')
+        this.cikalist = res.data.data;
+        this.$message.success("加载完成");
       }
     },
     async getlist (type) {
-      const res = await this.$axios.get('/api?datatype=get_member_moneydetail', {
-        params: {
-          storeid: this.storeid,
-          member_id: this.member_id,
-          type: type
+      const res = await this.$axios.get(
+        "/api?datatype=get_member_moneydetail",
+        {
+          params: {
+            storeid: this.storeid,
+            member_id: this.member_id,
+            type: type
+          }
         }
-      })
+      );
       if (res.data.code == 1) {
-        this.$message.success('加载完成')
-        this.tableData = res.data.data
+        this.$message.success("加载完成");
+        this.tableData = res.data.data;
       }
     }
   },
   created () {
     if (this.choose) {
-      this.getInfo(this.choose.member_id)
-      this.member_id = this.choose.member_id
+      this.getInfo(this.choose.member_id);
+      this.member_id = this.choose.member_id;
     }
   },
   mounted () { }
-}
+};
 </script>
 
 <style lang="scss" scoped>
@@ -377,6 +451,10 @@ export default {
         margin-right: 10px;
       }
     }
+  }
+  /deep/.menuBtn {
+    position: fixed;
+    right: 20px;
   }
   .contentView {
     position: relative;
