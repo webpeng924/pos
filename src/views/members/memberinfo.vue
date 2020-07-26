@@ -233,10 +233,13 @@
       width="70%"
       center
       :modal-append-to-body="false"
+      custom-class="cardDialog"
     >
       <el-table ref="cardTable" :data="cardList" style="width: 100%">
         <el-table-column width="55">
-          <el-checkbox v-model="checked"></el-checkbox>
+          <template slot-scope="{row}">
+            <div class="seleted" :class="{active:check==row.id}" @click="choosed(row)"></div>
+          </template>
         </el-table-column>
         <el-table-column label="日期">
           <template slot-scope="scope">{{ scope.row.date }}</template>
@@ -244,6 +247,10 @@
         <el-table-column prop="name" label="姓名"></el-table-column>
         <el-table-column prop="address" label="地址" show-overflow-tooltip></el-table-column>
       </el-table>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="menuDialog = false">取 消</el-button>
+        <el-button type="primary" @click="setCard">确 定</el-button>
+      </span>
     </el-dialog>
   </div>
 </template>
@@ -255,7 +262,7 @@ export default {
   props: ["choose"],
   data () {
     return {
-      menuDialog: false,
+
       show: 1,
       name: "",
       showMemo: false,
@@ -267,14 +274,19 @@ export default {
       cikalist: [],
       member_id: "",
       cardList: [{
+        id: 1,
         date: '2016-05-03',
         name: '王小虎',
         address: '上海市普陀区金沙江路 1518 弄'
       }, {
+        id: 2,
         date: '2016-05-02',
         name: '王小虎',
         address: '上海市普陀区金沙江路 1518 弄'
-      }]
+      }],
+      check: 0,
+      checkData: '',
+      menuDialog: false,
     };
   },
   watch: {
@@ -289,6 +301,22 @@ export default {
   },
   computed: {},
   methods: {
+    choosed (row) {
+      this.checkData = row
+      this.check = row.id
+    },
+    setCard () {
+      this.menuDialog = false
+    },
+    async getCard () {
+      const res = await this.$axios.get("/api?checkData=get_ci_list", {
+        params: {
+          storeid: this.storeid
+        }
+      })
+      console.log('次卡', res);
+
+    },
     async getInfo (id) {
       const res = await this.$axios.get("/api?datatype=get_one_member", {
         params: {
@@ -336,6 +364,7 @@ export default {
     }
   },
   created () {
+    this.getCard()
     if (this.choose) {
       this.getInfo(this.choose.member_id);
       this.member_id = this.choose.member_id;
@@ -698,6 +727,25 @@ export default {
       outline: none;
       resize: none;
       margin-bottom: 10px;
+    }
+  }
+  /deep/.cardDialog {
+    padding: 0 20px;
+    height: 500px;
+    position: relative;
+    .seleted {
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      border: 1px solid #ccc;
+    }
+    .active {
+      background-color: rgb(133, 206, 97);
+    }
+    /deep/.dialog-footer {
+      position: absolute;
+      right: 30px;
+      bottom: 10px;
     }
   }
 }
