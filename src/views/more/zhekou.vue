@@ -24,12 +24,12 @@
         </el-table-column>
         <el-table-column label="活动开始时间">
           <template slot-scope="scope">
-            <span>{{scope.row.starttime.split(' ')[0]}}</span>
+            <span v-if="scope.row.starttime">{{scope.row.starttime.split(' ')[0]}}</span>
           </template>
         </el-table-column>
         <el-table-column label="活动结束时间">
           <template slot-scope="scope">
-            <span>{{scope.row.endtime.split(' ')[0]}}</span>
+            <span v-if="scope.row.endtime">{{scope.row.endtime.split(' ')[0]}}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作">
@@ -112,8 +112,19 @@
           <el-form-item label="包含项目">
             <div class="list">
               <div class="item" v-for="(v,k) in itemsInfo" :key="k">
+                <i
+                  class="iconfont icon-shanchu1"
+                  style="color:red;padding:0 5px"
+                  @click="removeitem(k)"
+                ></i>
                 <span>{{v.name}}</span>
-                <el-input type="number" min="1" v-model="v.count" size="small"></el-input>次
+                <el-input-number
+                  :min="1"
+                  :max="999"
+                  v-model="v.count"
+                  @change="itemsChange(v)"
+                  size="mini"
+                ></el-input-number>次
               </div>
             </div>
             <i class="i" @click="openXM">添加</i>
@@ -121,8 +132,19 @@
           <el-form-item label="包含产品">
             <div class="list">
               <div class="item" v-for="(v,k) in goodsInfo" :key="k">
+                <i
+                  class="iconfont icon-shanchu1"
+                  style="color:red;padding:0 5px"
+                  @click="removegoods(k)"
+                ></i>
                 <span>{{v.goods_name}}</span>
-                <el-input type="number" min="1" v-model="v.count" size="small"></el-input>
+                <el-input-number
+                  :min="1"
+                  :max="999"
+                  v-model="v.count"
+                  @change="goodsChange(v)"
+                  size="mini"
+                ></el-input-number>
                 {{v.goods_unit}}
               </div>
             </div>
@@ -171,12 +193,35 @@ export default {
       product: false
     }
   },
-  watch: {},
+  watch: {
+    itemsInfo: {
+      handler () {
+        let sum = 0
+        this.itemsInfo.forEach(item => {
+          sum += item.count * item.price
+        })
+        this.goodsInfo.forEach(item => {
+          sum += item.count * item.price
+        })
+        this.form.sale_price = sum + Number(this.form.fact_price)
+      },
+      deep: true
+    },
+    goodsInfo () {
+      let sum = 0
+      this.itemsInfo.forEach(item => {
+        sum += item.count * item.price
+      })
+      this.goodsInfo.forEach(item => {
+        sum += item.count * item.price
+      })
+      this.form.sale_price = sum + Number(this.form.fact_price)
+    }
+  },
   computed: {},
   methods: {
     back () {
       this.$emit('close')
-
     },
     openXM () {
       this.fromtype = true
@@ -252,6 +297,12 @@ export default {
         this.tableData = res.data.data
       }
     },
+    removeitem (k) {
+      this.itemsInfo.splice(k, 1)
+    },
+    removegoods (k) {
+      this.goodsInfo.splice(k, 1)
+    },
     async submit () {
       let data = qs.stringify({
         storeid: this.storeid,
@@ -278,6 +329,12 @@ export default {
       } else {
         this.$message.error('添加失败')
       }
+    },
+    itemsChange (v) {
+
+    },
+    goodsChange (v) {
+
     }
   },
   created () {
@@ -344,6 +401,15 @@ export default {
         }
       }
     }
+  }
+  .el-input-number.el-input-number--mini {
+    margin-right: 10px;
+  }
+  .el-input.el-input--mini {
+    width: 130px !important;
+  }
+  .el-input-number--mini .el-input__inner {
+    padding-left: 0;
   }
 }
 .proDialog {

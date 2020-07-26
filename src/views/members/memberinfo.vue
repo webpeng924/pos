@@ -19,8 +19,8 @@
           </div>
         </div>
         <div class="btnView">
-          <div class="btn-tk">退款</div>
-          <div class="btn-hk">还款</div>
+          <div class="btn-tk" @click="returnCard">退款</div>
+          <div class="btn-hk" @click="huankuan=true">还款</div>
         </div>
       </div>
       <div class="menuView listView">
@@ -38,11 +38,11 @@
         <!-- <div class="menuItem btn-audio">个人档案</div> -->
         <!-- <div class="menuItem btn-audio">扩展档案</div> -->
       </div>
-      <!-- <div class="btnView">
-        <button class="btn-topup btn-audio">
+      <div class="btnView">
+        <button class="btn-topup btn-audio" @click="addmoney">
           <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Topup_White.png" />充值
         </button>
-      </div>-->
+      </div>
     </div>
     <div class="contentView" v-show="show==1">
       <div class="memberCardInfoView">
@@ -171,6 +171,11 @@
         </el-table>
       </div>
     </div>
+
+    <div class="set_page" :class="{activePage:huankuan}">
+      <huankuan @close="huankuan=false" v-if="huankuan" :member="choose"></huankuan>
+    </div>
+
     <el-dialog
       title="备注"
       :visible.sync="showMemo"
@@ -191,14 +196,16 @@
 
 <script>
 import moment from 'moment'
+import huankuan from '@/components/huankuan.vue'
 export default {
-  components: {},
+  components: { huankuan },
   props: ['choose'],
   data () {
     return {
       show: 1,
       name: '',
       showMemo: false,
+      huankuan: false,
       remark: '',
       userinfo: '',
       sign: 1,
@@ -220,6 +227,33 @@ export default {
   },
   computed: {},
   methods: {
+    addmoney () {
+      this.$prompt('请充值金额', '会员充值', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPattern: /^[1-9]\d*(.\d{1,2})?$/,
+        inputErrorMessage: '格式不正确'
+      }).then(({ value }) => {
+        this.$message({
+          type: 'success',
+          message: '已充值: ' + value + '元'
+        });
+      })
+    },
+    returnCard () {
+      this.$confirm('确认将此会员卡退款并注销吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$axios.get('/api?datatype=refund', {
+          params: {
+            storeid: this.storeid,
+            member_id: this.choose.member_id
+          }
+        })
+      })
+    },
     async getInfo (id) {
       const res = await this.$axios.get('/api?datatype=get_one_member', {
         params: {
@@ -350,7 +384,7 @@ export default {
       text-align: center;
       overflow-x: hidden;
       overflow-y: auto;
-      height: calc(100% - 248px);
+      height: calc(100% - 300px);
       background: #fff;
       padding: 10px 0;
       .menuItem {

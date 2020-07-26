@@ -20,7 +20,7 @@ export default {
 </script>
 
 <style lang="css">
-@import '//at.alicdn.com/t/font_1902156_vnq4m6hq8po.css';
+@import '//at.alicdn.com/t/font_1902156_jal59d8ywtq.css';
 
 /* html {
   min-width: 960px;

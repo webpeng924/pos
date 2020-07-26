@@ -9,7 +9,7 @@
       <add @close="add=false;getList()" :choose="choose" v-if="add"></add>
     </div>
     <div class="bomView">
-      <el-table :data="tableData" stripe style="width: 100%" @row-click="toEdit">
+      <el-table :data="tableData" stripe style="width: 100%">
         <el-table-column prop="stock_no" label="盘点单号"></el-table-column>
         <el-table-column prop="pan_date" label="盘点日期"></el-table-column>
         <el-table-column prop="pan_time" label="盘点时间"></el-table-column>
@@ -17,9 +17,7 @@
         <el-table-column prop="name" label="盘点人"></el-table-column>
         <el-table-column label="操作" width="100">
           <template slot-scope="scope">
-            <span
-              :style="scope.row.is_stop==1?'color:#999':'color:lightgreen'"
-            >{{scope.row.is_stop==1?'停用':'正常'}}</span>
+            <el-button @click="todel(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -31,7 +29,7 @@
 import add from './addpan'
 export default {
   components: { add },
-  props: ['from'],
+  props: [],
   data () {
     return {
       item: 1,
@@ -43,7 +41,8 @@ export default {
       catetitle: '全部',
       searchtxt: '',
       choose: '',
-      cateList: []
+      cateList: [],
+      storeid: sessionStorage.getItem('storeid')
     }
   },
   watch: {},
@@ -55,28 +54,41 @@ export default {
     async getList () {
       const res = await this.$axios.get('/api?datatype=get_stock_list', {
         params: {
-          storeid: sessionStorage.getItem('storeid'),
+          storeid: this.storeid,
           sign: 3
         }
       })
       console.log(res)
-      this.tableData = res.data.data
-    },
-    toEdit (row) {
-      if (this.from) {
-        this.$emit('close', row)
+      if (res.data.code == 1 && res.data.data) {
+        this.tableData = res.data.data
       } else {
-        console.log(row)
-        this.choose = row
-        this.add = true
+        this.tableData = []
       }
     },
-    handleClose (done) {
-      this.getList()
-        .then(_ => {
-          done();
+    toEdit (row) {
+      console.log(row)
+      this.choose = row
+      this.add = true
+    },
+    todel (v) {
+      this.$confirm('确认删除此条盘库信息吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$axios.get('/api?datatype=del_stock_pan', {
+          params: {
+            storeid: this.storeid,
+            id: v.id
+          }
         })
-        .catch(_ => { });
+        if (res.data.code == 1) {
+          this.$message.success('删除成功')
+          this.getList()
+        } else {
+          this.$message.error('删除失败')
+        }
+      })
     },
     handleCommand (command) {
       this.cate = command

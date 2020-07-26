@@ -256,7 +256,7 @@
         <div class="item">
           <div class="left">登陆账号（非必填）</div>
           <div class="right">
-            <input type="text" placeholder="请输入" v-model="username" />
+            <input type="text" placeholder="请输入" v-model="username" @input="change" />
           </div>
         </div>
         <div class="item">
@@ -315,6 +315,9 @@ export default {
   methods: {
     back () {
       this.$emit('close')
+    },
+    change () {
+      this.username = this.username.toLowerCase()
     },
     // 打开上传图片
     openCropper () {

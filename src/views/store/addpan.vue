@@ -53,7 +53,7 @@
         <div class="tView">
           详细信息
           <!-- <button class="btn-add btn-audio">扫码</button> -->
-          <button class="btn-add btn-audio" @click="openadd">添加</button>
+          <button class="btn-add btn-audio" @click="openadd">选择产品</button>
           <button style="color:red" v-show="setid" @click="delInstore">删除</button>
         </div>
         <div class="headerView">
@@ -61,28 +61,28 @@
           <div class="nameView">产品名称</div>
           <div class="priceView">现存数量</div>
           <div class="priceView">盘点数量</div>
-          <div class="amtView">差异数量</div>
+          <div class="priceView">差异数量</div>
         </div>
         <div class="listView" v-if="!setid">
           <div class="listItem" v-for="(v,k) in chooselist" :key="k">
             <button class="btn-del btn-audio" @click="delchoose(v)"></button>
             <div class="nameView overflowText">{{v.goods_no}}</div>
             <div class="nameView overflowText">{{v.name?v.name:v.goods_name}}</div>
-            <div class="priceView">{{v.number}}</div>
+            <div class="priceView">{{v.old_num}}</div>
             <div class="priceView">
-              <input v-model="v.in_cost" @change="changeNum(v)" />
+              <input v-model="v.new_num" @change="changeNum(v)" />
             </div>
-            <div class="amtView"></div>
+            <div class="priceView">{{v.cha}}</div>
           </div>
         </div>
         <div class="listView" v-show="setid">
           <div class="listItem" v-for="(v,k) in chooselist" :key="k">
             <button></button>
+            <div class="nameView overflowText">{{v.name?v.name:v.goods_no}}</div>
             <div class="nameView overflowText">{{v.name?v.name:v.goods_name}}</div>
-            <div class="nameView overflowText">{{v.name?v.name:v.goods_name}}</div>
-            <div class="priceView">{{v.in_cost}}</div>
-            <div class="priceView">{{v.in_cost}}</div>
-            <div class="amtView">{{v.total}}</div>
+            <div class="priceView">{{v.old_num}}</div>
+            <div class="priceView">{{v.new_num}}</div>
+            <div class="priceView">{{v.cha}}</div>
           </div>
         </div>
       </div>
@@ -132,13 +132,6 @@
         <el-calendar v-model="date"></el-calendar>
       </div>
     </el-dialog>
-
-    <!-- 生产日期 -->
-    <el-dialog :visible.sync="makeDay" center :append-to-body="true" custom-class="dialog">
-      <div @click="chosMakeDay">
-        <el-calendar v-model="prodate"></el-calendar>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -161,7 +154,6 @@ export default {
       wayDialog: false,
       dateDialog: false,
       workerDialog: false,
-      makeDay: false,
       getType: '员工',
       typeDialog: false,
       date: new Date,
@@ -200,8 +192,8 @@ export default {
         this.buyer = data.name
         this.buyid = data.get_userid
         data.goodsinfo.forEach(item => {
-          this.$set(item, 'outnumber', item.number)
-          this.$set(item, 'oldnumber', Number(item.number) + Number(item.skunum))
+          this.$set(item, 'new_num', item.number)
+          this.$set(item, 'old_num', Number(item.number) + Number(item.skunum))
         })
         this.chooselist = data.goodsinfo
       }
@@ -273,27 +265,21 @@ export default {
       }
     },
     async saveAdd () {
-      if (!this.buyid) return this.$message.error('请选择领取员工')
-      if (!this.usefor) return this.$message.error('请输入领取用途')
+      if (!this.buyid) return this.$message.error('请选择盘点员工')
       if (!this.chooselist.length) return this.$message.error('缺少产品信息')
       let data = qs.stringify({
         storeid: this.storeid,
         stock_no: this.stock_no,
-        out_date: this.formatDate(this.date),
-        out_type: this.way,
-        checkman: JSON.parse(sessionStorage.getItem('userInfo')).username,
+        pan_date: this.formatDate(this.date),
+        // checkman: JSON.parse(sessionStorage.getItem('userInfo')).username,
         warehouse: '总仓库',
-        number: this.chooselist.length,
-        amount: this.totalPrice,
-        get_usertype: '员工',
-        get_userid: this.buyid,
-        useinfo: this.usefor,
+        pan_userid: this.buyid,
         goodsinfo: this.chooselist
       })
-      const res = await this.$axios.post('/api?datatype=insert_out_stock', data)
+      const res = await this.$axios.post('/api?datatype=insert_pan_stock', data)
       console.log(res)
       if (res.data.code == 1) {
-        this.$message.success('出库成功')
+        this.$message.success('盘点成功')
         this.$emit('close', 1)
       }
     },
@@ -306,11 +292,9 @@ export default {
       this.list.forEach(id => {
         let a = this.tableData.find(item => item.id == id)
         let b = this.chooselist.find(val => val.id == id)
-        this.$set(a, 'oldnumber', a.number)
-        this.$set(a, 'outnumber', 0)
-        this.$set(a, 'total', 0)
-        this.$set(a, 'supplier_id', '供应商A')
-        this.$set(a, 'makedate', this.formatDate(new Date()))
+        this.$set(a, 'old_num', a.number)
+        this.$set(a, 'new_num', 0)
+        this.$set(a, 'cha', 0)
         Object.assign(a, b)
         console.log(a, b)
         arr.push(a)
@@ -342,29 +326,12 @@ export default {
     },
     // 修改数量
     changeNum (v) {
-      v.outnumber = v.outnumber.replace(/[^0-9]/g, '')
+      v.new_num = v.new_num.replace(/[^0-9]/g, '')
       this.chooselist.forEach(item => {
         if (item.id == v.id) {
-          if (Number(v.outnumber) > Number(v.oldnumber)) {
-            item.outnumber = v.oldnumber
-          }
-          item.total = Number(item.outnumber) * Number(item.in_cost)
-          item.number = item.outnumber
+          item.cha = Number(item.new_num) - Number(item.old_num)
         }
       })
-    },
-    changeDate (v) {
-      this.prodate = v.makedate
-      this.chosOne = v
-      this.makeDay = true
-    },
-    chosMakeDay () {
-      this.chooselist.forEach(item => {
-        if (item.id == this.chosOne.id) {
-          item.makedate = this.formatDate(this.prodate)
-        }
-      })
-      this.makeDay = false
     }
   },
   created () {
@@ -474,8 +441,8 @@ export default {
         padding-right: 5px;
         font-size: 14px;
         color: #8a8a8a;
-        text-align: center;
         > div {
+          text-align: center;
           flex: 2;
           &.nameView {
             flex: 3;
@@ -501,6 +468,7 @@ export default {
           }
           > div {
             flex: 2;
+            text-align: center;
             input {
               display: block;
               width: 100%;

@@ -315,8 +315,12 @@ export default {
           return "支付宝";
         case "cash":
           return "现金";
-        default:
+        case "signbill":
+          return "会员签账";
+        case "card":
           return "储值账户";
+        default:
+          return "其他";
       }
     }
   }

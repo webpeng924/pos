@@ -50,6 +50,18 @@
               <!-- <span class="s2">39</span> -->
             </div>
           </div>
+          <div class="one" v-show="list3.length">
+            <div class="item">
+              <span class="s1" style="color:red">欠款类</span>
+              <span>实际签账</span>
+              <!-- <span>虚</span> -->
+            </div>
+            <div class="item" v-for="(v,k) in list3" :key="k" style="color:red">
+              <span class="s2">会员签账</span>
+              <span>￥{{v.stotal}}</span>
+              <!-- <span class="s2">39</span> -->
+            </div>
+          </div>
         </div>
       </div>
       <div class="right">
@@ -203,6 +215,14 @@
                       <td>储值账户</td>
                       <td>{{v.stotal}}</td>
                     </tr>
+                    <tr v-show="list3.length">
+                      <td>欠款类:</td>
+                      <td></td>
+                    </tr>
+                    <tr v-for="(v,k) in list3" :key="k+'a'">
+                      <td>会员签账</td>
+                      <td>{{v.stotal}}</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -247,6 +267,7 @@ export default {
       total: 0,
       list1: [],
       list2: [],
+      list3: [],
       newcus: 0,
       oldcus: 0,
       nocard: 0,
@@ -315,6 +336,8 @@ export default {
           this.total += Number(item.stotal)
           if (item.pay_type == 'card') {
             this.list2.push(item)
+          } else if (item.pay_type == 'signbill') {
+            this.list3.push(item)
           } else {
             this.list1.push(item)
           }
