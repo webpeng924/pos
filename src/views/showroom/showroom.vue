@@ -5,28 +5,34 @@
         <label>展厅</label>
       </div>
       <el-badge :value="carlist.length" class="item" v-show="carlist.length">
-        <button class="btn-audio btn-shopCart"></button>
+        <button class="btn-audio btn-shopCart" @click="drawerRight=true"></button>
       </el-badge>
       <button class="btn-audio btn-shopCart" v-show="!carlist.length"></button>
     </div>
     <div class="top">
       <swiper ref="mySwiper" :options="swiperOptions">
-        <swiper-slide>1</swiper-slide>
-        <swiper-slide style="background: lime;">2</swiper-slide>
-        <swiper-slide style="background: blue;">3</swiper-slide>
+        <swiper-slide>
+          <img src="../../assets/images/kv1.jpg" alt />
+        </swiper-slide>
+        <swiper-slide style="background: lime;">
+          <img src="../../assets/images/kv2.jpg" alt />
+        </swiper-slide>
+        <swiper-slide style="background: blue;">
+          <img src="../../assets/images/kv3.jpg" alt />
+        </swiper-slide>
         <div class="swiper-pagination" slot="pagination"></div>
       </swiper>
       <div class="swiper-button-next"></div>
       <div class="swiper-button-prev"></div>
     </div>
     <div class="bottom">
-      <div class="left" @click="showProject = true">
+      <div class="left" @click="chostit = '项目介绍';showProject = true">
         <div class="p">
           <p>项目介绍</p>
           <p>project</p>
         </div>
       </div>
-      <div class="right" @click="showProduct = true">
+      <div class="right" @click="chostit = '产品介绍';showProject = true">
         <div class="p">
           <p>产品介绍</p>
           <p>product</p>
@@ -35,23 +41,73 @@
     </div>
 
     <div class="set_page" :class="{activePage:showProject}">
-      <project @close="showProject=false;modifyCar()" v-if="showProject"></project>
+      <project @close="modifyCar" v-if="showProject" :title="chostit"></project>
     </div>
 
-    <div class="set_page" :class="{activePage:showProduct}">
-      <product @close="showProduct=false;modifyCar()" v-if="showProduct"></product>
-    </div>
+    <!-- <div class="set_page" :class="{activePage:showProduct}">
+      <product @close="modifyCar" v-if="showProduct"></product>
+    </div>-->
+    <el-drawer
+      :visible.sync="drawerRight"
+      direction="rtl"
+      :with-header="false"
+      :append-to-body="true"
+      size="370px"
+    >
+      <div class="carView">
+        <div class="popView-headerView">购物车</div>
+        <div class="listView">
+          <div class="listItem serItem" v-for="(v,k) in carlist" :key="k">
+            <div class="imgView">
+              <img :src="v.img?v.img:'/upload/shop/moren.jpg'|imgUrl" />
+            </div>
+            <div class="textView">
+              <div class="nameView">
+                <span>({{v.typeid==1?'项目':'产品'}})</span>
+                &nbsp;{{v.itemname}}
+              </div>
+              <div class="bView">
+                <div class="cntView">
+                  <el-input-number
+                    size="mini"
+                    v-model="v.num"
+                    @change="handleChange"
+                    :min="1"
+                    :max="999"
+                  ></el-input-number>
+                </div>
+                <div class="priceView">
+                  ￥&nbsp;
+                  <span>{{v.num*Number(v.price)}}</span>
+                </div>
+              </div>
+            </div>
+            <button class="btn-audio btn-del" @click="del(k)"></button>
+          </div>
+        </div>
+        <div class="bottomView">
+          <div class="totalAmtView">
+            合计：
+            <label>
+              ￥&nbsp;
+              <span>{{totalPrice}}</span>
+            </label>
+          </div>
+          <button class="btn-audio btn-order" @click="openAdd">开单</button>
+        </div>
+      </div>
+    </el-drawer>
   </div>
 </template>
 
 <script>
-import project from '@/components/project.vue'
-import product from '@/components/product.vue'
+import project from './project.vue'
+// import product from './product.vue'
 
 import { Swiper, SwiperSlide, directive } from 'vue-awesome-swiper'
 import 'swiper/css/swiper.css'
 export default {
-  components: { Swiper, SwiperSlide, project, product },
+  components: { Swiper, SwiperSlide, project },
   directives: {
     swiper: directive
   },
@@ -74,23 +130,48 @@ export default {
       },
       showProject: false,
       showProduct: false,
-      carlist: JSON.parse(sessionStorage.getItem('carlist'))
+      carlist: JSON.parse(sessionStorage.getItem('carlist')),
+      chostit: '',
+      drawerRight: false,
     }
   },
   watch: {},
   computed: {
     swiper () {
       return this.$refs.mySwiper.$swiper
+    },
+    totalPrice () {
+      let sum = 0
+      this.carlist.forEach(item => {
+        sum += item.num * item.price
+      })
+      return sum
     }
   },
   methods: {
-    modifyCar () {
+    modifyCar (data) {
+      console.log(data)
       let arr = JSON.parse(sessionStorage.getItem('carlist'))
       if (arr) {
         this.carlist = arr
       } else {
         this.carlist = []
       }
+      if (data) {
+        this.carlist = data
+      }
+      this.showProject = false
+      this.showProduct = false
+    },
+    handleChange () {
+
+    },
+    del (k) {
+      this.carlist.splice(k, 1)
+    },
+    openAdd () {
+      sessionStorage.setItem('carlist', JSON.stringify(this.carlist))
+      this.$router.push({ name: 'Home', params: { from: 'car' } })
     }
   },
   created () {
@@ -135,7 +216,11 @@ export default {
     position: relative;
     .swiper-container {
       height: 100%;
-      background: pink;
+      // background: pink;
+      img {
+        width: 100%;
+        height: 100%;
+      }
     }
     .swiper-button-prev {
       color: #fff;
@@ -155,14 +240,23 @@ export default {
       width: 50%;
       cursor: pointer;
       text-align: center;
-      border: 1px solid #000;
+      // border: 1px solid #000;
       position: relative;
+      color: #fff;
       .p {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
       }
+    }
+    .left {
+      background: url(../../assets/images/xmjs.png) no-repeat center center;
+      background-size: 100% 100%;
+    }
+    .right {
+      background: url(../../assets/images/cpjs.png) no-repeat center center;
+      background-size: 100% 100%;
     }
   }
 }

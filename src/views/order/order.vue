@@ -121,6 +121,10 @@
             <div class="leftView">{{showcurrent.status==4?'占用时间':'到店日期'}}</div>
             <div class="valView">{{showcurrent.yytime}}</div>
           </div>
+          <div class="subView">
+            <div class="leftView">操作人</div>
+            <div class="valView">{{showcurrent.checkman}}</div>
+          </div>
           <div class="subView remarkView">
             <div class="leftView">备注</div>
             <div class="valView">{{showcurrent.remark}}</div>

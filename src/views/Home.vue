@@ -164,7 +164,12 @@
     </div>
 
     <div class="set_page" :class="{activePage:page}">
-      <opennew @close="page=false;getorderlist(1);server='服务中';info=''" :info="info" v-if="page"></opennew>
+      <opennew
+        @close="page=false;getorderlist(1);server='服务中';info=''"
+        :info="info"
+        v-if="page"
+        :from="from"
+      ></opennew>
     </div>
 
     <div class="statusView">
@@ -248,6 +253,7 @@ export default {
   props: {},
   data () {
     return {
+      from: this.$route.params.from,
       likeName: '',
       info: '',
       deg: 0,
@@ -527,6 +533,9 @@ export default {
     }
   },
   created () {
+    if (this.from == 'car') {
+      this.page = true
+    }
     this.getworkerlist()
     this.getorderlist(1)
   },

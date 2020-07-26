@@ -81,7 +81,7 @@ export default {
         }
       })
       if (res.data.code == 1 && res.data.list) {
-        this.signbillList = res.data.list.filter(item => !item.repay_time)
+        this.signbillList = res.data.list.filter(item => item.repay_time == 0)
       } else {
         this.signbillList = []
       }

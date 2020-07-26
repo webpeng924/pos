@@ -204,6 +204,7 @@
   }
 
   .carView {
+    height: 100%;
     position: absolute;
     overflow: auto;
     min-height: 200px;
@@ -220,6 +221,7 @@
 }
 
 .carView  .listView {
+  height: calc(100% - 161px);
   overflow-x: hidden;
   overflow-y: auto;
   background: #fff;
@@ -253,7 +255,7 @@
 }
 
 .carView  .listView > .listItem > .textView{
-  width: 100%;
+  width: calc(100% - 100px);
 }
 .carView  .listView > .listItem > .textView > .nameView {
   line-height: 22px;
@@ -283,4 +285,31 @@
   font-size: 15px;
   color: #FF5E56;
   text-align: right;
+}
+
+.carView  .bottomView {
+  display: flex;
+  padding: 15px 20px 20px 20px;
+  line-height: 40px;
+  background: #fff;
+}
+
+.carView .bottomView > .totalAmtView {
+  flex: 1;
+  color: #8A8A8A;
+}
+
+.carView .bottomView > .totalAmtView > label {
+  color: #FF5E56;
+  font-size: 15px;
+}
+
+.carView .btn-order {
+  width: 110px;
+  height: 40px;
+  line-height: 40px;
+  background: #dc670b;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 16px;
 }

@@ -356,21 +356,23 @@ export default {
         }
       })
       console.log(res)
-      this.tableData = res.data.data
-      this.tableData.forEach(item => {
-        this.cateList = []
-        res.data.data.forEach(item => {
-          if (this.cateList.length != 0) {
-            this.cateList.every(v => {
-              if (v.id != item.category_id) {
-                this.cateList.push({ 'id': item.category_id, 'title': item.title })
-              }
-            })
-          } else {
-            this.cateList.push({ 'id': item.category_id, 'title': item.title })
-          }
+      if (res.data.code == 1 && res.data.data) {
+        this.tableData = res.data.data
+        this.tableData.forEach(item => {
+          this.cateList = []
+          res.data.data.forEach(item => {
+            if (this.cateList.length != 0) {
+              this.cateList.every(v => {
+                if (v.id != item.category_id) {
+                  this.cateList.push({ 'id': item.category_id, 'title': item.title })
+                }
+              })
+            } else {
+              this.cateList.push({ 'id': item.category_id, 'title': item.title })
+            }
+          })
         })
-      })
+      }
     },
     chosCp (v) {
       if (!this.list.includes(v.id)) {

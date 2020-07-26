@@ -241,7 +241,7 @@ import addPro from "@/components/addpro.vue";
 import moment from "moment";
 export default {
   components: { addPro },
-  props: {},
+  props: ['Date'],
   data () {
     return {
       date: "",
@@ -299,8 +299,12 @@ export default {
     }
   },
   created () {
-    const a = this.formatDate(new Date());
-    this.date = [a, a];
+    if (this.Date) {
+      this.date = this.Date
+    } else {
+      const a = this.formatDate(new Date());
+      this.date = [a, a];
+    }
   },
   mounted () { },
   filters: {

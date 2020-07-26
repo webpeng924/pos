@@ -79,6 +79,7 @@
           <div class="titleView">财务中心</div>
           <div class="listView">
             <div class="listItem btn-audio" @click="baobiao=true">
+              <!-- <div class="listItem btn-audio" @click="$message('暂无数据')"> -->
               <img src="../../assets/images/xiaofeimingxi.png" />
               <div>消费明细表</div>
             </div>
@@ -114,7 +115,7 @@
               <img src="../../assets/images/chanpin1.png" />
               <div>产品资料</div>
             </div>
-            <div class="listItem btn-audio">
+            <div class="listItem btn-audio" @click="$message('暂未开放')">
               <img src="../../assets/images/xiaohao.png" />
               <div>产品消耗设定</div>
             </div>
@@ -254,7 +255,7 @@
       <msg @close="msg=false" v-if="msg"></msg>
     </div>
     <div class="set_page" :class="{activePage:erweima}">
-      <erweima @close="erweima=false" v-if="erweima"></erweima>
+      <erweima @close="erweima=false;changeEWM()" v-if="erweima"></erweima>
     </div>
     <div class="set_page" :class="{activePage:memberView}">
       <memberView @close="memberView=false" v-if="memberView"></memberView>
@@ -309,6 +310,14 @@ export default {
   watch: {},
   computed: {},
   methods: {
+    changeEWM () {
+      this.$axios.get('/api?datatype=more&storeid=' + this.storeid).then(
+        res => {
+          let data = res.data.data
+          sessionStorage.setItem('shopInfo', JSON.stringify(data))
+        }
+      )
+    },
     selectOption (data) {
       if (this.active == data) {
         if (this.show) {

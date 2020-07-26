@@ -98,11 +98,11 @@
               <div class="leftView">会员备注：</div>
               <div class="valView">
                 {{ remark ? remark : "暂无备注" }}
-                <img
+                <!-- <img
                   src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Edit_Green.png"
                   class="img-edit"
                   @click="showMemo = true"
-                />
+                />-->
               </div>
             </div>
           </div>
@@ -159,8 +159,12 @@
           <div class="menuView">
             <div class="menuItem" :class="{ select: sign == 1 }" @click="sign = 1">可用</div>
             <div class="menuItem" :class="{ select: sign == 2 }" @click="sign = 2">已用</div>
-
-            <el-button type="warning" class="menuBtn" @click="menuDialog=true">购买次卡</el-button>
+            <el-button
+              type="warning"
+              class="menuBtn"
+              @click="menuDialog=true;getCard()"
+              v-show="name=='品项信息'"
+            >购买次卡</el-button>
           </div>
           <el-table ref="Table" :data="cikalist" style="width: 100%">
             <el-table-column type="index" width="50"></el-table-column>
@@ -240,17 +244,17 @@
       :modal-append-to-body="false"
       custom-class="cardDialog"
     >
-      <el-table ref="cardTable" :data="cardList" style="width: 100%">
+      <el-table ref="cardTable" :data="cardList" style="width: 100%" @row-click="choosed">
         <el-table-column width="55">
           <template slot-scope="{row}">
-            <div class="seleted" :class="{active:check==row.id}" @click="choosed(row)"></div>
+            <div class="seleted" :class="{active:check==row.id}"></div>
           </template>
         </el-table-column>
-        <el-table-column label="日期">
-          <template slot-scope="scope">{{ scope.row.date }}</template>
-        </el-table-column>
-        <el-table-column prop="name" label="姓名"></el-table-column>
-        <el-table-column prop="address" label="地址" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="item_no" label="项目编号"></el-table-column>
+        <el-table-column prop="name" label="项目名称"></el-table-column>
+        <el-table-column prop="price" label="项目单价"></el-table-column>
+        <el-table-column prop="ccard_count" label="次数"></el-table-column>
+        <el-table-column prop="ccard_total" label="优惠总价"></el-table-column>
       </el-table>
       <span slot="footer" class="dialog-footer">
         <el-button @click="menuDialog = false">取 消</el-button>
@@ -268,7 +272,6 @@ export default {
   props: ['choose'],
   data () {
     return {
-
       show: 1,
       name: "",
       showMemo: false,
@@ -280,17 +283,7 @@ export default {
       tableData: [],
       cikalist: [],
       member_id: "",
-      cardList: [{
-        id: 1,
-        date: '2016-05-03',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        id: 2,
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }],
+      cardList: [],
       check: 0,
       checkData: '',
       menuDialog: false,
@@ -314,11 +307,20 @@ export default {
         cancelButtonText: '取消',
         inputPattern: /^[1-9]\d*(.\d{1,2})?$/,
         inputErrorMessage: '格式不正确'
-      }).then(({ value }) => {
-        this.$message({
-          type: 'success',
-          message: '已充值: ' + value + '元'
-        });
+      }).then(async ({ value }) => {
+        const res = await this.$axios.get('/api?datatype=recharge', {
+          params: {
+            storeid: this.storeid,
+            member_id: this.member_id,
+            money: value
+          }
+        })
+        if (res.data.code == 1) {
+          this.$message.success('充值成功')
+          this.getInfo(this.member_id)
+        } else {
+          this.$message.error('充值失败')
+        }
       })
     },
     returnCard () {
@@ -333,23 +335,43 @@ export default {
             member_id: this.choose.member_id
           }
         })
+        if (res.data.code == 1) {
+          this.$message.error('退款成功')
+          this.getInfo(this.member_id)
+        }
       })
     },
     choosed (row) {
       this.checkData = row
       this.check = row.id
     },
-    setCard () {
-      this.menuDialog = false
+    async setCard () {
+      const res = await this.$axios.get('/api?datatype=buy_ccard', {
+        params: {
+          storeid: this.storeid,
+          member_id: this.choose.member_id,
+          id: this.check
+        }
+      })
+      if (res.data.code == 1) {
+        this.$message.success('购买成功')
+        this.getInfo(this.choose.member_id)
+        this.menuDialog = false
+      } else {
+        this.$message.error(res.data.msg)
+      }
     },
     async getCard () {
-      const res = await this.$axios.get("/api?checkData=get_ci_list", {
+      const res = await this.$axios.get("/api?datatype=get_ci_list", {
         params: {
           storeid: this.storeid
         }
       })
-      console.log('次卡', res);
-
+      if (res.data.code == 1 && res.data.data) {
+        this.cardList = res.data.data
+      } else {
+        this.cardList = []
+      }
     },
     async getInfo (id) {
       const res = await this.$axios.get("/api?datatype=get_one_member", {
@@ -398,7 +420,6 @@ export default {
     }
   },
   created () {
-    this.getCard()
     if (this.choose) {
       this.getInfo(this.choose.member_id);
       this.member_id = this.choose.member_id;

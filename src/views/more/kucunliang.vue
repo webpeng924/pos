@@ -3,27 +3,27 @@
     <div class="topView">
       <button class="btn-close btn-audio" @click="back"></button>
       <div class="tView">
-        <p>库存量统计</p>
-        <p>{{date}}</p>
+        库存量统计
+        <!-- <p>{{date}}</p> -->
       </div>
-      <el-input placeholder="请输入产品编号/名称/统计类别" v-model="searchtxt">
+      <el-input placeholder="请输入产品编号/名称" v-model="searchtxt" style="width:200px" @input="getCPlist">
         <i slot="prefix" class="el-input__icon el-icon-search"></i>
       </el-input>
-      <i class="el-icon-date" @click="openDate"></i>
+      <!-- <i class="el-icon-date" @click="openDate"></i>
       <el-dialog :visible.sync="dialogVisible" :modal="false" style="height:0;margin-top:10%">
         <el-date-picker v-model="date" type="date" ref="date" value-format="yyyy年MM月dd日"></el-date-picker>
-      </el-dialog>
+      </el-dialog>-->
     </div>
     <div class="bomView">
       <el-table :data="tableData" stripe style="width: 100%">
-        <el-table-column prop="date" label="产品编号" width="180"></el-table-column>
-        <el-table-column prop="name" label="产品名称" width="180"></el-table-column>
-        <el-table-column prop="address" label="统计类别"></el-table-column>
-        <el-table-column prop="address" label="数量"></el-table-column>
-        <el-table-column prop="address" label="进货单价"></el-table-column>
-        <el-table-column prop="address" label="成本单价"></el-table-column>
-        <el-table-column prop="address" label="产品规格"></el-table-column>
-        <el-table-column prop="address" label="单位换算"></el-table-column>
+        <el-table-column prop="goods_no" label="产品编号"></el-table-column>
+        <el-table-column prop="goods_name" label="产品名称"></el-table-column>
+        <el-table-column prop="title" label="统计类别"></el-table-column>
+        <el-table-column prop="number" label="数量"></el-table-column>
+        <el-table-column prop="in_cost" label="进货单价"></el-table-column>
+        <el-table-column prop="price" label="成本单价"></el-table-column>
+        <el-table-column prop="goods_unit" label="产品规格"></el-table-column>
+        <!-- <el-table-column prop="address" label="单位换算"></el-table-column> -->
       </el-table>
     </div>
   </div>
@@ -36,11 +36,12 @@ export default {
   data () {
     return {
       item: 1,
-      tableData: [1, 2, 3],
+      tableData: [],
       add: false,
       dialogVisible: false,
       date: '',
-      searchtxt: ''
+      searchtxt: '',
+      storeid: sessionStorage.getItem('storeid'),
     }
   },
   watch: {},
@@ -48,6 +49,20 @@ export default {
   methods: {
     back () {
       this.$emit('close')
+    },
+    async getCPlist () {
+      const res = await this.$axios.get('/api?datatype=get_skulist', {
+        params: {
+          storeid: this.storeid,
+          search: this.searchtxt
+        }
+      })
+      console.log(res)
+      if (res.data.code == 1 && res.data.data) {
+        this.tableData = res.data.data
+      } else {
+        this.tableData = []
+      }
     },
     formatDate (date) {
       var y = date.getFullYear()
@@ -65,8 +80,9 @@ export default {
     }
   },
   created () {
-    let a = this.formatDate(new Date())
-    this.date = a
+    // let a = this.formatDate(new Date())
+    // this.date = a
+    this.getCPlist()
   },
   mounted () { }
 }

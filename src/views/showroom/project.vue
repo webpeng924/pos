@@ -2,7 +2,7 @@
   <div id="produce">
     <div class="topView">
       <button class="btn-back" @click="back"></button>
-      <div class="tView">项目介绍</div>
+      <div class="tView">{{title}}</div>
       <el-badge :value="carlist.length" class="item" v-show="carlist.length">
         <button class="btn-audio btn-shopCart" @click="drawerRight=true"></button>
       </el-badge>
@@ -13,7 +13,7 @@
         class="menuItem btn-audio"
         style="margin-left: 25px;"
         :class="{select:active==v.id}"
-        @click="active=v.id;getXMlist()"
+        @click="changeActive(v.id)"
         v-for="(v,k) in catelist"
         :key="k"
       >{{v.title}}</div>
@@ -81,7 +81,7 @@
             </div>
             <div class="textView">
               <div class="nameView">
-                <span>(项目)</span>
+                <span>({{v.typeid==1?'项目':'产品'}})</span>
                 &nbsp;{{v.itemname}}
               </div>
               <div class="bView">
@@ -103,6 +103,16 @@
             <button class="btn-audio btn-del" @click="del(k)"></button>
           </div>
         </div>
+        <div class="bottomView">
+          <div class="totalAmtView">
+            合计：
+            <label>
+              ￥&nbsp;
+              <span>{{totalPrice}}</span>
+            </label>
+          </div>
+          <button class="btn-audio btn-order" @click="openAdd">开单</button>
+        </div>
       </div>
     </el-drawer>
   </div>
@@ -111,7 +121,7 @@
 <script>
 export default {
   components: {},
-  props: {},
+  props: ['title'],
   data () {
     return {
       item: 1,
@@ -126,34 +136,78 @@ export default {
     }
   },
   watch: {},
-  computed: {},
+  computed: {
+    totalPrice () {
+      let sum = 0
+      this.carlist.forEach(item => {
+        sum += item.num * item.price
+      })
+      return sum
+    }
+  },
   beforeDestroy () {
     sessionStorage.setItem('carlist', JSON.stringify(this.carlist))
   },
   methods: {
     back () {
-      this.$emit('close')
+      console.log(this.carlist)
+      this.$emit('close', this.carlist)
     },
     additem () {
-      let obj = {
-        worker: '',
-        typeid: 1,
-        itemid: this.chooseItem.id,
-        num: 1,
-        itemname: this.chooseItem.name,
-        staff1: 0,
-        price: this.chooseItem.price,
-        subtotal: this.chooseItem.price,
-        is_usecard: 0,
-        discount: 1,
-        img: this.chooseItem.img,
+      let obj
+      if (this.title == '产品介绍') {
+        obj = {
+          worker: '',
+          typeid: 2,
+          itemid: this.chooseItem.goods_id,
+          num: 1,
+          itemname: this.chooseItem.goods_name,
+          staff1: 0,
+          price: this.chooseItem.price,
+          subtotal: this.chooseItem.price,
+          is_usecard: 0,
+          discount: 1,
+          img: this.chooseItem.img,
+        }
+      } else {
+        obj = {
+          worker: '',
+          typeid: 1,
+          itemid: this.chooseItem.id,
+          num: 1,
+          itemname: this.chooseItem.name,
+          staff1: 0,
+          price: this.chooseItem.price,
+          subtotal: this.chooseItem.price,
+          is_usecard: 0,
+          discount: 1,
+          img: this.chooseItem.img,
+        }
       }
       if (this.carlist && this.carlist.length) {
-        this.carlist.forEach(item => {
-          if (item.id != this.chooseItem.id) {
+        if (this.title == '项目介绍') {
+          let flag = this.carlist.some(item => item.typeid == 1 && item.itemid == this.chooseItem.id)
+          if (flag) {
+            this.carlist.filter(v => {
+              if (v.itemid == this.chooseItem.id) {
+                v.num++
+              }
+            })
+          } else {
             this.carlist.push(obj)
           }
-        })
+        } else {
+          let flag = this.carlist.some(item => item.typeid == 2 && item.itemid == this.chooseItem.goods_id)
+          if (flag) {
+            this.carlist.filter(v => {
+              if (v.typeid == 2 && v.itemid == this.chooseItem.goods_id) {
+                v.num++
+              }
+            })
+          } else {
+            this.carlist.push(obj)
+          }
+        }
       } else {
         this.carlist.push(obj)
       }
@@ -161,6 +215,15 @@ export default {
       this.drawer = false
     },
     handleChange () {
+
+    },
+    changeActive (id) {
+      this.active = id
+      if (this.title == '项目介绍') {
+        this.getXMlist()
+      } else {
+        this.getCPlist()
+      }
 
     },
     // 获取项目分类
@@ -187,12 +250,43 @@ export default {
         this.XMlist = []
       }
     },
+    // 获取产品分类
+    async getCPcate () {
+      const res = await this.$axios.get('/api?datatype=get_goodscate&storeid=' + this.storeid)
+      console.log(res)
+      this.catelist = res.data.data
+      this.active = res.data.data[0].id
+      this.getCPlist()
+    },
+    async getCPlist () {
+      const res = await this.$axios.get('/api?datatype=get_skulist', {
+        params: {
+          cate: this.active,
+          storeid: this.storeid
+        }
+      })
+      console.log(res)
+      if (res.data.code == 1 && res.data.data) {
+        this.XMlist = res.data.data
+      } else {
+        this.XMlist = []
+      }
+    },
     del (k) {
       this.carlist.splice(k, 1)
+    },
+    openAdd () {
+      sessionStorage.setItem('carlist', JSON.stringify(this.carlist))
+      this.$router.push({ name: 'Home', params: { from: 'car' } })
     }
   },
   created () {
-    this.getXMcate()
+    if (this.title == '项目介绍') {
+      this.getXMcate()
+    } else {
+      this.getCPcate()
+    }
+
     let arr = JSON.parse(sessionStorage.getItem('carlist'))
     if (arr) {
       this.carlist = arr

@@ -317,7 +317,7 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_stock_no', {
         params: {
           storeid: this.storeid,
-          type: 2
+          type: 3
         }
       })
       if (res.data.code == 1) {

@@ -9,11 +9,11 @@
       <div
         class="menuItem btn-audio"
         style="margin-left: 25px;"
-        :class="{select:item==1}"
-        @click="item=1"
-      >护理</div>
-      <div class="menuItem btn-audio" :class="{select:item==2}" @click="item=2">美容</div>
-      <div class="menuItem btn-audio" :class="{select:item==3}" @click="item=3">精油</div>
+        :class="{select:active==v.id}"
+        @click="changeActive(v.id)"
+        v-for="(v,k) in catelist"
+        :key="k"
+      >{{v.title}}</div>
     </div>
   </div>
 </template>
@@ -24,7 +24,9 @@ export default {
   props: {},
   data () {
     return {
-      item: 1
+      storeid: sessionStorage.getItem('storeid'),
+      catelist: [],
+      active: ''
     }
   },
   watch: {},
@@ -32,9 +34,35 @@ export default {
   methods: {
     back () {
       this.$emit('close')
-    }
+    },
+    changeActive (id) {
+      this.active = id
+      this.getCPlist()
+    },
+    // 获取产品分类
+    async getCPcate () {
+      const res = await this.$axios.get('/api?datatype=get_goodscate&storeid=' + this.storeid)
+      console.log(res)
+      this.catelist = res.data.data
+      this.active = res.data.data[0].id
+      this.getCPlist()
+    },
+    async getCPlist () {
+      const res = await this.$axios.get('/api?datatype=get_skulist', {
+        params: {
+          cate: this.active,
+          storeid: this.storeid
+        }
+      })
+      console.log(res)
+      if (res.data.code == 1 && res.data.data) {
+        this.tableData = res.data.data
+      } else {
+        this.tableData = []
+      }
+    },
   },
-  created () { },
+  created () { this.getCPcate() },
   mounted () { }
 }
 </script>

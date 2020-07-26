@@ -27,13 +27,13 @@
               <input type="text" placeholder="请输入" v-model="goodsInfo.price" />
             </div>
           </div>
-          <!-- <div class="subItem type-select">
-            <label class="label-leftText">折扣类别</label>
+          <div class="subItem type-input">
+            <label class="label-leftText">采购价格</label>
             <div class="valView">
-              <input type="text" placeholder="请选择" v-model="belong_job" readonly />
+              <input type="text" placeholder="请输入" v-model="goodsInfo.in_cost" />
             </div>
             <i class="el-icon-arrow-right"></i>
-          </div>-->
+          </div>
           <div class="subItem type-select">
             <label class="label-leftText">统计分类</label>
             <div class="valView" @click="categoryDialog=true">
@@ -158,6 +158,7 @@ export default {
         goods_name: '',
         goods_no: '',
         price: '',
+        in_cost: '',
         category_id: '',
         warehouse: '总仓库',
         goods_unit: '',
@@ -197,6 +198,7 @@ export default {
         goods_name: this.goodsInfo.goods_name,
         goods_no: this.goodsInfo.goods_no,
         price: this.goodsInfo.price,
+        in_cost: this.goodsInfo.in_cost,
         category_id: this.goodsInfo.category_id,
         warehouse: this.goodsInfo.warehouse,
         goods_unit: this.goodsInfo.goods_unit,
@@ -228,6 +230,7 @@ export default {
       this.goodsInfo.warehouse = this.choose.warehouse
       this.goodsInfo.name = this.choose.name
       this.goodsInfo.price = this.choose.price
+      this.goodsInfo.in_cost = this.choose.in_cost
       this.goodsInfo.category_id = this.choose.category_id
       this.goodsInfo.goods_unit = this.choose.goods_unit
       this.goodsInfo.is_stop = this.choose.is_stop == 1 ? true : false

@@ -9,6 +9,9 @@ import 'element-ui/lib/theme-chalk/index.css'
 import './assets/css/reset.css'
 import './assets/css/global.css'
 
+import VueDND from 'awe-dnd'
+
+Vue.use(VueDND)
 import animated from 'animate.css'
 // import 'amfe-flexible'
 //全局过滤器

@@ -577,6 +577,7 @@ export default {
         yytime: this.staTime,
         itemid: this.chosItem.id,
         itemname: this.chosItem.name,
+        checkman: JSON.parse(sessionStorage.getItem('userInfo')).username,
         price: this.chosItem.price,
         remark: this.remark
       }

@@ -45,7 +45,7 @@
                 </div>
                 <div class="payableAmt" style="color:#ccc">
                   优惠金额：
-                  <label>￥&nbsp;{{bookinfo.total-bookinfo.dis_total}}</label>
+                  <label>￥&nbsp;{{(bookinfo.total-bookinfo.dis_total).toFixed(2)}}</label>
                 </div>
                 <div class="toPayAmt">
                   待付金额：
@@ -236,6 +236,8 @@ export default {
       if (res.data.code == 1) {
         this.$message.success('完成')
         this.payend = true
+      } else {
+        this.$message.error(res.data.msg)
       }
     },
     changepaytype (data) {

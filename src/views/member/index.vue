@@ -27,7 +27,7 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="page_num"
-        :page-sizes="[1, 10, 15, 20]"
+        :page-sizes="[5, 10, 15, 20]"
         :page-size="page_size"
         layout="total, sizes, prev, pager, next, jumper"
         :total="2"
@@ -35,10 +35,11 @@
       ></el-pagination>
     </div>
     <el-dialog
-      title="会员基本信息"
+      title="会员信息"
       width="30%"
       :visible.sync="dialogVisible"
       :modal-append-to-body="false"
+      center
     >
       <div class="info">
         <div class="info-item">
@@ -46,7 +47,7 @@
           <span>{{ onceList.account }}</span>
         </div>
         <div class="info-item">
-          <span>会员名称；</span>
+          <span>会员姓名：</span>
           <span>{{ onceList.name }}</span>
         </div>
         <div class="info-item">
@@ -70,10 +71,10 @@
           <span>{{ onceList.sex == 1 ? "男" : "女" }}</span>
         </div>
       </div>
-      <span slot="footer" class="dialog-footer">
+      <!-- <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-      </span>
+      </span>-->
     </el-dialog>
   </div>
 </template>
@@ -84,7 +85,7 @@ export default {
     return {
       tableData: [],
       dialogVisible: false,
-      page_size: 1,
+      page_size: 5,
       page_num: 1,
       total: "",
       onceList: []
@@ -156,6 +157,19 @@ export default {
   }
   .info {
     padding: 20px;
+    .info-item {
+      line-height: 40px;
+      display: flex;
+      span {
+        &:first-child {
+          width: 90px;
+        }
+        &:last-child {
+          flex: 1;
+          text-align: right;
+        }
+      }
+    }
   }
 
   .member-header {

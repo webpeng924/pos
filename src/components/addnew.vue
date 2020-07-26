@@ -304,7 +304,7 @@ import qs from 'qs'
 import { userInfo } from 'os';
 export default {
   components: { chooseworker, closeBook },
-  props: ['info'],
+  props: ['info', 'from'],
   data () {
     return {
       member: '',
@@ -411,6 +411,7 @@ export default {
       })
     },
     async submit (status) {
+      sessionStorage.removeItem('carlist')
       let type = 1
       let id = 0
       if (this.info) {
@@ -842,7 +843,7 @@ export default {
               v['worker'] = workerlist.find(item => item.id == v.staff1)
             })
           }
-          this.newprice = ''
+          this.newprice = this.info.dis_total
           this.memo = this.info.remark
           this.chooslist = this.info.orderinfo
           this.chooslist.forEach(item => {
@@ -861,6 +862,10 @@ export default {
     }
   },
   created () {
+    if (this.from == 'car') {
+      let arr = JSON.parse(sessionStorage.getItem('carlist'))
+      this.chooslist = arr
+    }
     this.getXMcate()
     this.getList()
   },

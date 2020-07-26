@@ -244,7 +244,7 @@
       </el-dialog>
     </div>
     <div class="set_page" :class="{activePage:ysmingxi}">
-      <ysmingxi @close="ysmingxi=false" v-if="ysmingxi"></ysmingxi>
+      <ysmingxi @close="ysmingxi=false" v-if="ysmingxi" :Date="date"></ysmingxi>
     </div>
   </div>
 </template>
@@ -331,31 +331,53 @@ export default {
       })
       if (res.data.code == 1) {
         this.total = 0
+        this.list1 = []
+        this.list2 = []
+        this.list3 = []
+        this.newcus = 0
+        this.oldcus = 0
+        this.nocard = 0
+        this.card = 0
+        this.chong = {
+          ccount: 0,
+          point: 0,
+          total: 0
+        }
+        this.kaika = {
+          ccount: 0,
+          point: 0,
+          total: 0
+        }
         this.infolist = res.data.data
-        res.data.data.arr1.forEach(item => {
-          this.total += Number(item.stotal)
-          if (item.pay_type == 'card') {
-            this.list2.push(item)
-          } else if (item.pay_type == 'signbill') {
-            this.list3.push(item)
-          } else {
-            this.list1.push(item)
-          }
-        })
-        res.data.data.customer1.forEach(item => {
-          if (item.customer_type == 1) {
-            this.nocard = item.ccount
-          } else {
-            this.card = item.ccount
-          }
-        })
-        res.data.data.customer1.forEach(item => {
-          if (item.customer_type == 1) {
-            this.newcus = item.ccount
-          } else {
-            this.oldcus = item.ccount
-          }
-        })
+        if (res.data.data.arr1) {
+          res.data.data.arr1.forEach(item => {
+            this.total += Number(item.stotal)
+            if (item.pay_type == 'card') {
+              this.list2.push(item)
+            } else if (item.pay_type == 'signbill') {
+              this.list3.push(item)
+            } else {
+              this.list1.push(item)
+            }
+          })
+        }
+        if (res.data.data.customer1) {
+          res.data.data.customer1.forEach(item => {
+            if (item.customer_type == 1) {
+              this.nocard = item.ccount
+            } else {
+              this.card = item.ccount
+            }
+          })
+          res.data.data.customer1.forEach(item => {
+            if (item.customer_type == 1) {
+              this.newcus = item.ccount
+            } else {
+              this.oldcus = item.ccount
+            }
+          })
+        }
+
         if (res.data.data.member != null) {
           res.data.data.member.forEach(item => {
             if (item.type == '充值') {

@@ -86,7 +86,12 @@ export default {
   components: {
     xcropper
   },
-  created () { }
+  created () {
+    let info = JSON.parse(sessionStorage.getItem('shopInfo'))
+    this.zfb = info.zfb_code
+    this.wx = info.wx_code
+    this.other = info.other_code
+  }
 };
 </script>
 
@@ -113,7 +118,7 @@ export default {
 .erweima-pay {
   display: flex;
   justify-content: space-between;
-  padding: 50px 15%;
+  padding: 50px 5%;
   .line::after {
     content: '';
     display: block;
@@ -145,7 +150,7 @@ export default {
       text-align: center;
       img {
         max-width: 300px;
-        height: 300px;
+        max-height: 300px;
       }
     }
   }
