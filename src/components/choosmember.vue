@@ -62,7 +62,7 @@
     <div class="bView">
       <div class="cntView">
         数量：
-        <el-input-number v-model="num" :min="1" :disabled="isusecard"></el-input-number>
+        <el-input-number v-model="num" :min="1" :max="maxNum" :disabled="isusecard"></el-input-number>
       </div>
       <div class="amtView">
         总价：
@@ -84,6 +84,7 @@ export default {
       money: 0,
       callback: null,
       num: 1,
+      maxNum: 9999,
       storeid: sessionStorage.getItem('storeid'),
       choose: '1',
       choose1: null,
@@ -99,6 +100,9 @@ export default {
       this.serverfor = option.serverfor
       this.money = option.money
       this.num = option.num
+      if (option.maxNum) {
+        this.maxNum = Number(option.maxNum)
+      }
       this.$nextTick(() => {
         this.getworkerlist()
       })
@@ -121,7 +125,7 @@ export default {
           }
         })
         this.workerlist = res.data.data
-        if (this.setinfo.worker) {
+        if (this.setinfo.worker && this.setinfo.worker.staff1 != 0) {
           this.choosegong = this.workerlist.find(item => item.id == this.setinfo.worker.staff1)
         }
       }
@@ -149,7 +153,7 @@ export default {
     submit () {
       let data = {
         num: this.num,
-        choose: this.choosegong,
+        choose: { gong: this.choosegong },
         price: this.money * this.num
       }
       console.log(data)

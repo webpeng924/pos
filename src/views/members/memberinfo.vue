@@ -33,6 +33,7 @@
             name = '品项信息';
             getcicardInfo();
           "
+          :class="{select:show == 2&&name =='品项信息'}"
         >品项信息</div>
         <div
           class="menuItem btn-audio"
@@ -41,6 +42,7 @@
             name = '套餐信息';
             cikalist = [];
           "
+          :class="{select:show == 2&&name =='套餐信息'}"
         >套餐信息</div>
         <div class="menuItem btn-audio" @click="$message('暂未开放')">抵用券信息</div>
         <div
@@ -50,6 +52,7 @@
             name = '充值记录';
             getlist(1);
           "
+          :class="{select:show == 3&&name =='充值记录'}"
         >充值记录</div>
         <div
           class="menuItem btn-audio"
@@ -58,8 +61,17 @@
             name = '消费记录';
             getlist(2);
           "
+          :class="{select:show == 3&&name =='消费记录'}"
         >消费记录</div>
-        <!-- <div class="menuItem btn-audio">数据分析</div> -->
+        <div
+          class="menuItem btn-audio"
+          @click="
+            show = 4;
+            name = '案例图片';
+            getmemberPic()
+          "
+          :class="{select:show == 4&&name =='案例图片'}"
+        >案例图片</div>
         <!-- <div class="menuItem btn-audio">沟通记录</div> -->
         <!-- <div class="menuItem btn-audio">产品寄存</div> -->
         <!-- <div class="menuItem btn-audio">皮肤检测</div> -->
@@ -67,7 +79,7 @@
         <!-- <div class="menuItem btn-audio">扩展档案</div> -->
       </div>
       <div class="btnView">
-        <button class="btn-topup btn-audio" @click="addmoney">
+        <button class="btn-topup btn-audio" @click="showaddMoney=true">
           <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Topup_White.png" />充值
         </button>
       </div>
@@ -159,18 +171,15 @@
           <div class="menuView">
             <div class="menuItem" :class="{ select: sign == 1 }" @click="sign = 1">可用</div>
             <div class="menuItem" :class="{ select: sign == 2 }" @click="sign = 2">已用</div>
-            <el-button
-              type="warning"
-              class="menuBtn"
-              @click="menuDialog=true;getCard()"
-              v-show="name=='品项信息'"
-            >购买次卡</el-button>
+            <div class="menuItem" :class="{ select: sign == 3 }" @click="sign = 3">过期</div>
           </div>
           <el-table ref="Table" :data="cikalist" style="width: 100%">
             <el-table-column type="index" width="50"></el-table-column>
             <el-table-column prop="itemname" label="名称" width="180"></el-table-column>
-            <!-- <el-table-column prop="name" label="有效期" width="150"></el-table-column> -->
-            <el-table-column prop="first_count" label="购买次数"></el-table-column>
+            <el-table-column label="类型" width="150">
+              <template slot-scope="scope">{{ scope.row.typeid|type}}</template>
+            </el-table-column>
+            <el-table-column prop="first_count" label="购买次数/时长"></el-table-column>
             <!-- <el-table-column prop="address" label="赠送次数"></el-table-column> -->
             <el-table-column label="使用次数">
               <template slot-scope="scope">
@@ -215,10 +224,56 @@
         </el-table>
       </div>
     </div>
-
+    <div class="contentView" v-show="show == 4">
+      <div class="subTView">{{ name }}</div>
+      <p style="padding:10px 0 10px 30px;color:red">点击“+”添加图片, 点击相应图片可删除</p>
+      <div class="imageRoom">
+        <el-image
+          v-for="(v,k) in urls"
+          :key="k"
+          style="width: 200px; height: 200px;"
+          :src="v.img|imgUrl"
+          fit="scale-down"
+          @click="delPic(v)"
+        ></el-image>
+        <el-image style="width: 200px; height: 200px" fit="scale-down">
+          <div slot="error" class="image-slot">
+            <i class="el-icon-plus" @click="openCropper"></i>
+          </div>
+        </el-image>
+      </div>
+    </div>
     <div class="set_page" :class="{activePage:huankuan}">
       <huankuan @close="huankuan=false" v-if="huankuan" :member="choose"></huankuan>
     </div>
+
+    <el-dialog
+      title="会员充值"
+      :visible.sync="showaddMoney"
+      width="430px"
+      center
+      custom-class="quickmoney"
+      :modal-append-to-body="false"
+    >
+      <div class="textView">
+        <div class="item">
+          <span>充值金额：</span>
+          <el-input placeholder="请输入"></el-input>
+        </div>
+        <div class="item">
+          <span>赠送金额：</span>
+          <el-input placeholder="请输入"></el-input>
+        </div>
+        <div class="item">
+          <span>合计：</span>
+          <el-input readonly></el-input>
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showaddMoney = false">取消</el-button>
+        <el-button @click="showaddMoney = false" style="background-color:#dc670b;color:#fff">确定</el-button>
+      </span>
+    </el-dialog>
 
     <el-dialog
       title="备注"
@@ -235,43 +290,22 @@
         <el-button @click="showMemo = false" style="background-color:#dc670b;color:#fff">保 存</el-button>
       </span>
     </el-dialog>
-    <!-- 次卡弹窗 -->
-    <el-dialog
-      title="次卡列表"
-      :visible.sync="menuDialog"
-      width="70%"
-      center
-      :modal-append-to-body="false"
-      custom-class="cardDialog"
-    >
-      <el-table ref="cardTable" :data="cardList" style="width: 100%" @row-click="choosed">
-        <el-table-column width="55">
-          <template slot-scope="{row}">
-            <div class="seleted" :class="{active:check==row.id}"></div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="item_no" label="项目编号"></el-table-column>
-        <el-table-column prop="name" label="项目名称"></el-table-column>
-        <el-table-column prop="price" label="项目单价"></el-table-column>
-        <el-table-column prop="ccard_count" label="次数"></el-table-column>
-        <el-table-column prop="ccard_total" label="优惠总价"></el-table-column>
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="menuDialog = false">取 消</el-button>
-        <el-button type="primary" @click="setCard">确 定</el-button>
-      </span>
-    </el-dialog>
+
+    <!-- 图片上传 -->
+    <xcropper ref="cropper"></xcropper>
   </div>
 </template>
 
 <script>
 import moment from 'moment'
 import huankuan from '@/components/huankuan.vue'
+import xcropper from '@/components/xcropper.vue'
 export default {
-  components: { huankuan },
+  components: { huankuan, xcropper },
   props: ['choose'],
   data () {
     return {
+      urls: [],
       show: 1,
       name: "",
       showMemo: false,
@@ -283,10 +317,8 @@ export default {
       tableData: [],
       cikalist: [],
       member_id: "",
-      cardList: [],
-      check: 0,
-      checkData: '',
-      menuDialog: false,
+
+      showaddMoney: false
     };
   },
   watch: {
@@ -297,31 +329,97 @@ export default {
   filters: {
     time (value) {
       return moment.unix(value).format("YYYY-MM-DD");
+    },
+    type (val) {
+      switch (val) {
+        case '1':
+          return '次卡';
+        case '2':
+          return '月卡';
+        case '3':
+          return '季卡';
+        case '4':
+          return '年卡';
+      }
     }
   },
   computed: {},
   methods: {
-    addmoney () {
-      this.$prompt('请充值金额', '会员充值', {
+    // 打开上传图片
+    delPic (v) {
+      this.$confirm('确认删除此图片吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputPattern: /^[1-9]\d*(.\d{1,2})?$/,
-        inputErrorMessage: '格式不正确'
-      }).then(async ({ value }) => {
-        const res = await this.$axios.get('/api?datatype=recharge', {
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$axios.get('/api?datatype=del_member_photo&id=' + v.id)
+        if (res.data.code == 1) {
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+          this.getmemberPic()
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });
+      });
+    },
+    openCropper () {
+      let option = {
+        title: '项目图',
+        msg: '建议图片大小：2M'
+      };
+      this.$refs.cropper.open(option, (data) => {
+        console.log(data)
+        this.$axios.get('/api?datatype=insert_member_photo', {
           params: {
             storeid: this.storeid,
             member_id: this.member_id,
-            money: value
+            img: data
+          }
+        }).then(res => {
+          if (res.data.code == 1) {
+            this.$message.success('添加成功')
+            this.getmemberPic()
           }
         })
-        if (res.data.code == 1) {
-          this.$message.success('充值成功')
-          this.getInfo(this.member_id)
-        } else {
-          this.$message.error('充值失败')
+      })
+    },
+    async getmemberPic () {
+      const res = await this.$axios.get('/api?datatype=get_photo_list', {
+        params: {
+          storeid: this.storeid,
+          member_id: this.member_id
         }
       })
+      if (res.data.code == 1) {
+        this.urls = res.data.list
+        this.$message.success('加载完成')
+      } else if (res.data.code == 3) {
+        this.urls = []
+        this.$message.success('加载完成')
+      } else {
+        this.urls = []
+        this.$message.error('获取失败')
+      }
+    },
+    async addmoney () {
+      const res = await this.$axios.get('/api?datatype=recharge', {
+        params: {
+          storeid: this.storeid,
+          member_id: this.member_id,
+          money: value
+        }
+      })
+      if (res.data.code == 1) {
+        this.$message.success('充值成功')
+        this.getInfo(this.member_id)
+      } else {
+        this.$message.error('充值失败')
+      }
     },
     returnCard () {
       this.$confirm('确认将此会员卡退款并注销吗?', '提示', {
@@ -341,38 +439,7 @@ export default {
         }
       })
     },
-    choosed (row) {
-      this.checkData = row
-      this.check = row.id
-    },
-    async setCard () {
-      const res = await this.$axios.get('/api?datatype=buy_ccard', {
-        params: {
-          storeid: this.storeid,
-          member_id: this.choose.member_id,
-          id: this.check
-        }
-      })
-      if (res.data.code == 1) {
-        this.$message.success('购买成功')
-        this.getInfo(this.choose.member_id)
-        this.menuDialog = false
-      } else {
-        this.$message.error(res.data.msg)
-      }
-    },
-    async getCard () {
-      const res = await this.$axios.get("/api?datatype=get_ci_list", {
-        params: {
-          storeid: this.storeid
-        }
-      })
-      if (res.data.code == 1 && res.data.data) {
-        this.cardList = res.data.data
-      } else {
-        this.cardList = []
-      }
-    },
+
     async getInfo (id) {
       const res = await this.$axios.get("/api?datatype=get_one_member", {
         params: {
@@ -386,6 +453,11 @@ export default {
           this.userinfo.last_time = moment
             .unix(this.userinfo.last_time)
             .format("YYYY-MM-DD");
+        }
+        if (Number(this.userinfo.signbill) > 0) {
+          this.$alert('该会员欠款：' + this.userinfo.signbill + ' 元', '提示', {
+            center: true,
+          })
         }
       }
     },
@@ -518,6 +590,10 @@ export default {
         background: #fff;
         color: #5a5a5a;
         font-size: 15px;
+        &.select {
+          background: #f4f4f4;
+          color: #28282d;
+        }
       }
     }
     .btn-topup {
@@ -748,6 +824,25 @@ export default {
         width: 192px;
       }
     }
+
+    .imageRoom {
+      height: calc(100% - 100px);
+      overflow-y: auto;
+      padding: 0 20px;
+      /deep/ .el-image {
+        margin: 10px;
+        border: 1px dashed #ccc;
+        .image-slot {
+          text-align: center;
+          vertical-align: middle;
+          i {
+            font-size: 100px;
+            color: #ccc;
+            line-height: 200px;
+          }
+        }
+      }
+    }
   }
   .el-dialog.quickmoney {
     border-radius: 6px;
@@ -783,24 +878,13 @@ export default {
       resize: none;
       margin-bottom: 10px;
     }
-  }
-  /deep/.cardDialog {
-    padding: 0 20px;
-    height: 500px;
-    position: relative;
-    .seleted {
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      border: 1px solid #ccc;
-    }
-    .active {
-      background-color: rgb(133, 206, 97);
-    }
-    /deep/.dialog-footer {
-      position: absolute;
-      right: 30px;
-      bottom: 10px;
+    .item {
+      display: flex;
+      height: 50px;
+      line-height: 50px;
+      span {
+        width: 100px;
+      }
     }
   }
 }

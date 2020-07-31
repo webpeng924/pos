@@ -115,6 +115,10 @@
               <img src="../../assets/images/chanpin1.png" />
               <div>产品资料</div>
             </div>
+            <div class="listItem btn-audio" @click="cikalist=true">
+              <img src="../../assets/images/kucunpandian.png" />
+              <div>次卡设置</div>
+            </div>
             <div class="listItem btn-audio" @click="$message('暂未开放')">
               <img src="../../assets/images/xiaohao.png" />
               <div>产品消耗设定</div>
@@ -131,33 +135,13 @@
               <img src="../../assets/images/yuangong1.png" />
               <div>员工资料</div>
             </div>
-            <!-- <div class="listItem btn-audio">
-              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Feature_XTCS.png" />
-              <div>系统参数</div>
-            </div>-->
+
+            <div class="listItem btn-audio" @click="$message('开发中')">
+              <img src="../../assets/images/diyongquan.png" />
+              <div>抵用券设置</div>
+            </div>
           </div>
         </div>
-        <!-- <div class="groupView">
-          <div class="titleView">现场管理</div>
-          <div class="listView">
-            <div class="listItem btn-audio">
-              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Feature_SRZC.png" />
-              <div>收入支出</div>
-            </div>
-            <div class="listItem btn-audio">
-              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Feature_MKDD.png" />
-              <div>卖卡订单</div>
-            </div>
-            <div class="listItem btn-audio">
-              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Feature_CZDD.png" />
-              <div>充值订单</div>
-            </div>
-            <div class="listItem btn-audio">
-              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Feature_FWMYD.png" />
-              <div>服务满意度</div>
-            </div>
-          </div>
-        </div>-->
         <div class="groupView">
           <div class="titleView">库存管理</div>
           <div class="listView">
@@ -165,25 +149,17 @@
               <img src="../../assets/images/kucunpandian1.png" />
               <div>库存盘点</div>
             </div>
-            <!-- <div class="listItem btn-audio">
-              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Feature_CPJC.png" />
-              <div>产品寄存</div>
-            </div>-->
-          </div>
-        </div>
-        <!-- <div class="groupView">
-          <div class="titleView">系统管理</div>
-          <div class="listView">
-            <div class="listItem btn-audio">
-              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Feature_KCPD.png" />
+            <div class="listItem btn-audio" @click="dinghuo=true">
+              <img src="../../assets/images/mendian1.png" />
               <div>订货系统</div>
             </div>
-            <div class="listItem btn-audio">
-              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Feature_CPJC.png" />
-              <div>后台管理</div>
-            </div>
+            <el-dialog title="扫描下方二维码进入订货商城" :visible.sync="dinghuo" width="30%" center>
+              <div style="text-align: center;padding: 20px;">
+                <img style="width: 200px; height: 200px" src="../../assets/images/dinghuoPic.png" />
+              </div>
+            </el-dialog>
           </div>
-        </div>-->
+        </div>
         <div class="set_page_right" :class="{activePage:shopinfo}">
           <shopInfo @close="shopinfo=false" v-if="shopinfo"></shopInfo>
         </div>
@@ -260,8 +236,11 @@
     <div class="set_page" :class="{activePage:memberView}">
       <memberView @close="memberView=false" v-if="memberView"></memberView>
     </div>
-    <div class="set_page" :class="{activePage:panku}">
-      <panku @close="panku=false" v-if="panku"></panku>
+    <div class="set_page" :class="{activePage:cikalist}">
+      <cikalist @close="cikalist=false" v-if="cikalist"></cikalist>
+    </div>
+    <div class="set_page" :class="{activePage:quanlist}">
+      <quanlist @close="quanlist=false" v-if="quanlist"></quanlist>
     </div>
   </div>
 </template>
@@ -280,8 +259,10 @@ import msg from '../lqy/index'
 import erweima from '../lqy/erweimaPay'
 import memberView from '../member/index'
 import panku from '../store/panku'
+import cikalist from './cikalist'
+import quanlist from './quanlist'
 export default {
-  components: { product, memberlist, projectlist, shopInfo, zhekou, xiaohao, baobiao, kucun, setCard, msg, erweima, memberView, panku },
+  components: { product, memberlist, projectlist, shopInfo, zhekou, xiaohao, baobiao, kucun, setCard, msg, erweima, memberView, panku, cikalist, quanlist },
   props: {},
   data () {
     return {
@@ -300,7 +281,11 @@ export default {
       erweima: false,
       setcard: false,
       memberView: false,
+      dinghuo: false,
       panku: false,
+      cikalist: false,
+      quanlist: false,
+      role: JSON.parse(sessionStorage.getItem('userInfo')).role,
       shopInfo: {
         avatar: '',
         shop_name: ''
@@ -319,6 +304,7 @@ export default {
       )
     },
     selectOption (data) {
+      if (this.role != 1) return this.$message.error('没有权限')
       if (this.active == data) {
         if (this.show) {
           this.show = false

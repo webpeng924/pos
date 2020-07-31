@@ -1,37 +1,47 @@
 <template>
-  <div id="prolist">
+  <div id="cikalist">
     <div class="topView">
       <button class="btn-close btn-audio" @click="back"></button>
-      <div class="tView">产品资料</div>
+      <div class="tView">次卡列表</div>
       <button class="btn-audio btn-shopCart" @click="add=true"></button>
     </div>
     <div class="bomView">
       <el-table :data="tableData" stripe style="width: 100%" @row-click="toEdit">
-        <el-table-column prop="goods_no" label="编号" width="180"></el-table-column>
-        <el-table-column prop="goods_name" label="产品名称" width="180"></el-table-column>
-        <el-table-column prop="price" label="标准价格"></el-table-column>
-        <el-table-column prop="goods_unit" label="标准单位"></el-table-column>
-        <el-table-column prop="title" label="统计分类"></el-table-column>
-        <el-table-column prop="address" label="目前状态">
+        <el-table-column prop="id" label="编号"></el-table-column>
+        <el-table-column prop="itemname" label="项目名称"></el-table-column>
+        <el-table-column label="次卡类型">
+          <template slot-scope="scope">{{scope.row.typeid|type}}</template>
+        </el-table-column>
+        <el-table-column label="次数 / 时长">
+          <template slot-scope="{row}">{{row.typeid==1?row.count:row.num}}</template>
+        </el-table-column>
+        <el-table-column prop="price" label="次卡售价"></el-table-column>
+        <el-table-column prop="address" width="120" label="操作">
           <template slot-scope="scope">
-            <span
-              :style="scope.row.state==1?'color:#999':scope.row.is_stop==1?'color:#999':'color:lightgreen'"
-            >{{scope.row.is_stop==1?'停用':scope.row.state==1?'停止销售':'正常'}}</span>
+            <el-button
+              v-show="scope.row.state==0"
+              type="danger"
+              @click="changeState(scope.row.id,1)"
+            >停用</el-button>
+            <el-button
+              v-show="!scope.row.state==1"
+              type="success"
+              @click="changeState(scope.row.id,0)"
+            >启用</el-button>
           </template>
         </el-table-column>
-        <el-table-column prop="address" width="50">></el-table-column>
       </el-table>
     </div>
     <div class="set_page" :class="{activePage:add}">
-      <addPro @close="add=false;getList()" v-if="add" :choose="choose"></addPro>
+      <addcika @close="add=false;getList()" v-if="add" :choose="choose"></addcika>
     </div>
   </div>
 </template>
 
 <script>
-import addPro from '@/components/addpro.vue'
+import addcika from '@/components/addcika.vue'
 export default {
-  components: { addPro },
+  components: { addcika },
   props: ['from'],
   data () {
     return {
@@ -44,31 +54,52 @@ export default {
       choose: ''
     }
   },
+  filters: {
+    type (val) {
+      switch (val) {
+        case '1':
+          return '次卡';
+        case '2':
+          return '月卡';
+        case '3':
+          return '季卡';
+        case '4':
+          return '年卡';
+      }
+    }
+  },
   watch: {},
   computed: {},
   methods: {
     back () {
       this.$emit('close')
     },
+    toEdit (row) {
+      if (this.from) {
+        this.$emit('close', row)
+      }
+    },
     async getList () {
-      const res = await this.$axios.get('/api?datatype=get_goods_list', {
+      const res = await this.$axios.get('/api?datatype=get_ci_list', {
         params: {
           storeid: sessionStorage.getItem('storeid'),
-          status: this.status,
-          cate: this.cate,
-          search: this.searchtxt
         }
       })
       console.log(res)
       this.tableData = res.data.data
     },
-    toEdit (row) {
-      if (this.from) {
-        this.$emit('close', row)
+    async changeState (id, state) {
+      const res = await this.$axios.get('/api?datatype=change_cicard_state', {
+        params: {
+          id: id,
+          state: state
+        }
+      })
+      if (res.data.code == 1) {
+        this.$message.success('修改成功')
+        this.getList()
       } else {
-        console.log(row)
-        this.choose = row
-        this.add = true
+        this.$message.success('操作失败')
       }
     }
   },
@@ -83,7 +114,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-#prolist {
+#cikalist {
   height: 100%;
   .topView {
     width: 100%;

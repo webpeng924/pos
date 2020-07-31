@@ -58,10 +58,13 @@
             class="serviceItem boxItem btn-audio"
             v-for="(v,k) in XMlist"
             :key="k"
-            @click="openworker(v)"
+            @click="openworker(v,'',1)"
           >
-            <div class="nameView">{{id==1?v.name:v.goods_name}}</div>
-            <div class="priceView">￥{{v.price}}</div>
+            <div
+              class="nameView"
+              :style="`background:url('http://hb.rgoo.com${v.img?v.img:'/upload/shop/moren.jpg'}') no-repeat 0 0 /100% 100%;`"
+            ></div>
+            <div class="priceView">{{id==1?v.name:v.goods_name}} ￥{{v.price}}</div>
           </div>
         </div>
         <div class="boxView listView" style="height:50%;" v-show="member">
@@ -75,8 +78,10 @@
             @row-click="choosecika"
           >
             <el-table-column type="index" width="50"></el-table-column>
-            <el-table-column property="itemname" label="名称" width="180"></el-table-column>
-            <!-- <el-table-column property="name" label="有效期" width="150"></el-table-column> -->
+            <el-table-column property="itemname" label="名称" width="120"></el-table-column>
+            <el-table-column label="卡类型">
+              <template slot-scope="scope">{{scope.row.typeid|type}}</template>
+            </el-table-column>
             <el-table-column property="first_count" label="购买次数"></el-table-column>
             <el-table-column property="address" label="使用次数">
               <template slot-scope="scope">{{scope.row.first_count-scope.row.rest_count}}</template>
@@ -157,18 +162,21 @@
                 &nbsp;x{{v.num}}
               </div>
               <i
-                class="iconfont icon-edit1-act"
                 style="color:orange;margin-right:10px"
                 @click="modifyOnePrice(v,k)"
                 v-show="v.is_usecard!=1"
-              ></i>
+              >修改价格</i>
               <div class="priceView">￥&nbsp;{{Number(v.price)*v.num*v.discount}}</div>
             </div>
             <div class="empView">
-              <div class="empItem" v-if="!v.worker">
-                <label class="label-name" style="color: rgb(255, 94, 86);">未设置服务人员</label>
+              <div class="empItem" v-show="!v.worker&&v.typeid!=2">
+                <label
+                  class="label-name"
+                  style="color: rgb(255, 94, 86);"
+                  @click="openworker(v,k,2)"
+                >未设置服务人员</label>
               </div>
-              <div class="empItem" v-else>
+              <div class="empItem" v-show="v.worker">
                 <img :src="v.worker.avatar?v.worker.avatar:'/upload/shop/moren.jpg'|imgUrl" />
                 <label class="label-name overflowText">{{v.worker.name}}（No：{{v.worker.job_no}}）</label>
                 <label class="label-job overflowText">服务人员</label>
@@ -191,12 +199,8 @@
           class="btn-audio btn-red btn-checkout"
           @click="confirmDiscount(2)"
         >结账&nbsp;&nbsp;￥&nbsp;{{sumprice}}</button>
-        <button class="btn-audio btn-save">
-          <i
-            class="iconfont icon-edit1-act"
-            style="color:orange;margin-right:5px"
-            @click="modifytotalPrice"
-          ></i>
+        <button class="btn-audio btn-save" @click="modifytotalPrice">
+          <i class="iconfont icon-edit1-act" style="color:orange;margin-right:5px"></i>
           优惠总价￥{{newprice?newprice:sumprice}}
         </button>
       </div>
@@ -338,7 +342,8 @@ export default {
       yyitem: '',
       page: false,
       bookinfo: '',
-      newprice: ''
+      newprice: '',
+      ModifyW: ''
     }
   },
   watch: {
@@ -355,11 +360,13 @@ export default {
     member (val, oldValue) {
       console.log(val, oldValue)
       if (val) {
+        this.getInfo(val.member_id)
         this.getcicardInfo()
         this.getmembercount()
       } else {
         this.yyitem = ''
-        this.chooslist.forEach(item => item.discount = 1)
+        // this.chooslist.forEach(item => item.discount = 1)
+        this.chooslist = []
       }
     },
     yyitem (val) {
@@ -414,7 +421,7 @@ export default {
       sessionStorage.removeItem('carlist')
       let type = 1
       let id = 0
-      if (this.info) {
+      if (this.info || this.bookinfo) {
         type = 2
         id = this.info.id
       }
@@ -443,7 +450,23 @@ export default {
         } else {
           this.$set(res.data.data, 'orderinfo', this.chooslist)
           this.bookinfo = res.data.data
+          // this.info = res.data.data
           this.page = true
+        }
+      }
+    },
+    async getInfo (id) {
+      const res = await this.$axios.get("/api?datatype=get_one_member", {
+        params: {
+          storeid: this.storeid,
+          member_id: id
+        }
+      });
+      if (res.data.code == 1) {
+        if (Number(res.data.data.signbill) > 0) {
+          this.$alert('该会员欠款：' + res.data.data.signbill + ' 元', '提示', {
+            center: true,
+          })
         }
       }
     },
@@ -474,7 +497,8 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_card_memberitem', {
         params: {
           storeid: this.storeid,
-          member_id: this.member.member_id
+          member_id: this.member.member_id,
+          sign: 1
         }
       })
       if (res.data.code == 1) {
@@ -499,10 +523,11 @@ export default {
       })
     },
     choosecika (data) {
+      if (data.typeid != 1) return this.setcika(1, data)
       this.$prompt('', '请输入项目使用次数', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputPattern: /^[0-9]+$/,
+        inputPattern: /^[1-9]+$/,
         inputValidator: (val) => { return Number(val) <= Number(data.rest_count) },
         inputErrorMessage: '次数错误或超出'
       }).then(({ value }) => {
@@ -516,6 +541,7 @@ export default {
     },
     setcika (value, v) {
       let obj = {
+        worker: '',
         is_usecard: 1,
         typeid: 1,
         itemid: v.id,
@@ -524,7 +550,8 @@ export default {
         price: 0,
         cikaid: v.id,
         subtotal: 0,
-        discount: Number(this.member.item_discount) / 10
+        discount: Number(this.member.item_discount) / 10,
+        maxNum: v.typeid == 1 ? v.rest_count : ''
       }
       this.chooslist = this.chooslist.filter(item => !item.cikaid || item.cikaid != v.id)
       this.chooslist.push(obj)
@@ -609,36 +636,64 @@ export default {
       })
     },
     setdata (data) {
-      this.addchooselist(this.additem, data.choose, data.num)
+      if (this.ModifyW != null) {
+        this.chooslist.forEach((v, k) => {
+          if (k == this.ModifyW) {
+            v.num = data.num
+            if (data.choose.gong) {
+              v.worker = data.choose.gong
+              v.staff1 = data.choose.gong.id
+            }
+          }
+        })
+      } else {
+        this.addchooselist(this.additem, data.choose, data.num)
+      }
       this.showworker = false
     },
     // 打开
-    openworker (v) {
-      this.additem = v
-      if (this.id == 1) {
-        console.log(v)
+    openworker (v, k, sign) {
+      console.log(v)
+      if (sign == 2) {
+        this.ModifyW = k
         let option = {
-          title: v.name,
-          serverfor: '客B',
+          title: v.itemname,
+          serverfor: this.member ? this.member.name : '客B',
           money: v.price,
-          num: 1
+          num: v.num,
+          maxNum: v.maxNum ? v.maxNum : ''
         }
         this.setinfo = option
         this.showworker = true
       } else {
-        this.CPnum = 1
-        // this.setnum = true
-        this.$set(this.additem, 'name', this.additem.goods_name)
-        this.$prompt('', '请输入产品数量', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          inputPattern: /^[0-9]+$/,
-          inputValidator: (val) => { return Number(val) <= Number(v.number) },
-          inputErrorMessage: '数量错误或超出'
-        }).then(({ value }) => {
-          this.addchooselist(v, '', value)
-        })
+        this.additem = v
+        this.ModifyW = null
+        if (this.id == 1) {
+          console.log(v)
+          let option = {
+            title: v.name,
+            serverfor: this.member ? this.member.name : '客B',
+            money: v.price,
+            num: 1
+          }
+          this.setinfo = option
+          this.showworker = true
+        } else {
+          this.CPnum = 1
+          // this.setnum = true
+          this.$set(this.additem, 'name', this.additem.goods_name)
+          this.$prompt('', '请输入产品数量', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            inputPattern: /^[0-9]+$/,
+            inputValidator: (val) => { return Number(val) <= Number(v.number) },
+            inputErrorMessage: '数量错误或超出'
+          }).then(({ value }) => {
+            this.addchooselist(v, '', value)
+          })
+        }
       }
+
     },
     changeActive (id) {
       if (this.delcate) {
@@ -781,9 +836,11 @@ export default {
     },
     // 添加到右侧
     addchooselist (v, data, num) {
-      console.log(v)
+      console.log(v, data)
       if (data) {
-        this.$set(v, 'staff1', data.id)
+        if (data.gong) {
+          this.$set(v, 'staff1', data.id)
+        }
         this.$set(v, 'typeid', 1)
         if (this.member) {
           this.$set(v, 'discount', Number(this.member.item_discount) / 10)
@@ -801,7 +858,7 @@ export default {
       }
       console.log(v)
       let obj = {
-        worker: data,
+        worker: data ? data.gong : '',
         typeid: v.typeid,
         itemid: v.goods_id,
         num: num,
@@ -840,7 +897,11 @@ export default {
           let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
           if (this.info.orderinfo != 'null') {
             this.info.orderinfo.forEach(v => {
-              v['worker'] = workerlist.find(item => item.id == v.staff1)
+              if (v.staff1 != 0) {
+                v['worker'] = workerlist.find(item => item.id == v.staff1)
+              } else {
+                v['worker'] = ''
+              }
             })
           }
           this.newprice = this.info.dis_total
@@ -858,6 +919,20 @@ export default {
             }
           })
         }
+      }
+    }
+  },
+  filters: {
+    type (val) {
+      switch (val) {
+        case '1':
+          return '次卡';
+        case '2':
+          return '月卡';
+        case '3':
+          return '季卡';
+        case '4':
+          return '年卡';
       }
     }
   },
@@ -1476,6 +1551,11 @@ export default {
               color: #28282d;
             }
           }
+        }
+        .tipView {
+          padding: 30px;
+          width: 100%;
+          text-align: center;
         }
       }
     }

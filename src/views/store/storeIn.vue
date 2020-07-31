@@ -121,10 +121,10 @@
             <button class="btn-del btn-audio" @click="delchoose(v)"></button>
             <div class="nameView overflowText">{{v.name?v.name:v.goods_name}}</div>
             <div class="cntView">
-              <input v-model="v.number" @change="changeNum(v)" />
+              <input v-model="v.number" @change="changeNum(v,1)" />
             </div>
             <div class="priceView">
-              <input v-model="v.in_cost" @change="changeNum(v)" />
+              <input v-model="v.in_cost" @change="changeNum(v,2)" />
             </div>
             <div class="amtView">
               <input v-model="v.total" @change="changeTotal(v)" />
@@ -394,8 +394,12 @@ export default {
       }
     },
     // 修改数量
-    changeNum (v) {
-      v.number = v.number.replace(/[^0-9]/g, '0')
+    changeNum (v, id) {
+      if (id == 1) {
+        v.number = v.number.replace(/[^0-9]/g, '')
+      } else {
+        v.in_cost = v.in_cost.replace(/[^0-9]/g, '')
+      }
       this.chooselist.forEach(item => {
         if (item.id == v.id) {
           item.total = Number(item.number) * Number(item.in_cost)

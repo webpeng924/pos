@@ -417,6 +417,7 @@ export default {
       }
     },
     openworker (v, val) {
+      console.log(val)
       if (Number(v.status) < 3) {
         let option = {
           title: val.itemname,

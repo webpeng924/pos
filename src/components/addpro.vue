@@ -9,6 +9,16 @@
       <div class="baseInfoView">
         <div class="tipView">必填</div>
         <div class="groupView">
+          <div class="subItem">
+            <label class="label-leftText">产品图片</label>
+            <div class="valView">
+              <div class="imgView">
+                <img :src="img|imgUrl" alt />
+                <span @click="openCropper">点击上传</span>
+              </div>
+            </div>
+            <i class="el-icon-arrow-right"></i>
+          </div>
           <div class="subItem type-input">
             <label class="label-leftText">产品编号</label>
             <div class="valView">
@@ -134,12 +144,15 @@
         </div>
       </div>
     </div>
+    <!-- 图片上传 -->
+    <xcropper ref="cropper"></xcropper>
   </div>
 </template>
 
 <script>
+import xcropper from '@/components/xcropper.vue'
 export default {
-  components: {},
+  components: { xcropper },
   props: ['choose'],
   data () {
     return {
@@ -150,6 +163,7 @@ export default {
       unitlist: ['瓶', '盒', '袋', '份', '克', '个', '千克', '升', '毫升', '双', '套'],
       unitDialog: false,
       supplier: '',
+      img: '',
       storeid: sessionStorage.getItem('storeid'),
       goodsInfo: {
         storeid: sessionStorage.getItem('storeid'),
@@ -190,11 +204,24 @@ export default {
         this.catelist = res.data.data
       }
     },
+    // 打开上传图片
+    openCropper () {
+      let option = {
+        title: '项目图',
+        msg: '建议图片大小：2M',
+        fixedNumber: [3, 2]
+      };
+      this.$refs.cropper.open(option, (data) => {
+        console.log(data)
+        this.img = data
+      })
+    },
     async submit () {
       let params = {
         storeid: this.goodsInfo.storeid,
         type: this.goodsInfo.type,
         id: this.goodsInfo.id,
+        pic: this.img,
         goods_name: this.goodsInfo.goods_name,
         goods_no: this.goodsInfo.goods_no,
         price: this.goodsInfo.price,
@@ -224,6 +251,7 @@ export default {
     if (this.choose) {
       this.categoryName = this.choose.title
       this.goodsInfo.type = 2
+      this.img = this.choose.img
       this.goodsInfo.id = this.choose.id
       this.goodsInfo.goods_name = this.choose.goods_name
       this.goodsInfo.goods_no = this.choose.goods_no
@@ -333,6 +361,33 @@ export default {
           text-align: right;
           font-size: 14px;
           color: #28282d;
+          .imgView {
+            display: inline-block;
+            position: relative;
+            width: 120px;
+            height: 80px;
+            background: url('https://hb.rgoo.com/upload/shop/moren.jpg')
+              no-repeat center center;
+            background-size: 100% 100%;
+            img {
+              width: 100%;
+            }
+            span {
+              position: absolute;
+              width: 100%;
+              right: 0;
+              width: 120px;
+              height: 80px;
+              line-height: 80px;
+              text-align: center;
+              color: #fff;
+              background-color: rgba(0, 0, 0, 0.5);
+              display: none;
+            }
+            &:hover span {
+              display: inline-block;
+            }
+          }
           > input {
             line-height: 28px;
             text-align: right;

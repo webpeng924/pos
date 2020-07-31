@@ -3,12 +3,12 @@
     <div class="topView">
       <button class="btn-back" @click="back"></button>
       <div class="tView">{{step==1?'添加':'次卡'}}</div>
-      <button class="btn-audio btn-shopCart" @click="step=2" v-show="step==1">下一步</button>
-      <button class="btn-audio btn-shopCart" @click="step=1" v-show="step==2">上一步</button>
-      <button class="btn-audio btn-shopCart" @click="submit" v-show="step==2">保存</button>
+      <!-- <button class="btn-audio btn-shopCart" @click="step=2" v-show="step==1">下一步</button>
+      <button class="btn-audio btn-shopCart" @click="step=1" v-show="step==2">上一步</button>-->
+      <button class="btn-audio btn-shopCart" @click="submit">保存</button>
     </div>
     <div class="contentView">
-      <div class="listView" v-show="step==1">
+      <div class="listView">
         <div class="item">
           <div class="left">项目图</div>
           <div class="right">
@@ -100,7 +100,7 @@
           </div>
         </div>
       </div>
-      <div class="listView" v-show="step==2">
+      <div class="listView" v-show="0">
         <div class="item">
           <div class="left">项目次数</div>
           <div class="right">
@@ -146,7 +146,6 @@
 
 <script>
 import xcropper from '@/components/xcropper.vue'
-import { type } from 'os';
 export default {
   components: { xcropper },
   props: ['choose'],

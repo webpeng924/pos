@@ -34,7 +34,7 @@
         class="page"
       ></el-pagination>
     </div>
-    <el-dialog
+    <!-- <el-dialog
       title="会员信息"
       width="30%"
       :visible.sync="dialogVisible"
@@ -71,16 +71,17 @@
           <span>{{ onceList.sex == 1 ? "男" : "女" }}</span>
         </div>
       </div>
-      <!-- <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-      </span>-->
-    </el-dialog>
+    </el-dialog>-->
+    <div class="set_page" :class="{activePage:dialogVisible}">
+      <detail @close="dialogVisible=false" v-if="dialogVisible" :info="onceList"></detail>
+    </div>
   </div>
 </template>
 
 <script>
+import detail from './detail'
 export default {
+  components: { detail },
   data () {
     return {
       tableData: [],
@@ -88,6 +89,7 @@ export default {
       page_size: 5,
       page_num: 1,
       total: "",
+      storeid: sessionStorage.getItem('storeid'),
       onceList: []
     };
   },
@@ -98,7 +100,7 @@ export default {
     async getList () {
       const res = await this.$axios.get("/api?datatype=get_memberlist", {
         params: {
-          storeid: 1,
+          storeid: this.storeid,
           page_size: this.page_size,
           page_num: this.page_num
         }

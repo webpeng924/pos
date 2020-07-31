@@ -77,7 +77,7 @@ export default {
         params: {
           sign: type,
           code: data,
-          storeid: 1
+          storeid: sessionStorage.getItem('storeid')
         }
       });
       console.log("上传", res);

@@ -66,10 +66,10 @@
           <label style="background: rgb(244, 78, 78);"></label>
           已占用
         </div>
-        <div class="flagItem">
+        <!-- <div class="flagItem">
           <label style="background: rgb(237, 179, 57);"></label>
           已取消
-        </div>
+        </div>-->
         <div class="flagItem">
           <label style="background: rgb(138, 138, 138);"></label>
           已过期
@@ -90,7 +90,7 @@
     </el-dialog>
 
     <el-dialog
-      :title="showcurrent.status==4?'占用信息':'预约信息'"
+      :title="showcurrent.customer_type==0?'占用信息':'预约信息'"
       :visible.sync="yuyueDialog"
       center
       custom-class="yuyueDialog"
@@ -114,11 +114,11 @@
         </div>
         <div class="groupView">
           <div class="subView">
-            <div class="leftView">{{showcurrent.status==4?'占用员工':'预约员工'}}</div>
+            <div class="leftView">{{showcurrent.customer_type==0?'占用员工':'预约员工'}}</div>
             <div class="valView">{{showcurrent.staff}}</div>
           </div>
           <div class="subView">
-            <div class="leftView">{{showcurrent.status==4?'占用时间':'到店日期'}}</div>
+            <div class="leftView">{{showcurrent.customer_type==0?'占用时间':'到店日期'}}</div>
             <div class="valView">{{showcurrent.yytime}}</div>
           </div>
           <div class="subView">
@@ -136,7 +136,7 @@
         <div v-show="showcurrent.status==2">已取消</div>
         <div v-show="showcurrent.status==1">已开单</div>
         <div v-show="showcurrent.status==3">已过期</div>
-        <div v-show="showcurrent.status==4">已占用</div>
+        <div @click="cancel(showcurrent.id)" v-show="showcurrent.status==4">取消占用</div>
       </span>
     </el-dialog>
   </div>
@@ -168,9 +168,7 @@ export default {
   },
   watch: {
     date (val) {
-      this.$nextTick(() => {
-        this.checkyy()
-      })
+      this.getworkerlist()
     }
   },
   computed: {},
@@ -202,6 +200,7 @@ export default {
           this.$set(v, 'shilist', [])
         })
         this.workerlist = res.data.data
+        this.checkyy()
       }
     },
     checktime (v, val) {
@@ -267,7 +266,7 @@ export default {
       }
     },
     cancel (id) {
-      this.$confirm('确认取消该预约?', '提示', {
+      this.$confirm('确认取消?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -282,6 +281,11 @@ export default {
           id: id
         }
       })
+      if (res.data.code == 1) {
+        this.yuyueDialog = false
+        this.$message.error('取消成功')
+        this.getworkerlist()
+      }
     },
     async submit () {
       let params = {
@@ -297,6 +301,8 @@ export default {
       console.log(res)
       if (res.data.code == 1) {
         this.$message.success('占用成功')
+        this.typeDialog = false
+        this.getworkerlist()
       } else {
         this.$message.success('占用失败')
       }

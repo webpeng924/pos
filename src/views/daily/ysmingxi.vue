@@ -37,13 +37,6 @@
       <div class="menuItem btn-audio" @click="chos = 1" :class="{ select: chos == 1 }">
         <label>充值</label>
       </div>
-      <!-- <div
-        class="menuItem btn-audio"
-        :class="{ select: chos == 2 }"
-        @click="chos = 2"
-      >
-        <label>项目</label>
-      </div>-->
     </div>
     <!-- <div class="menuView" v-show="title == '卡项明细'">
       <div
@@ -119,9 +112,14 @@
           </template>
         </el-table-column>
         <el-table-column prop="total" label="金额"></el-table-column>
-        <!-- <el-table-column prop="address" width="50">
-          <i class="el-icon-arrow-right"></i>
-        </el-table-column>-->
+        <el-table-column prop="address" label="操作">
+          <template slot-scope="scope">
+            <span
+              style="padding:10px;background:orange;color:#fff"
+              @click="getOneOrder(scope.row.order_id)"
+            >退货</span>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
     <div class="bomView" v-show="0">
@@ -157,7 +155,7 @@
       <addPro @close="add = false"></addPro>
     </div>
 
-    <!-- 详情 -->
+    <!-- 卡项详情 -->
     <div class="receipt">
       <el-dialog
         :visible.sync="receiptVisible"
@@ -233,12 +231,44 @@
         </div>
       </el-dialog>
     </div>
+
+    <!-- 退货窗口 -->
+    <el-dialog
+      title="可退货列表"
+      :visible.sync="tuiVisible"
+      width="60%"
+      :modal-append-to-body="false"
+      center
+    >
+      <el-table
+        :data="tuilist"
+        style="width: 100%"
+        :header-cell-style="headerClass"
+        :cell-style="headerClass"
+        height="350px"
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="55"></el-table-column>
+        <el-table-column prop="itemname" label="产品名称" width="180"></el-table-column>
+        <el-table-column prop="num" label="购买数量" width="180"></el-table-column>
+        <el-table-column label="退货数量">
+          <template slot-scope="{row}">
+            <el-input-number :min="0" :max="Number(row.num)" v-model="row.number"></el-input-number>
+          </template>
+        </el-table-column>
+      </el-table>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="tuiVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitTui">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import addPro from "@/components/addpro.vue";
 import moment from "moment";
+import qs from 'qs'
 export default {
   components: { addPro },
   props: ['Date'],
@@ -246,16 +276,22 @@ export default {
     return {
       date: "",
       item: 1,
+      stock_no: '',
       tableData: [],
+      tuilist: [],
+      chosOrder: '',
       add: false,
       title: "营收明细",
+      storeid: sessionStorage.getItem('storeid'),
       chos: 3,
       option: [
         { text: "收银", value: "收银" },
         { text: "售卡", value: "售卡" },
         { text: "充值", value: "充值" }
       ],
-      receiptVisible: false
+      receiptVisible: false,
+      tuiVisible: false,
+      needchangelist: []
     };
   },
   watch: {
@@ -285,10 +321,131 @@ export default {
     filterType (val) {
       console.log(val);
     },
+    async getNewNo () {
+      const res = await this.$axios.get('/api?datatype=get_stock_no', {
+        params: {
+          storeid: this.storeid,
+          type: 1
+        }
+      })
+      if (res.data.code == 1) {
+        this.stock_no = res.data.data
+        this.saveAdd()
+      }
+    },
+    async getOneOrder (id) {
+      // 获取单个订单
+      // this.$message('开发中')
+      const res = await this.$axios.get('/api?datatype=get_one_order', {
+        params: {
+          storeid: this.storeid,
+          order_id: id
+        }
+      })
+      if (res.data.code == 1) {
+        this.chosOrder = res.data.list
+        this.tuilist = []
+        this.chosOrder.info.forEach(item => {
+          if (item.typeid == 2) {
+            this.$set(item, 'number', 0)
+            this.tuilist.push(item)
+          }
+        })
+        this.tuiVisible = true
+      }
+    },
+    submitTui () {
+      if (!this.needchangelist.length) return this.$message.error('请先勾选需要退货的产品')
+      this.needchangelist.forEach(item => {
+        if (item.number == Number(item.num)) {
+          // this.tuilist = this.tuilist.filter(v => v.id != item.id)
+          let arr = this.chosOrder.info
+          arr = arr.filter(j => j.id != item.id)
+          arr.forEach(v => {
+            v['cikaid'] = v.card_memberitem_id
+          })
+          this.chosOrder['info'] = arr
+          console.log(this.chosOrder)
+        } else {
+          let arr = this.chosOrder.info
+          arr.forEach(v => {
+            v['cikaid'] = v.card_memberitem_id
+            if (v.id == item.id) {
+              v.num = v.number - Number(v.num)
+            }
+          })
+          this.chosOrder['info'] = arr
+        }
+      })
+      this.getNewNo()
+    },
+    handleSelectionChange (val) {
+      console.log(val)
+      this.needchangelist = val
+    },
+    // 修改order订单
+    async submit () {
+      let obj = {
+        storeid: this.storeid,
+        customer_type: this.chosOrder.customer_type,
+        status: this.chosOrder.status,
+        total: this.chosOrder.total,
+        remark: this.chosOrder.remark,
+        member_id: this.chosOrder.member_id,
+        orderinfo: this.chosOrder.info,
+        type: 2,
+        id: this.chosOrder.id,
+        dis_total: this.chosOrder.dis_total
+      }
+      let data = qs.stringify(obj)
+      console.log(obj)
+      const res = await this.$axios.post('/api?datatype=insert_order', data)
+      if (res.data.code == 1) {
+        this.$message.success('退货成功')
+        this.tuiVisible = false
+      }
+    },
+    // 退货入库
+    async saveAdd () {
+      let totalPrice = 0
+      let arr = []
+      this.needchangelist.forEach(val => {
+        totalPrice += val.number * Number(val.in_cost)
+        let obj = {
+          id: val.itemid,
+          goods_name: val.itemname,
+          number: val.number,
+          in_cost: val.in_cost,
+          total: val.number * Number(val.in_cost),
+          supplier: '',
+          makedate: this.formatDate(new Date)
+        }
+        arr.push(obj)
+      })
+      let data = qs.stringify({
+        storeid: this.storeid,
+        stock_no: this.stock_no,
+        into_date: this.formatDate(new Date()),
+        into_type: '客户退货',
+        warehouse: '总仓库',
+        number: this.needchangelist.length,
+        amount: totalPrice,
+        into_userid: JSON.parse(sessionStorage.getItem('userInfo')).id,
+        checkman: JSON.parse(sessionStorage.getItem('userInfo')).username,
+        remark: this.chosOrder.order_no,
+        goodsinfo: arr
+      })
+      const res = await this.$axios.post('/api?datatype=insert_into_stock', data)
+      console.log(res)
+      if (res.data.code == 1) {
+        this.$message.success('成功')
+        this.submit()
+      }
+    },
     async getList () {
       const res = await this.$axios("/api?datatype=get_store_moneydetail", {
         params: {
-          storeid: 1,
+          storeid: this.storeid,
           type: this.chos,
           start: this.date[0],
           end: this.date[1]
@@ -296,7 +453,10 @@ export default {
       });
       if (res.code !== 1 && !res.data.data) return this.tableData = [];
       this.tableData = res.data.data;
-    }
+    },
+    headerClass () {
+      return 'text-align: center'
+    },
   },
   created () {
     if (this.Date) {

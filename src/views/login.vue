@@ -77,14 +77,15 @@ export default {
   width: 100%;
   > div {
     height: 100%;
-    min-height: 550px;
+    min-height: 700px;
+    // min-width: 1200px;
     position: relative;
     justify-content: center; /*子元素水平居中*/
     align-items: center; /*子元素垂直居中*/
     display: -webkit-flex;
     .login_box {
-      width: 60%;
-      height: 80%;
+      width: 40%;
+      height: 60%;
       background: rgba(255, 255, 255, 1);
       box-shadow: 0px 16px 60px 0px rgba(0, 0, 0, 0.5);
       border-radius: 16px;

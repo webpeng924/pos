@@ -26,12 +26,66 @@
         <el-table-column prop="mobile" label="手机号"></el-table-column>
         <el-table-column prop="cardtype" label="卡类型"></el-table-column>
         <el-table-column prop="balance" label="储值余额"></el-table-column>
-        <el-table-column prop="expiry_date" label="有效期"></el-table-column>
+        <el-table-column label="操作">
+          <template slot-scope="scope">
+            <div>
+              <el-button type="success" size="mini" @click.stop="getCard(scope.row,1)">购买次卡</el-button>
+            </div>
+            <div style="margin-top:10px">
+              <el-button type="warning" size="mini" @click.stop="getCard(scope.row,2)">购买套餐</el-button>
+            </div>
+          </template>
+        </el-table-column>
+        <!-- <el-table-column prop="expiry_date" label="有效期"></el-table-column> -->
       </el-table>
     </div>
     <div class="set_page" :class="{activePage:info}">
       <memInfo @close="info=false;getList()" :choose="choosOne" v-if="info"></memInfo>
     </div>
+
+    <!-- 次卡弹窗 -->
+    <el-dialog
+      title="次卡列表"
+      :visible.sync="menuDialog"
+      width="70%"
+      center
+      :modal-append-to-body="false"
+      custom-class="cardDialog"
+    >
+      <el-table ref="cardTable" :data="cardList" style="width: 100%" @row-click="choosed">
+        <el-table-column width="55">
+          <template slot-scope="{row}">
+            <div class="seleted" :class="{active:check==row.id}"></div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="id" label="次卡编号"></el-table-column>
+        <el-table-column prop="itemname" label="项目名称"></el-table-column>
+        <el-table-column label="次数 / 时长">
+          <template slot-scope="{row}">{{row.typeid==1?row.count:row.num}}</template>
+        </el-table-column>
+        <el-table-column label="次卡类型">
+          <template slot-scope="scope">{{scope.row.typeid|type}}</template>
+        </el-table-column>
+        <el-table-column prop="price" label="次卡售价"></el-table-column>
+      </el-table>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="menuDialog = false">取 消</el-button>
+        <el-button type="primary" @click="innerVisible = true">确 定</el-button>
+      </span>
+
+      <el-dialog width="50%" title="请选择支付方式" :visible.sync="innerVisible" append-to-body center>
+        <el-radio-group v-model="paytype" style="padding:50px">
+          <el-radio label="zfb">支付宝</el-radio>
+          <el-radio label="wx">微信</el-radio>
+          <el-radio label="cash">现金</el-radio>
+          <el-radio label="other">其他</el-radio>
+          <el-radio label="card">会员卡余额</el-radio>
+        </el-radio-group>
+        <span slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="setCard">支付</el-button>
+        </span>
+      </el-dialog>
+    </el-dialog>
   </div>
 </template>
 
@@ -47,16 +101,77 @@ export default {
       tableData: [1, 2],
       info: false,
       choosOne: '',
+      cardList: [],
+      menuDialog: false,
+      innerVisible: false,
+      choose: '',
+      paytype: 'card',
+      check: 0,
+      checkData: '',
       storeid: sessionStorage.getItem('storeid')
     }
   },
   watch: {},
   computed: {},
+  filters: {
+    type (val) {
+      switch (val) {
+        case '1':
+          return '次卡';
+        case '2':
+          return '月卡';
+        case '3':
+          return '季卡';
+        case '4':
+          return '年卡';
+      }
+    }
+  },
   methods: {
     openInfo (row) {
       this.choosOne = row
       this.info = true
     },
+    async getCard (member, type) {
+      this.choose = member
+      if (type == 1) {
+        const res = await this.$axios.get("/api?datatype=get_ci_list", {
+          params: {
+            storeid: this.storeid
+          }
+        })
+        if (res.data.code == 1 && res.data.data) {
+          this.cardList = res.data.data
+          this.menuDialog = true
+        } else {
+          this.cardList = []
+        }
+      } else {
+
+      }
+    },
+    choosed (row) {
+      this.checkData = row
+      this.check = row.id
+    },
+    async setCard () {
+      const res = await this.$axios.get('/api?datatype=buy_ccard', {
+        params: {
+          storeid: this.storeid,
+          member_id: this.choose.member_id,
+          id: this.check,
+          pay_type: this.paytype
+        }
+      })
+      if (res.data.code == 1) {
+        this.$message.success('购买成功')
+        this.menuDialog = false
+        this.innerVisible = false
+      } else {
+        this.$message.error(res.data.msg)
+      }
+    },
+
     async getList () {
       const res = await this.$axios.get('/api?datatype=get_memberlist', {
         params: {
@@ -156,6 +271,25 @@ export default {
       button.search {
         background: #28282d;
       }
+    }
+  }
+  /deep/.cardDialog {
+    padding: 0 20px;
+    height: 500px;
+    position: relative;
+    .seleted {
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      border: 1px solid #ccc;
+    }
+    .active {
+      background-color: rgb(133, 206, 97);
+    }
+    /deep/.dialog-footer {
+      position: absolute;
+      right: 30px;
+      bottom: 10px;
     }
   }
 }

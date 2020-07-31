@@ -6,7 +6,7 @@
     </div>
     <div class="contentView">
       <div class="orderView">
-        <div class="contentView listView" style="height: 841px;">
+        <div class="contentView listView">
           <div class="orderInfoView">
             <div class="itemsView" style="padding-top: 15px;">
               <div class="tView">消费明细</div>
@@ -58,7 +58,7 @@
               <button
                 class="btn-remark overflowText"
                 v-show="bookinfo.customer_type==2"
-              >（此订单将使用会员卡余额抵扣，请确保余额充足！）</button>
+              >会员卡余额：{{memberPrice}}元（此订单将使用会员卡余额抵扣，请确保余额充足！）</button>
             </div>
             <div class="paymentView">
               <div class="tView">支付方式</div>
@@ -165,7 +165,7 @@
     >
       <img :src="showImg|imgUrl" alt class="payEr" />
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary">确认收到款项</el-button>
+        <el-button type="primary" @click="fukuanOK">确认收到款项</el-button>
       </span>
     </el-dialog>
 
@@ -195,7 +195,8 @@ export default {
       showImg: '',
       erweima: false,
       dialogVisible: false,
-      payend: false
+      payend: false,
+      memberPrice: 0
     }
   },
   methods: {
@@ -225,10 +226,12 @@ export default {
       }
     },
     async  fukuanOK () {
+      if (!this.paytype) return this.$message.error('请选择扣款方式')
+      let paytype = this.type(this.paytype)
       const res = await this.$axios.get('/api?datatype=pay_order', {
         params: {
           storeid: this.storeid,
-          pay_type: this.type(this.paytype),
+          pay_type: paytype,
           order_no: this.bookinfo.order_no,
           order_id: this.bookinfo.id
         }
@@ -236,18 +239,20 @@ export default {
       if (res.data.code == 1) {
         this.$message.success('完成')
         this.payend = true
+        this.dialogVisible = false
       } else {
         this.$message.error(res.data.msg)
       }
     },
     changepaytype (data) {
-      if (this.bookinfo.customer_type != 2) {
-        this.paytype = data
-      } else {
-        if (data == '签账' || data == '会员卡') {
-          this.paytype = data
-        }
-      }
+      // if (this.bookinfo.customer_type != 2) {
+      //   this.paytype = data
+      // } else {
+      //   if (data == '签账' || data == '会员卡') {
+      //     this.paytype = data
+      //   }
+      // }
+      this.paytype = data
     },
     type (val) {
       switch (val) {
@@ -275,7 +280,22 @@ export default {
           sessionStorage.setItem('shopInfo', JSON.stringify(data))
         }
       )
-    }
+    },
+    async getmember () {
+      const res = await this.$axios.get("/api?datatype=get_one_member", {
+        params: {
+          storeid: this.storeid,
+          member_id: this.bookinfo.member_id
+        }
+      });
+      if (res.data.code == 1) {
+        if (Number(res.data.data.signbill) > 0) {
+          this.memberPrice = '-' + res.data.data.signbill
+        } else {
+          this.memberPrice = res.data.data.balance
+        }
+      }
+    },
   },
   created () {
     if (this.bookinfo) {
@@ -283,6 +303,7 @@ export default {
       if (this.bookinfo.customer_type == 2) {
         this.paytype = '会员卡'
       }
+      this.getmember()
     }
     let obj = JSON.parse(sessionStorage.getItem('shopInfo'))
     if (obj) {
@@ -302,6 +323,7 @@ export default {
 <style lang="scss" scoped>
 .closebook {
   font-size: 16px;
+  height: 100%;
   .topView {
     position: relative;
     background: #fff;
@@ -324,6 +346,8 @@ export default {
   .contentView {
     display: flex;
     position: relative;
+    height: calc(100% - 85px);
+    overflow: auto;
     .orderView {
       flex: 1;
       position: relative;
@@ -335,6 +359,7 @@ export default {
       .contentView {
         overflow-x: hidden;
         overflow-y: auto;
+        height: calc(100%);
         .orderInfoView {
           width: 100%;
         }

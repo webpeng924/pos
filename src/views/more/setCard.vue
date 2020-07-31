@@ -42,7 +42,7 @@
       :visible.sync="add"
       width="500px"
       custom-class="formDialog"
-      :modal="false"
+      :modal-append-to-body="false"
     >
       <div class="contant">
         <el-form label-position="right" label-width="80px" :model="form">

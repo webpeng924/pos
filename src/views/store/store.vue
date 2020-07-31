@@ -151,7 +151,7 @@ export default {
     },
     Timer (date) {
       let time = Number(date)
-      return moment.unix(time).format('YYYY-MM-DD hh:mm:ss')
+      return moment.unix(time).format('YYYY-MM-DD HH:mm:ss')
     },
     formatDate (date) {
       var y = date.getFullYear()

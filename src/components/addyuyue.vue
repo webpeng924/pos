@@ -382,7 +382,8 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_card_memberitem', {
         params: {
           storeid: this.storeid,
-          member_id: this.ismember.member_id
+          member_id: this.ismember.member_id,
+          sign: 1
         }
       })
       if (res.data.code == 1) {

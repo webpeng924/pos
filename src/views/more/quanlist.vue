@@ -1,8 +1,8 @@
 <template>
-  <div id="prolist">
+  <div id="cikalist">
     <div class="topView">
       <button class="btn-close btn-audio" @click="back"></button>
-      <div class="tView">产品资料</div>
+      <div class="tView">抵用券信息</div>
       <button class="btn-audio btn-shopCart" @click="add=true"></button>
     </div>
     <div class="bomView">
@@ -83,7 +83,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-#prolist {
+#cikalist {
   height: 100%;
   .topView {
     width: 100%;

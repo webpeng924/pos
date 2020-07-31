@@ -117,14 +117,8 @@
                   style="color:red;padding:0 5px"
                   @click="removeitem(k)"
                 ></i>
-                <span>{{v.name}}</span>
-                <el-input-number
-                  :min="1"
-                  :max="999"
-                  v-model="v.count"
-                  @change="itemsChange(v)"
-                  size="mini"
-                ></el-input-number>次
+                <span>{{v.itemname}}</span>
+                <div>{{v.typeid==1?v.count:v.num}}{{v.typeid|Type}}</div>
               </div>
             </div>
             <i class="i" @click="openXM">添加</i>
@@ -161,7 +155,7 @@
 </template>
 
 <script>
-import projectList from './projectList'
+import projectList from './cikalist'
 import product from './product'
 import qs from 'qs'
 export default {
@@ -219,6 +213,20 @@ export default {
     }
   },
   computed: {},
+  filters: {
+    Type (val) {
+      switch (val) {
+        case '1':
+          return '次卡';
+        case '2':
+          return '月卡';
+        case '3':
+          return '季卡';
+        case '4':
+          return '年卡';
+      }
+    }
+  },
   methods: {
     back () {
       this.$emit('close')
@@ -238,12 +246,12 @@ export default {
         this.itemsInfo.forEach(item => {
           console.log(item.id, data.id)
           if (item.id != data.id) {
-            this.$set(data, 'count', 1)
             this.itemsInfo.push(data)
+          } else {
+            this.$message.error('已选此项')
           }
         })
       } else {
-        this.$set(data, 'count', 1)
         this.itemsInfo.push(data)
       }
     },
