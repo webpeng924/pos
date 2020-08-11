@@ -3,6 +3,9 @@
     <div class="topView">
       <button class="btn-close btn-audio" @click="back"></button>
       <div class="tView">次卡列表</div>
+      <div class="checkbox" v-show="!from">
+        <el-checkbox v-model="checked" @change="getList">隐藏已停用</el-checkbox>
+      </div>
       <button class="btn-audio btn-shopCart" @click="add=true"></button>
     </div>
     <div class="bomView">
@@ -16,18 +19,18 @@
           <template slot-scope="{row}">{{row.typeid==1?row.count:row.num}}</template>
         </el-table-column>
         <el-table-column prop="price" label="次卡售价"></el-table-column>
-        <el-table-column prop="address" width="120" label="操作">
+        <el-table-column width="120" label="操作" v-if="!from">
           <template slot-scope="scope">
-            <el-button
+            <span
+              style="padding:10px;background:red;color:#fff"
               v-show="scope.row.state==0"
-              type="danger"
               @click="changeState(scope.row.id,1)"
-            >停用</el-button>
-            <el-button
-              v-show="!scope.row.state==1"
-              type="success"
+            >停用</span>
+            <span
+              style="padding:10px;background:#60e860;color:#fff"
+              v-show="scope.row.state==1"
               @click="changeState(scope.row.id,0)"
-            >启用</el-button>
+            >启用</span>
           </template>
         </el-table-column>
       </el-table>
@@ -51,7 +54,8 @@ export default {
       status: 0,
       cate: '',
       searchtxt: '',
-      choose: ''
+      choose: '',
+      checked: false
     }
   },
   filters: {
@@ -83,6 +87,7 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_ci_list', {
         params: {
           storeid: sessionStorage.getItem('storeid'),
+          state: this.checked ? 0 : null
         }
       })
       console.log(res)
@@ -105,7 +110,7 @@ export default {
   },
   created () {
     if (this.from) {
-      this.status = 1
+      this.checked = true
     }
     this.getList()
   },
@@ -137,6 +142,10 @@ export default {
       font-size: 24px;
       color: #28282d;
       font-family: PingFangSC-Semibold;
+    }
+    .checkbox {
+      position: absolute;
+      right: 80px;
     }
     button.btn-shopCart {
       width: 40px;

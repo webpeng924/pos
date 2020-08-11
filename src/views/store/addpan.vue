@@ -180,7 +180,7 @@ export default {
     async getinfoByid () {
       const res = await this.$axios.get('/api?datatype=get_one_stock', {
         params: {
-          sign: 2,
+          sign: 3,
           id: this.setid
         }
       })
@@ -251,7 +251,8 @@ export default {
     async getCPlist () {
       const res = await this.$axios.get('/api?datatype=get_skulist', {
         params: {
-          storeid: this.storeid
+          storeid: this.storeid,
+          type: 1
         }
       })
       console.log(res)
@@ -326,7 +327,7 @@ export default {
     },
     // 修改数量
     changeNum (v) {
-      v.new_num = v.new_num.replace(/[^0-9]/g, '')
+      // v.new_num = v.new_num.replace(/[^0-9]/g, '')
       this.chooselist.forEach(item => {
         if (item.id == v.id) {
           item.cha = Number(item.new_num) - Number(item.old_num)

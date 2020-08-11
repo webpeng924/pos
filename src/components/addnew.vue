@@ -166,7 +166,7 @@
                 @click="modifyOnePrice(v,k)"
                 v-show="v.is_usecard!=1"
               >修改价格</i>
-              <div class="priceView">￥&nbsp;{{Number(v.price)*v.num*v.discount}}</div>
+              <div class="priceView">￥&nbsp;{{(Number(v.price)*v.num*v.discount).toFixed(2)}}</div>
             </div>
             <div class="empView">
               <div class="empItem" v-show="!v.worker&&v.typeid!=2">
@@ -236,7 +236,7 @@
           <el-table-column prop="mobile" label="手机号"></el-table-column>
           <el-table-column prop="cardtype" label="卡类型"></el-table-column>
           <el-table-column prop="balance" label="储值余额"></el-table-column>
-          <el-table-column prop="expiry_date" label="有效期"></el-table-column>
+          <!-- <el-table-column prop="expiry_date" label="有效期"></el-table-column> -->
         </el-table>
       </div>
     </el-dialog>
@@ -394,18 +394,19 @@ export default {
       this.chooslist.forEach(item => {
         sum += Number(item.price) * Number(item.num) * item.discount
       })
-      return sum
+      return sum.toFixed(2)
     }
   },
   methods: {
     //挂单
     confirmDiscount (status) {
+      if (!this.chooslist.length) return this.$message.error('请至少选择一个项目或产品')
       this.$prompt('', '修改优惠后总价', {
         distinguishCancelAndClose: true,
         confirmButtonText: '确定修改',
         cancelButtonText: '不修改，直接保存',
         inputValue: this.newprice ? this.newprice : this.sumprice,
-        inputPattern: /^[1-9]\d*(.\d{1,2})?$/,
+        inputPattern: /^[0-9]\d*(.\d{1,2})?$/,
         // inputValidator: (val) => { return Number(val) <= Number(data.rest_count) },
         inputErrorMessage: '价格为整数或最多保留2位小数'
       }).then(({ value }) => {
@@ -423,7 +424,7 @@ export default {
       let id = 0
       if (this.info || this.bookinfo) {
         type = 2
-        id = this.info.id
+        id = this.info ? this.info.id : this.bookinfo.id
       }
       this.chooslist.forEach(item => {
         item['discount_price'] = Number(item.price) * item.discount * item.num
@@ -685,9 +686,10 @@ export default {
           this.$prompt('', '请输入产品数量', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
+            inputValue: 1,
             inputPattern: /^[0-9]+$/,
-            inputValidator: (val) => { return Number(val) <= Number(v.number) },
-            inputErrorMessage: '数量错误或超出'
+            // inputValidator: (val) => { return Number(val) <= Number(v.number) },
+            inputErrorMessage: '格式错误'
           }).then(({ value }) => {
             this.addchooselist(v, '', value)
           })
@@ -727,11 +729,11 @@ export default {
       } else if (this.id == 2) {
         url = '/api?datatype=get_skulist'
       }
-
       const res = await this.$axios.get(url, {
         params: {
           storeid: this.storeid,
           status: 1,
+          type: this.id == 2 ? 1 : null,
           cate: this.active,
           search: this.keyword
         }
@@ -880,7 +882,7 @@ export default {
         this.yyitem = ''
       }
     },
-    async getList () {
+    async getList (sign) {
       const res = await this.$axios.get('/api?datatype=get_memberlist', {
         params: {
           storeid: this.storeid,
@@ -890,7 +892,7 @@ export default {
       console.log(res)
       if (res.data.code == 1) {
         this.tableData = res.data.data
-        if (this.info) {
+        if (this.info && sign == 1) {
           if (this.info.member_id != 0) {
             this.member = this.tableData.find(item => item.member_id == this.info.member_id)
           }
@@ -942,7 +944,8 @@ export default {
       this.chooslist = arr
     }
     this.getXMcate()
-    this.getList()
+    this.getList(1)
+
   },
   mounted () { }
 }

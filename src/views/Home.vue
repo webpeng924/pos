@@ -111,7 +111,7 @@
                 @click.stop="openworker(v,val)"
                 v-show="val.typeid==1"
               >{{val.workername}}</div>
-              <div class="priceView">
+              <div class="priceView one-txt-cut">
                 <span>￥&nbsp;</span>
                 {{val.subtotal}}
               </div>
@@ -127,7 +127,7 @@
               </label>
             </div>
             <div class="amtView">
-              <label class="label-text">优惠总价：</label>
+              <label class="label-text">实收金额：</label>
               <label class="label-amt">
                 ￥&nbsp;
                 <span>{{v.dis_total}}</span>
@@ -204,16 +204,34 @@
           @focus="chosIput(1)"
         ></el-input>
         <i>￥</i>
-        <el-input
+        <!-- <el-input
           class="keyboardInputView"
           :class="{select:chosIpu==2}"
           placeholder="扫描付款码或手输付款码按回车键收款"
           @focus="chosIput(2)"
-        ></el-input>
+        ></el-input>-->
       </div>
+      <el-dialog
+        width="50%"
+        title="请选择支付方式"
+        :visible.sync="innerVisible"
+        append-to-body
+        center
+        custom-class="quickmoney"
+      >
+        <el-radio-group v-model="paytype" style="padding:50px">
+          <el-radio label="zfb">支付宝</el-radio>
+          <el-radio label="wx">微信</el-radio>
+          <el-radio label="cash">现金</el-radio>
+          <el-radio label="other">其他</el-radio>
+        </el-radio-group>
+        <span slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="setCard">支付</el-button>
+        </span>
+      </el-dialog>
       <span slot="footer" class="dialog-footer">
         <el-button @click="quickmoney = false">取 消</el-button>
-        <el-button @click="quickmoney = false" style="background-color:#dc670b;color:#fff">确 定</el-button>
+        <el-button @click="toSubmit" style="background-color:#dc670b;color:#fff">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -258,11 +276,13 @@ export default {
       info: '',
       deg: 0,
       mainPay: false,
+      innerVisible: false,
       value: '今日收银',
       people: '单据人员',
       server: '服务中',
       rotate: true,
       choose: null,
+      paytype: 'zfb',
       gongzhong: 1,
       storeid: sessionStorage.getItem('storeid'),
       page: false,
@@ -335,32 +355,37 @@ export default {
           staffid: this.people == '单据人员' ? 'all' : this.worker.id//all,1,2,3...
         }
       })
-
       if (res.data.code == 1) {
         this.$message.success('加载成功')
         let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
-        res.data.data.forEach(item => {
-          console.log(1, item.orderinfo)
-          if (item.orderinfo != null) {
-            console.log(2)
-            item.orderinfo.forEach(k => {
-              this.$set(k, 'workername', '')
-              if (k.staff1 != 0) {
-                let workername = workerlist.find(w => w.id == k.staff1)
-                k.workername = workername.name
-              }
-            })
-          }
-        })
-
-        this.orderlist = res.data.data
-        this.statuslist.forEach(item => {
-          res.data.right.forEach(v => {
-            if (item.status == v.status) {
-              item = Object.assign(item, v)
+        if (res.data.data) {
+          res.data.data.forEach(item => {
+            console.log(1, item.orderinfo)
+            if (item.orderinfo != null) {
+              console.log(2)
+              item.orderinfo.forEach(k => {
+                this.$set(k, 'workername', '')
+                if (k.staff1 && k.staff1 != 0) {
+                  let workername = workerlist.find(w => w.id == k.staff1)
+                  console.log(workerlist, k.staff1, workername)
+                  k.workername = workername.name
+                }
+              })
             }
           })
-        })
+          this.orderlist = res.data.data
+          this.statuslist.forEach(item => {
+            res.data.right.forEach(v => {
+              if (item.status == v.status) {
+                item = Object.assign(item, v)
+              }
+            })
+          })
+        } else {
+          this.orderlist = []
+        }
+      } else {
+        this.$message.error('加载失败')
       }
     },
     cancelorder (id) {
@@ -381,8 +406,30 @@ export default {
         }
       })
     },
-
-
+    toSubmit () {
+      if (!this.Quickprice || this.Quickprice == 0) {
+        this.$message.error('请输入价格')
+      } else {
+        this.innerVisible = true
+      }
+    },
+    // 快速收款
+    async setCard () {
+      const res = await this.$axios.get('/api?datatype=quick_pay', {
+        params: {
+          storeid: this.storeid,
+          dis_total: this.Quickprice,
+          pay_type: this.paytype
+        }
+      })
+      if (res.data.code == 1) {
+        this.$message.success('收款成功')
+        this.innerVisible = false
+        this.quickmoney = false
+      } else {
+        this.$message.error('收款失败')
+      }
+    },
     // 打开整单
     modifyorder (v) {
       if (v.status < 3) {
@@ -493,7 +540,7 @@ export default {
           is_wei: 1
         }
       })
-      if (res.data.code == 1) {
+      if (res.data.code == 1 && res.data.data) {
         res.data.data.forEach(item => {
           if (!item.avatar) {
             item.avatar = '/upload/shop/moren.jpg'

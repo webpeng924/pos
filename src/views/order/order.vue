@@ -302,26 +302,26 @@ export default {
       if (res.data.code == 1) {
         this.$message.success('占用成功')
         this.typeDialog = false
-        this.getworkerlist()
       } else {
-        this.$message.success('占用失败')
+        this.$message.error(res.data.msg)
       }
+      this.getworkerlist()
     },
     daybefore () {
       const day1 = new Date(this.date)
       day1.setTime(day1.getTime() - 24 * 60 * 60 * 1000)
       this.date = this.formatDate(day1)
-      this.getworkerlist()
+      // this.getworkerlist()
     },
     daynext () {
       const day1 = new Date(this.date)
       day1.setTime(day1.getTime() + 24 * 60 * 60 * 1000)
       this.date = this.formatDate(day1)
-      this.getworkerlist()
+      // this.getworkerlist()
     }
   },
   created () {
-    this.getworkerlist()
+    // this.getworkerlist()
     for (let i = 10; i < 22; i++) {
       for (let j = 0; j < 2; j++) {
         if (j == 0) {

@@ -37,6 +37,7 @@
     </div>
     <!-- 图片上传 -->
     <xcropper ref="cropper"></xcropper>
+
     <el-dialog
       title="添加卡类"
       :visible.sync="add"
@@ -45,20 +46,20 @@
       :modal-append-to-body="false"
     >
       <div class="contant">
-        <el-form label-position="right" label-width="80px" :model="form">
-          <el-form-item label="类别编号">
+        <el-form label-position="right" label-width="80px" :model="form" :rules="rules" ref="form">
+          <el-form-item label="类别编号" prop="card_no">
             <el-input v-model="form.card_no"></el-input>
           </el-form-item>
-          <el-form-item label="卡名称">
+          <el-form-item label="卡名称" prop="name">
             <el-input v-model="form.name"></el-input>
           </el-form-item>
-          <el-form-item label="储值金额">
+          <el-form-item label="储值金额" prop="deposit_amount">
             <el-input v-model="form.deposit_amount"></el-input>
           </el-form-item>
-          <el-form-item label="起充金额">
+          <el-form-item label="起充金额" prop="recharge_money">
             <el-input v-model="form.recharge_money"></el-input>
           </el-form-item>
-          <el-form-item label="有效期限">
+          <el-form-item label="有效期限" prop="usetime">
             <el-col :span="11">
               <el-input v-model="form.usetime"></el-input>
             </el-col>
@@ -130,6 +131,23 @@ export default {
         item_discount: '',
         goods_discount: ''
       },
+      rules: {
+        card_no: [
+          { required: true, message: '请输入类别编号', trigger: 'focus' }
+        ],
+        name: [
+          { required: true, message: '请输入卡名称', trigger: 'focus' }
+        ],
+        deposit_amount: [
+          { required: true, message: '请输入储值金额', trigger: 'focus' }
+        ],
+        recharge_money: [
+          { required: true, message: '请输入起充金额', trigger: 'focus' }
+        ],
+        usetime: [
+          { required: true, message: '请输入有效期限', trigger: 'focus' }
+        ]
+      }
     }
   },
   watch: {},
@@ -180,7 +198,7 @@ export default {
       this.add = true
       this.type = 2
       this.id = data.id
-      this.form = data
+      this.form = JSON.parse(JSON.stringify(data))
       this.form.dateType = data.usetime.match(/[\u4e00-\u9fa5]/g).join("")
       this.form.usetime = data.usetime.slice(0, data.usetime.length - 1)
     },
@@ -210,6 +228,7 @@ export default {
       }
     },
     async submit () {
+      if (!this.form.card_no || !this.form.name || !this.form.deposit_amount || !this.form.recharge_money || !this.form.usetime) return this.$message.error('缺少必填信息')
       let data = qs.stringify({
         storeid: this.storeid,
         type: this.type,//1增加  2编辑

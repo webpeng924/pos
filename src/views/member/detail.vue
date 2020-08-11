@@ -131,5 +131,19 @@ export default {
       }
     }
   }
+  .imageRoom {
+    /deep/ .el-image {
+      margin: 10px;
+      .image-slot {
+        text-align: center;
+        vertical-align: middle;
+        i {
+          font-size: 100px;
+          color: #ccc;
+          line-height: 200px;
+        }
+      }
+    }
+  }
 }
 </style>

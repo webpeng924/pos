@@ -1,7 +1,7 @@
 <template>
   <div id="sznav">
     <div class="logo">
-      <img src="../assets/images/logo.jpg" alt />
+      <img src="../assets/images/logo.png" alt />
     </div>
     <router-link :to="{name:'Home'}">
       <div class="nav_item">

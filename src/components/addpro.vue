@@ -101,6 +101,12 @@
               >{{v}}</div>
             </div>
           </el-dialog>
+          <div class="subItem type-input">
+            <label class="label-leftText">条形码</label>
+            <div class="valView">
+              <input placeholder="请输入" v-model="goodsInfo.bar_code" />
+            </div>
+          </div>
         </div>
         <div class="tipView">非必填</div>
         <div class="groupView">
@@ -123,12 +129,7 @@
               <el-switch v-model="goodsInfo.state" active-color="#13ce66"></el-switch>
             </div>
           </div>
-          <div class="subItem type-input">
-            <label class="label-leftText">条形码</label>
-            <div class="valView">
-              <input placeholder="请输入" v-model="goodsInfo.bar_code" />
-            </div>
-          </div>
+
           <div class="subItem type-input">
             <label class="label-leftText">规格描述</label>
             <div class="valView">

@@ -3,38 +3,57 @@
     <div class="topView">
       <button class="btn-close btn-audio" @click="back"></button>
       <div class="tView">活动套餐</div>
-      <el-input v-model="searchtxt" placeholder="输入套餐编号/名称" style="width:200px;margin-right:20px">
+      <div class="checkbox">
+        <el-checkbox v-model="checked" @change="getList">隐藏已停用</el-checkbox>
+      </div>
+      <el-input
+        v-model="searchtxt"
+        placeholder="输入套餐编号/名称"
+        style="width:200px;position: absolute;right: 80px;"
+      >
         <i slot="prefix" class="el-input__icon el-icon-search" @click="getList"></i>
       </el-input>
-      <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="add=true">新增</button>
+      <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="addNew">新增</button>
     </div>
     <div class="bView">
       <el-table :data="tableData" style="width: 100%" height="100%">
-        <!-- <el-table-column prop="date" label="门店编号"></el-table-column> -->
-        <el-table-column prop="package_no" label="套餐编号"></el-table-column>
+        <el-table-column type="expand">
+          <template slot-scope="props">
+            <div class="props_item" v-for="(v,k) in props.row.goodsinfo" :key="k">
+              <span>产品名称：{{v.goods_name}}</span>
+              <span>数量：{{v.count}}</span>
+              <span>单价：{{v.price}}</span>
+              <span>总价值：{{(Number(v.price)*Number(v.count)).toFixed(2)}}</span>
+            </div>
+            <div class="props_item" v-for="(v,k) in props.row.itemsinfo" :key="k+Math.random()">
+              <span>次卡名称：{{v.itemname}}</span>
+              <span>数量：{{v.typeid==1?v.count:v.num}}</span>
+              <span>类型：{{v.typeid|Type}}</span>
+              <span>总价值：{{Number(v.price).toFixed(2)}}</span>
+            </div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="id" label="套餐编号"></el-table-column>
         <el-table-column prop="name" label="套餐名称"></el-table-column>
-        <el-table-column prop="fact_price" label="标准价格"></el-table-column>
-        <el-table-column prop="usetime" label="有效期限"></el-table-column>
-        <el-table-column label="状态">
+        <el-table-column prop="pay_money" label="销售价"></el-table-column>
+        <el-table-column prop="fact_money" label="会员到账"></el-table-column>
+        <el-table-column label="套餐可售时间" width="220">
+          <template slot-scope="scope">
+            <span v-if="scope.row.starttime">{{scope.row.starttime.split(' ')[0]}}</span>至
+            <span v-if="scope.row.endtime">{{scope.row.endtime.split(' ')[0]}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" width="100">
           <template slot-scope="scope">
             <span
               :style="scope.row.is_stop==1?'color:#999':'color:lightgreen'"
             >{{scope.row.is_stop==1?'停用':'正常'}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="活动开始时间">
+        <el-table-column label="操作" width="150">
           <template slot-scope="scope">
-            <span v-if="scope.row.starttime">{{scope.row.starttime.split(' ')[0]}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="活动结束时间">
-          <template slot-scope="scope">
-            <span v-if="scope.row.endtime">{{scope.row.endtime.split(' ')[0]}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作">
-          <template slot-scope="scope">
-            <el-button @click="del(scope.row.id)">删除</el-button>
+            <el-button type="primary" icon="el-icon-edit" circle @click="toEdit(scope.row)"></el-button>
+            <el-button type="danger" icon="el-icon-delete" circle @click="del(scope.row.id)"></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -66,19 +85,16 @@
     >
       <div class="contant">
         <el-form label-position="right" label-width="80px" :model="form">
-          <el-form-item label="套餐编号">
-            <el-input v-model="form.package_no"></el-input>
-          </el-form-item>
           <el-form-item label="套餐名称">
             <el-input v-model="form.name"></el-input>
           </el-form-item>
-          <el-form-item label="汇总价格">
-            <el-input v-model="form.sale_price"></el-input>
+          <el-form-item label="支付金额">
+            <el-input v-model="form.pay_money"></el-input>
           </el-form-item>
-          <el-form-item label="实际价格">
-            <el-input v-model="form.fact_price"></el-input>
+          <el-form-item label="会员到账">
+            <el-input v-model="form.fact_money"></el-input>
           </el-form-item>
-          <el-form-item label="有效期限">
+          <!-- <el-form-item label="有效期限">
             <el-col :span="11">
               <el-input v-model="form.usetime"></el-input>
             </el-col>
@@ -92,13 +108,8 @@
                 <el-option label="日" value="日"></el-option>
               </el-select>
             </el-col>
-          </el-form-item>
-          <el-form-item label="是否停用">
-            <el-radio-group v-model="form.is_stop">
-              <el-radio label="1">是</el-radio>
-              <el-radio label="0">否</el-radio>
-            </el-radio-group>
-          </el-form-item>
+          </el-form-item>-->
+
           <el-form-item label="可售期限">
             <el-date-picker
               v-model="date"
@@ -107,7 +118,14 @@
               start-placeholder="开始日期"
               end-placeholder="结束日期"
               value-format="yyyy-MM-dd"
+              style="width:100%"
             ></el-date-picker>
+          </el-form-item>
+          <el-form-item label="是否停用">
+            <el-radio-group v-model="form.is_stop">
+              <el-radio label="1">是</el-radio>
+              <el-radio label="0">否</el-radio>
+            </el-radio-group>
           </el-form-item>
           <el-form-item label="包含项目">
             <div class="list">
@@ -132,13 +150,7 @@
                   @click="removegoods(k)"
                 ></i>
                 <span>{{v.goods_name}}</span>
-                <el-input-number
-                  :min="1"
-                  :max="999"
-                  v-model="v.count"
-                  @change="goodsChange(v)"
-                  size="mini"
-                ></el-input-number>
+                <el-input-number :min="1" :max="999" v-model="v.count" size="mini"></el-input-number>
                 {{v.goods_unit}}
               </div>
             </div>
@@ -158,6 +170,7 @@
 import projectList from './cikalist'
 import product from './product'
 import qs from 'qs'
+import moment from 'moment'
 export default {
   components: { projectList, product },
   props: [],
@@ -167,24 +180,22 @@ export default {
       fromtype: false,
       type: 1,
       id: 0,
-      tableData: [1, 2, 3],
+      tableData: [],
       add: false,
       searchtxt: '',
       headname: '',
       form: {
-        package_no: '',
         name: '',
-        sale_price: '',
+        pay_money: '',
         is_stop: '0',
-        usetime: '',
-        dateType: '年',
-        fact_price: ''
+        fact_money: ''
       },
       itemsInfo: [],
       goodsInfo: [],
       date: '',
       projectList: false,
-      product: false
+      product: false,
+      checked: false
     }
   },
   watch: {
@@ -242,21 +253,23 @@ export default {
     setdata (data) {
       this.projectList = false
       console.log(data)
-      if (this.itemsInfo.length) {
-        this.itemsInfo.forEach(item => {
-          console.log(item.id, data.id)
-          if (item.id != data.id) {
-            this.itemsInfo.push(data)
-          } else {
-            this.$message.error('已选此项')
-          }
-        })
-      } else {
-        this.itemsInfo.push(data)
+      if (data) {
+        if (this.itemsInfo.length) {
+          this.itemsInfo.forEach(item => {
+            console.log(item.id, data.id)
+            if (item.id != data.id) {
+              this.itemsInfo.push(data)
+            } else {
+              this.$message.error('已选此项')
+            }
+          })
+        } else {
+          this.itemsInfo.push(data)
+        }
       }
     },
     del (id) {
-      this.$confirm('确定删除该活动吗?', '提示', {
+      this.$confirm('确定删除吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -277,33 +290,77 @@ export default {
         this.getList()
       }
     },
+    addNew () {
+      this.form = {
+        name: '',
+        pay_money: '',
+        is_stop: '0',
+        fact_money: ''
+      }
+      this.date = ''
+      this.goodsInfo = []
+      this.itemsInfo = []
+      this.id = 0
+      this.type = 1
+      this.add = true
+    },
+    toEdit (row) {
+      let starttime = moment(row.starttime).format('YYYY-MM-DD')
+      let endtime = moment(row.endtime).format('YYYY-MM-DD')
+      this.form = {
+        name: row.name,
+        pay_money: row.pay_money,
+        is_stop: row.is_stop,
+        fact_money: row.fact_money
+      }
+      this.date = [starttime, endtime]
+      this.goodsInfo = row.goodsinfo
+      this.itemsInfo = row.itemsinfo
+      this.id = row.id
+      this.type = 2
+      this.add = true
+    },
     setdata1 (data) {
       this.product = false
       console.log(data)
-      if (this.goodsInfo.length) {
-        this.goodsInfo.forEach(item => {
-          console.log(item.id, data.id)
-          if (item.id != data.id) {
-            this.$set(data, 'count', 1)
-            this.goodsInfo.push(data)
-          }
-        })
-      } else {
-        this.$set(data, 'count', 1)
-        this.goodsInfo.push(data)
+      if (data) {
+        if (this.goodsInfo.length) {
+          this.goodsInfo.forEach(item => {
+            console.log(item.id, data.id)
+            if (item.id != data.id) {
+              this.$set(data, 'count', 1)
+              this.goodsInfo.push(data)
+            }
+          })
+        } else {
+          this.$set(data, 'count', 1)
+          this.goodsInfo.push(data)
+        }
       }
     },
     async getList () {
       const res = await this.$axios.get('/api?datatype=get_package_list', {
         params: {
           storeid: this.storeid,
-          search: this.searchtxt ? this.searchtxt : null
+          search: this.searchtxt ? this.searchtxt : null,
+          status: this.checked ? 1 : null
         }
       })
       console.log(res)
-      if (res.data.code == 1) {
+      if (res.data.code == 1 && res.data.data) {
         this.tableData = res.data.data
+        this.tableData.forEach(item => {
+          if (item.goodsinfo) {
+            item.goodsinfo = JSON.parse(item.goodsinfo)
+          }
+          if (item.itemsinfo) {
+            item.itemsinfo = JSON.parse(item.itemsinfo)
+          }
+        })
+      } else {
+        this.tableData = []
       }
+      this.$message.success('加载完成')
     },
     removeitem (k) {
       this.itemsInfo.splice(k, 1)
@@ -316,11 +373,9 @@ export default {
         storeid: this.storeid,
         type: this.type,//1增加  2编辑
         id: this.id,
-        package_no: this.form.package_no,//编号
         name: this.form.name,
-        sale_price: this.form.sale_price,
-        fact_price: this.form.fact_price,
-        usetime: this.form.usetime + this.form.dateType,
+        pay_money: this.form.pay_money,
+        fact_money: this.form.fact_money,
         is_stop: this.form.is_stop,
         starttime: this.date[0],
         endtime: this.date[1],
@@ -330,19 +385,14 @@ export default {
       const res = await this.$axios.post('/api?datatype=insert_package', data)
       console.log(res)
       if (res.data.code == 1) {
-        this.$message.success(res.data.data)
+        this.$message.success(res.data.msg)
+        this.getList()
         this.add = false
       } else if (res.data.code == 2) {
-        this.$message.error(res.data.data)
+        this.$message.error(res.data.msg)
       } else {
         this.$message.error('添加失败')
       }
-    },
-    itemsChange (v) {
-
-    },
-    goodsChange (v) {
-
     }
   },
   created () {
@@ -455,6 +505,10 @@ export default {
       color: #28282d;
       font-family: PingFangSC-Semibold;
     }
+    .checkbox {
+      position: absolute;
+      right: 300px;
+    }
   }
 
   .el-form-item__content .list {
@@ -464,6 +518,16 @@ export default {
   .bView {
     padding: 0 20px;
     height: calc(100% - 85px);
+  }
+  .props_item {
+    padding-left: 60px;
+    line-height: 30px;
+    background-color: #eee;
+    display: flex;
+    span {
+      flex: 1;
+      margin-right: 50px;
+    }
   }
 }
 </style>

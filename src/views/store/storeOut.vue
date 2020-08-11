@@ -39,11 +39,11 @@
                   :class="{select:way=='正常出库'}"
                   @click="way='正常出库';wayDialog=false"
                 >正常出库</div>
-                <div
+                <!-- <div
                   class="listItem"
                   :class="{select:way=='盘亏出库'}"
                   @click="way='盘亏出库';wayDialog=false"
-                >盘亏出库</div>
+                >盘亏出库</div>-->
                 <div
                   class="listItem"
                   :class="{select:way=='供应商退货'}"
@@ -160,13 +160,13 @@
         </div>
         <div class="listView" v-show="setid">
           <div class="listItem" v-for="(v,k) in chooselist" :key="k">
-            <button></button>
             <div class="nameView overflowText">{{v.name?v.name:v.goods_name}}</div>
             <div class="cntView">{{v.number}}</div>
-            <div class="priceView">{{v.price}}</div>
+            <div class="stockCntView">{{v.oldnumber}}</div>
+            <div class="priceView">{{v.in_cost}}</div>
             <div class="amtView">{{v.total}}</div>
             <div class="supplierView">{{v.supplier_id}}</div>
-            <div class="dateView">{{v.makedate}}</div>
+            <div class="descView"></div>
           </div>
         </div>
       </div>
@@ -290,6 +290,7 @@ export default {
         this.date = data.out_date
         this.way = data.out_type
         this.buyer = data.name
+        this.usefor = data.useinfo
         this.buyid = data.get_userid
         this.remark = data.remark
         data.goodsinfo.forEach(item => {
@@ -300,6 +301,8 @@ export default {
       }
     },
     delInstore () {
+      if (this.usefor == '用户购买套餐') return this.$message.error('关联套餐，不可删除')
+      if (this.way == '盘亏出库') return this.$message.error('盘点相关，无法删除')
       this.$confirm('确认删除此出库单吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -352,7 +355,8 @@ export default {
     async getCPlist () {
       const res = await this.$axios.get('/api?datatype=get_skulist', {
         params: {
-          storeid: this.storeid
+          storeid: this.storeid,
+          type: 1
         }
       })
       console.log(res)
@@ -455,9 +459,9 @@ export default {
       v.outnumber = v.outnumber.replace(/[^0-9]/g, '')
       this.chooselist.forEach(item => {
         if (item.id == v.id) {
-          if (Number(v.outnumber) > Number(v.oldnumber)) {
-            item.outnumber = v.oldnumber
-          }
+          // if (Number(v.outnumber) > Number(v.oldnumber)) {
+          //   item.outnumber = v.oldnumber
+          // }
           item.total = Number(item.outnumber) * Number(item.in_cost)
           item.number = item.outnumber
         }

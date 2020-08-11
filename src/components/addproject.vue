@@ -20,25 +20,37 @@
           <i class="el-icon-arrow-right"></i>
         </div>
         <div class="item">
-          <div class="left">项目编号</div>
+          <div class="left">
+            项目编号
+            <span class="xing">*</span>
+          </div>
           <div class="right">
             <input type="text" placeholder="请输入" v-model="item_no" />
           </div>
         </div>
         <div class="item">
-          <div class="left">项目名称</div>
+          <div class="left">
+            项目名称
+            <span class="xing">*</span>
+          </div>
           <div class="right">
             <input type="text" placeholder="请输入" v-model="name" />
           </div>
         </div>
         <div class="item">
-          <div class="left">标准价格</div>
+          <div class="left">
+            标准价格
+            <span class="xing">*</span>
+          </div>
           <div class="right">
             <input type="text" placeholder="请输入" v-model="price" />
           </div>
         </div>
         <div class="item" @click="categoryDialog=true">
-          <div class="left">分类</div>
+          <div class="left">
+            分类
+            <span class="xing">*</span>
+          </div>
           <div class="right">
             <input type="text" placeholder="请选择" v-model="categoryName" readonly />
           </div>
@@ -202,6 +214,10 @@ export default {
       })
     },
     async submit () {
+      if (!this.item_no) return this.$message.error('请输入项目编号')
+      if (!this.name) return this.$message.error('请输入项目名称')
+      if (!this.price) return this.$message.error('请输入价格')
+      if (!this.category_id) return this.$message.error('请选择项目分类')
       const params = {
         storeid: this.storeid,
         remark: this.remark,

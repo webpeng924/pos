@@ -51,7 +51,7 @@
           <template slot-scope="scope">{{scope.row.goodsinfo?scope.row.goodsinfo.length:0}}</template>
         </el-table-column>
         <el-table-column prop="checkman" label="操作人"></el-table-column>
-        <el-table-column label="操作时间">
+        <el-table-column label="操作时间" width="100">
           <template slot-scope="scope">{{Timer(scope.row.check_time)}}</template>
         </el-table-column>
       </el-table>
@@ -75,7 +75,7 @@
           <template slot-scope="scope">{{scope.row.goodsinfo?scope.row.goodsinfo.length:0}}</template>
         </el-table-column>
         <el-table-column prop="checkman" label="操作人"></el-table-column>
-        <el-table-column label="操作时间">
+        <el-table-column label="操作时间" width="100">
           <template slot-scope="scope">{{Timer(scope.row.check_time)}}</template>
         </el-table-column>
       </el-table>

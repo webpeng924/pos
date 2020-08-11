@@ -15,7 +15,7 @@
         </div>
         <button class="btn-audio" :class="{search:keyword}" @click="getList">查询</button>
       </div>
-      <el-table :data="tableData" style="width: 100%" @row-click="openInfo">
+      <el-table :data="tableData" style="width: 100%" @row-click="openInfo" height="100%">
         <el-table-column width="120">
           <template slot-scope="scope">
             <img :src="scope.row.img|imgUrl" alt style="width:100px;height:75px" />
@@ -64,13 +64,74 @@
           <template slot-scope="{row}">{{row.typeid==1?row.count:row.num}}</template>
         </el-table-column>
         <el-table-column label="次卡类型">
-          <template slot-scope="scope">{{scope.row.typeid|type}}</template>
+          <template slot-scope="scope">{{scope.row.typeid|Type}}</template>
         </el-table-column>
         <el-table-column prop="price" label="次卡售价"></el-table-column>
       </el-table>
       <span slot="footer" class="dialog-footer">
         <el-button @click="menuDialog = false">取 消</el-button>
         <el-button type="primary" @click="innerVisible = true">确 定</el-button>
+      </span>
+
+      <el-dialog width="50%" title="请选择支付方式" :visible.sync="innerVisible" append-to-body center>
+        <el-radio-group v-model="paytype" style="padding:50px">
+          <el-radio label="zfb">支付宝</el-radio>
+          <el-radio label="wx">微信</el-radio>
+          <el-radio label="cash">现金</el-radio>
+          <el-radio label="other">其他</el-radio>
+          <el-radio label="card">会员卡余额</el-radio>
+        </el-radio-group>
+        <span slot="footer" class="dialog-footer">
+          <el-button type="primary" @click="setCard">支付</el-button>
+        </span>
+      </el-dialog>
+    </el-dialog>
+
+    <!-- 套餐弹窗 -->
+    <el-dialog
+      title="套餐列表"
+      :visible.sync="TCDialog"
+      width="70%"
+      center
+      :modal-append-to-body="false"
+      custom-class="cardDialog"
+    >
+      <el-table ref="cardTable" :data="TCList" style="width: 100%" @row-click="choosed">
+        <el-table-column width="55">
+          <template slot-scope="{row}">
+            <div class="seleted" :class="{active:check==row.id}"></div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="id" label="套餐编号"></el-table-column>
+        <el-table-column prop="name" label="套餐名称"></el-table-column>
+        <el-table-column prop="pay_money" label="销售价"></el-table-column>
+        <el-table-column prop="fact_money" label="会员到账"></el-table-column>
+        <el-table-column label="套餐可售时间" width="220">
+          <template slot-scope="scope">
+            <span v-if="scope.row.starttime">{{scope.row.starttime.split(' ')[0]}}</span>至
+            <span v-if="scope.row.endtime">{{scope.row.endtime.split(' ')[0]}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column type="expand">
+          <template slot-scope="props">
+            <div class="props_item" v-for="(v,k) in props.row.goodsinfo" :key="k">
+              <span>产品名称：{{v.goods_name}}</span>
+              <span>数量：{{v.count}}</span>
+              <span>单价：{{v.price}}</span>
+              <span>总价值：{{(Number(v.price)*Number(v.count)).toFixed(2)}}</span>
+            </div>
+            <div class="props_item" v-for="(v,k) in props.row.itemsinfo" :key="k+Math.random()">
+              <span>次卡名称：{{v.itemname}}</span>
+              <span>数量：{{v.typeid==1?v.count:v.num}}</span>
+              <span>类型：{{v.typeid|Type}}</span>
+              <span>总价值：{{Number(v.price).toFixed(2)}}</span>
+            </div>
+          </template>
+        </el-table-column>
+      </el-table>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="TCDialog = false">取 消</el-button>
+        <el-button type="primary" @click="choosePay">确 定</el-button>
       </span>
 
       <el-dialog width="50%" title="请选择支付方式" :visible.sync="innerVisible" append-to-body center>
@@ -98,11 +159,14 @@ export default {
     return {
       type: '号码',
       keyword: '',
-      tableData: [1, 2],
+      tableData: [],
       info: false,
       choosOne: '',
       cardList: [],
+      buytype: 1,
+      TCList: [],
       menuDialog: false,
+      TCDialog: false,
       innerVisible: false,
       choose: '',
       paytype: 'card',
@@ -114,7 +178,7 @@ export default {
   watch: {},
   computed: {},
   filters: {
-    type (val) {
+    Type (val) {
       switch (val) {
         case '1':
           return '次卡';
@@ -133,11 +197,13 @@ export default {
       this.info = true
     },
     async getCard (member, type) {
+      this.buytype = type
       this.choose = member
       if (type == 1) {
         const res = await this.$axios.get("/api?datatype=get_ci_list", {
           params: {
-            storeid: this.storeid
+            storeid: this.storeid,
+            state: 0
           }
         })
         if (res.data.code == 1 && res.data.data) {
@@ -147,7 +213,26 @@ export default {
           this.cardList = []
         }
       } else {
-
+        const res = await this.$axios.get("/api?datatype=get_package_list", {
+          params: {
+            storeid: this.storeid,
+            status: 1
+          }
+        })
+        if (res.data.code == 1 && res.data.data) {
+          this.TCList = res.data.data
+          this.TCList.forEach(item => {
+            if (item.goodsinfo) {
+              item.goodsinfo = JSON.parse(item.goodsinfo)
+            }
+            if (item.itemsinfo) {
+              item.itemsinfo = JSON.parse(item.itemsinfo)
+            }
+          })
+          this.TCDialog = true
+        } else {
+          this.TCList = []
+        }
       }
     },
     choosed (row) {
@@ -155,23 +240,51 @@ export default {
       this.check = row.id
     },
     async setCard () {
-      const res = await this.$axios.get('/api?datatype=buy_ccard', {
-        params: {
-          storeid: this.storeid,
-          member_id: this.choose.member_id,
-          id: this.check,
-          pay_type: this.paytype
+      if (this.buytype == 1) {
+        const res = await this.$axios.get('/api?datatype=buy_ccard', {
+          params: {
+            storeid: this.storeid,
+            member_id: this.choose.member_id,
+            id: this.check,
+            pay_type: this.paytype
+          }
+        })
+        if (res.data.code == 1) {
+          this.$message.success('购买成功')
+          this.menuDialog = false
+          this.innerVisible = false
+        } else {
+          this.$message.error(res.data.msg)
         }
-      })
-      if (res.data.code == 1) {
-        this.$message.success('购买成功')
-        this.menuDialog = false
-        this.innerVisible = false
       } else {
-        this.$message.error(res.data.msg)
+        const res = await this.$axios.get('/api?datatype=buy_package', {
+          params: {
+            storeid: this.storeid,
+            member_id: this.choose.member_id,
+            id: this.check,
+            pay_type: this.paytype,
+            userid: JSON.parse(sessionStorage.getItem('userInfo')).id,
+            username: JSON.parse(sessionStorage.getItem('userInfo')).username
+          }
+        })
+        if (res.data.code == 1) {
+          this.$message.success('购买成功')
+          this.TCDialog = false
+          this.innerVisible = false
+          this.getList()
+        } else {
+          this.$message.error(res.data.msg)
+        }
       }
     },
+    choosePay () {
+      if (this.check) {
+        this.innerVisible = true
+      } else {
+        this.$message.error('请选择')
+      }
 
+    },
     async getList () {
       const res = await this.$axios.get('/api?datatype=get_memberlist', {
         params: {
@@ -182,6 +295,8 @@ export default {
       console.log(res)
       if (res.data.code == 1) {
         this.tableData = res.data.data
+      } else {
+        this.tableData = []
       }
     }
   },
@@ -195,12 +310,14 @@ export default {
 
 <style lang="scss" scoped>
 #members {
+  height: 100%;
   .topView {
     background: #eee;
     position: fixed;
     left: 120px;
   }
   .searchResView {
+    height: 100%;
     position: relative;
     right: 0;
     top: 0;
@@ -290,6 +407,15 @@ export default {
       position: absolute;
       right: 30px;
       bottom: 10px;
+    }
+  }
+  .props_item {
+    line-height: 30px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    span {
+      flex: 1;
+      margin-right: 50px;
     }
   }
 }

@@ -54,7 +54,8 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_skulist', {
         params: {
           storeid: this.storeid,
-          search: this.searchtxt
+          search: this.searchtxt,
+          type: 1
         }
       })
       console.log(res)

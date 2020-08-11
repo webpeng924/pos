@@ -6,7 +6,7 @@
       <button class="btn-audio btn-shopCart" @click="add=true"></button>
     </div>
     <div class="set_page" :class="{activePage:add}">
-      <add @close="add=false;getList()" :choose="choose" v-if="add"></add>
+      <add @close="add=false;getList()" :setid="choose" v-if="add"></add>
     </div>
     <div class="bomView">
       <el-table :data="tableData" stripe style="width: 100%">
@@ -15,11 +15,11 @@
         <el-table-column prop="pan_time" label="盘点时间"></el-table-column>
         <el-table-column prop="warehouse" label="仓库名称"></el-table-column>
         <el-table-column prop="name" label="盘点人"></el-table-column>
-        <el-table-column label="操作" width="100">
+        <!-- <el-table-column label="操作" width="100">
           <template slot-scope="scope">
-            <el-button @click="todel(scope.row)">删除</el-button>
+            <el-button @click="toEdit(scope.row)">详情</el-button>
           </template>
-        </el-table-column>
+        </el-table-column>-->
       </el-table>
     </div>
   </div>
@@ -67,28 +67,8 @@ export default {
     },
     toEdit (row) {
       console.log(row)
-      this.choose = row
+      this.choose = row.id
       this.add = true
-    },
-    todel (v) {
-      this.$confirm('确认删除此条盘库信息吗?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(async () => {
-        const res = await this.$axios.get('/api?datatype=del_stock_pan', {
-          params: {
-            storeid: this.storeid,
-            id: v.id
-          }
-        })
-        if (res.data.code == 1) {
-          this.$message.success('删除成功')
-          this.getList()
-        } else {
-          this.$message.error('删除失败')
-        }
-      })
     },
     handleCommand (command) {
       this.cate = command

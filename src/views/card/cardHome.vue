@@ -3,7 +3,7 @@
     <div class="tView">注册会员</div>
     <div class="cView">
       <p>清扫面下方二维码，进入会员专用小程序注册会员</p>
-      <img src="../../assets/images/logo.jpg" alt />
+      <img src="../../assets/images/zhuceewm.jpg" alt />
     </div>
   </div>
 </template>

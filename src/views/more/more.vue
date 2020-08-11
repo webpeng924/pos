@@ -136,7 +136,7 @@
               <div>员工资料</div>
             </div>
 
-            <div class="listItem btn-audio" @click="$message('开发中')">
+            <div class="listItem btn-audio" @click="quanlist=true">
               <img src="../../assets/images/diyongquan.png" />
               <div>抵用券设置</div>
             </div>
@@ -183,7 +183,7 @@
             </div>
           </div>
         </div>
-        <div class="groupView">
+        <!-- <div class="groupView">
           <div class="titleView">库存中心</div>
           <div class="listView">
             <div class="listItem btn-audio">
@@ -191,7 +191,7 @@
               <div>统计分析</div>
             </div>
           </div>
-        </div>
+        </div>-->
         <div class="groupView">
           <div class="titleView">会员中心</div>
           <div class="listView">
@@ -241,6 +241,9 @@
     </div>
     <div class="set_page" :class="{activePage:quanlist}">
       <quanlist @close="quanlist=false" v-if="quanlist"></quanlist>
+    </div>
+    <div class="set_page" :class="{activePage:panku}">
+      <panku @close="panku=false" v-if="panku"></panku>
     </div>
   </div>
 </template>

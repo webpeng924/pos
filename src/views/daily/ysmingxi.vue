@@ -78,22 +78,17 @@
     <div class="bomView">
       <el-table :data="tableData" stripe style="width: 100%" height="100%">
         <el-table-column prop="type" label="类型" width="80"></el-table-column>
-        <el-table-column label="单号" width="150">
+        <el-table-column label="单号" width="150" show-overflow-tooltip>
           <template slot-scope="scope">
             {{
             scope.row.pay_sn ? scope.row.pay_sn : scope.row.order_no
             }}
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="结账时间">
-          <template slot-scope="scope">
-            {{
-            scope.row.dateline && scope.row.dateline | time
-            }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="name" label="客户信息">
-          <template slot-scope="scope">{{ scope.row.name?scope.row.name:'散客' }}</template>
+        <el-table-column prop="name" label="客户信息" show-overflow-tooltip>
+          <template
+            slot-scope="scope"
+          >{{ scope.row.customer_type==2?scope.row.name:'散客' }} ({{ scope.row.customer_type==2?scope.row.mobile:'' }})</template>
         </el-table-column>
         <el-table-column prop="address" label="消费内容">
           <template slot-scope="scope">
@@ -111,8 +106,21 @@
             <span v-else></span>
           </template>
         </el-table-column>
-        <el-table-column prop="total" label="金额"></el-table-column>
-        <el-table-column prop="address" label="操作">
+        <el-table-column prop="dis_total" label="金额">
+          <template slot-scope="scope">
+            {{
+            scope.row.type=='收银'? scope.row.dis_total : scope.row.change
+            }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="name" label="结账时间" width="110">
+          <template slot-scope="scope">
+            {{
+            scope.row.dateline && scope.row.dateline | time
+            }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="address" label="操作" v-if="chos==3">
           <template slot-scope="scope">
             <span
               style="padding:10px;background:orange;color:#fff"
@@ -371,7 +379,7 @@ export default {
           arr.forEach(v => {
             v['cikaid'] = v.card_memberitem_id
             if (v.id == item.id) {
-              v.num = v.number - Number(v.num)
+              v.num = Number(v.num) - v.number
             }
           })
           this.chosOrder['info'] = arr
@@ -453,6 +461,11 @@ export default {
       });
       if (res.code !== 1 && !res.data.data) return this.tableData = [];
       this.tableData = res.data.data;
+      if (this.chos == 1) {
+        this.tableData.forEach(item => {
+          this.$set(item, 'customer_type', 2)
+        })
+      }
     },
     headerClass () {
       return 'text-align: center'
@@ -469,7 +482,7 @@ export default {
   mounted () { },
   filters: {
     time (value) {
-      return moment.unix(value).format("YYYY-MM-DD");
+      return moment.unix(value).format("YYYY-MM-DD HH:mm:ss");
     },
     paytype (val) {
       switch (val) {

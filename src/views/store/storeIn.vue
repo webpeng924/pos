@@ -38,11 +38,11 @@
                   :class="{select:way=='正常入库'}"
                   @click="way='正常入库';wayDialog=false"
                 >正常入库</div>
-                <div
+                <!-- <div
                   class="listItem"
                   :class="{select:way=='盘盈入库'}"
                   @click="way='盘盈入库';wayDialog=false"
-                >盘盈入库</div>
+                >盘盈入库</div>-->
                 <div
                   class="listItem"
                   :class="{select:way=='客户退货'}"
@@ -446,6 +446,7 @@ export default {
       }
     },
     delInstore () {
+      if (this.way == '盘盈入库') return this.$message.error('盘点相关，无法删除')
       this.$confirm('确认删除此入库单吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

@@ -262,6 +262,7 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_skulist', {
         params: {
           cate: this.active,
+          type: 1,
           storeid: this.storeid
         }
       })
@@ -400,11 +401,11 @@ export default {
       cursor: pointer;
       display: inline-block;
       width: 164px;
-      height: 210px;
+      height: 156px;
       margin: 0 38px 38px 0;
       .imgView {
         width: 164px;
-        height: 164px;
+        height: 110px;
         overflow: hidden;
         img {
           width: 100%;

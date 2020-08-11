@@ -55,13 +55,15 @@
             @row-click="choosecika"
           >
             <el-table-column type="index" width="50"></el-table-column>
-            <el-table-column prop="itemname" label="名称" width="180"></el-table-column>
-            <!-- <el-table-column prop="name" label="有效期" width="150"></el-table-column> -->
-            <el-table-column prop="first_count" label="购买次数"></el-table-column>
-            <el-table-column prop="address" label="使用次数">
+            <el-table-column property="itemname" label="名称" width="120"></el-table-column>
+            <el-table-column label="卡类型">
+              <template slot-scope="scope">{{scope.row.typeid|type}}</template>
+            </el-table-column>
+            <el-table-column property="first_count" label="购买次数"></el-table-column>
+            <el-table-column property="address" label="使用次数">
               <template slot-scope="scope">{{scope.row.first_count-scope.row.rest_count}}</template>
             </el-table-column>
-            <el-table-column prop="rest_count" label="剩余次数"></el-table-column>
+            <el-table-column property="rest_count" label="剩余次数"></el-table-column>
           </el-table>
         </div>
       </div>
@@ -266,16 +268,22 @@
         <el-calendar v-model="yudate"></el-calendar>
         <div class="timeView">
           <div class="listView">
-            <div class="listItem" v-for="(v,k) in timelist" :key="k" @click="sethours(v)">
+            <div
+              class="listItem"
+              :class="{select:hours == (v.shi + ':' + v.fen + ':00')}"
+              v-for="(v,k) in timelist"
+              :key="k"
+              @click.stop="sethours(v)"
+            >
               <label>
                 {{v.shi}} : {{v.fen}}
-                <span></span>
+                <span v-show="v.isyy">已预约</span>
               </label>
             </div>
             <div class="tipItem" v-show="!timelist.length">当日无可预约时间！</div>
           </div>
           <div class="btnView">
-            <button>确认</button>
+            <button @click="dateDialog = false">确认</button>
           </div>
         </div>
       </div>
@@ -473,6 +481,25 @@ export default {
         }
       })
       console.log(res)
+      if (res.data.code == 1 && res.data.data) {
+        if (this.timelist.length > 0) {
+          let arr = []
+          res.data.data.forEach(item => {
+            let aa = item.yytime.split(' ')[1]
+            arr.push(aa)
+          })
+          console.log(arr)
+          for (let i = 0; i < this.timelist.length; i++) {
+            let bb = this.timelist[i].shi + ':' + this.timelist[i].fen + ':00'
+            console.log(bb)
+            if (arr.includes(bb)) {
+              console.log(this.timelist[i])
+              this.timelist[i]['isyy'] = true
+              this.timelist[i + 1]['isyy'] = true
+            }
+          }
+        }
+      }
     },
     formatDate (date) {
       var y = date.getFullYear()
@@ -495,10 +522,10 @@ export default {
             if (i >= nowshi) {
               for (let j = 0; j < 2; j++) {
                 if (j == 0 && i != nowshi) {
-                  const a = { shi: i, fen: '00' }
+                  const a = { shi: i, fen: '00', isyy: false }
                   this.timelist.push(a)
                 } else if (j == 1 && nowfen < 30) {
-                  const a = { shi: i, fen: '30' }
+                  const a = { shi: i, fen: '30', isyy: false }
                   this.timelist.push(a)
                 }
               }
@@ -508,10 +535,10 @@ export default {
           for (let i = 10; i < 22; i++) {
             for (let j = 0; j < 2; j++) {
               if (j == 0) {
-                const a = { shi: i, fen: '00' }
+                const a = { shi: i, fen: '00', isyy: false }
                 this.timelist.push(a)
               } else {
-                const a = { shi: i, fen: '30' }
+                const a = { shi: i, fen: '30', isyy: false }
                 this.timelist.push(a)
               }
             }
@@ -553,10 +580,10 @@ export default {
       this.getcicardInfo()
     },
     sethours (v) {
+      if (v.isyy) return this.$message.error('该时段已被预约！')
       this.hours = v.shi + ":" + v.fen + ":00"
       let date = moment(this.yudate).format('YYYY-MM-DD')
       this.staTime = date + ' ' + this.hours
-      this.dateDialog = false
     },
     async submit () {
       if (!this.workerid) return this.$message.error('请选择预约员工')
@@ -591,6 +618,20 @@ export default {
         this.$emit('close')
       } else {
         this.$message.success('预约失败')
+      }
+    }
+  },
+  filters: {
+    type (val) {
+      switch (val) {
+        case '1':
+          return '次卡';
+        case '2':
+          return '月卡';
+        case '3':
+          return '季卡';
+        case '4':
+          return '年卡';
       }
     }
   },
@@ -683,7 +724,22 @@ export default {
             color: #28282d;
             padding-left: 50px;
             cursor: pointer;
+            span {
+              margin-left: 12px;
+              font-size: 14px;
+              color: #ccc;
+            }
           }
+        }
+        .listItem.select {
+          border-top: 0.5px solid rgba(154, 154, 154, 0.5);
+          border-bottom: 0.5px solid rgba(154, 154, 154, 0.5);
+        }
+        .listItem.select > label {
+          font-size: 20px;
+          border-left: 2px solid #47bf7c;
+          color: #47bf7c;
+          box-sizing: border-box;
         }
         .tipItem {
           line-height: 300px;
@@ -1158,7 +1214,6 @@ export default {
           line-height: 36px;
           padding-left: 15px;
           font-size: 15px;
-          font-family: PingFangSC-Medium;
           color: #28282d;
         }
         .listItem {

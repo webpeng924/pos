@@ -22,11 +22,13 @@
                       <button class="btn-dyqPay"></button>
                     </div>-->
                     <div class="amtView">
-                      <span>￥&nbsp;{{Number(v.num)*Number(v.price)}}</span>
+                      <span>原价：￥&nbsp;{{Number(v.num)*Number(v.price)}}</span>
                     </div>
-                    <div class="discountView"></div>
+                    <div class="discountView" v-show="bookinfo.customer_type==2&&isuseCard">
+                      <span>会员折扣价：￥&nbsp;{{Number(v.discount_price)}}</span>
+                    </div>
                     <div class="payTypeView">
-                      <label class>{{paytype}}</label>
+                      <label class>支付方式：{{paytype}}</label>
                     </div>
                     <button class="btn-select select"></button>
                   </div>
@@ -34,31 +36,38 @@
               </div>
             </div>
             <div class="bView">
-              <div class="btnView">
-                <!-- <button class="btn-select select">全选</button> -->
-                <!-- <button class="btn-merge disable">合并</button> -->
+              <div class="btnView" v-show="bookinfo.dis_total!=0">
+                <button @click="quanDialog=true;getvoucher()">抵用券</button>
+                <span v-show="choosquan">
+                  -{{choosquan.v_amount}}元
+                  <i
+                    class="el-icon-remove-outline"
+                    style="color:red"
+                    @click="choosquan=''"
+                  ></i>
+                </span>
               </div>
               <div class="amtInfoView">
                 <div class="payableAmt" style="color:#ccc">
                   应付金额：
-                  <label>￥&nbsp;{{bookinfo.total}}</label>
+                  <label>￥&nbsp;{{isuseCard ? bookinfo.total : fullPrice}}</label>
                 </div>
-                <div class="payableAmt" style="color:#ccc">
+                <div class="payableAmt" style="color:#ccc" v-show="isuseCard">
                   优惠金额：
-                  <label>￥&nbsp;{{(bookinfo.total-bookinfo.dis_total).toFixed(2)}}</label>
+                  <label>￥&nbsp;{{isuseCard ?(bookinfo.total-bookinfo.dis_total).toFixed(2):0}}</label>
                 </div>
                 <div class="toPayAmt">
                   待付金额：
                   <label>
                     ￥&nbsp;
-                    <span>{{bookinfo.dis_total}}</span>
+                    <span>{{payPrice}}</span>
                   </label>
                 </div>
               </div>
               <button
                 class="btn-remark overflowText"
                 v-show="bookinfo.customer_type==2"
-              >会员卡余额：{{memberPrice}}元（此订单将使用会员卡余额抵扣，请确保余额充足！）</button>
+              >会员卡余额：{{memberPrice}}元（此订单若使用会员卡余额抵扣，请确保余额充足！）</button>
             </div>
             <div class="paymentView">
               <div class="tView">支付方式</div>
@@ -73,7 +82,7 @@
                   </div>
                   <div class="textView overflowText">
                     <label class="label-name">支付宝</label>
-                    <label class="label-amt" v-show="paytype=='支付宝'">应收：{{bookinfo.dis_total}}</label>
+                    <label class="label-amt" v-show="paytype=='支付宝'">应收：{{payPrice}}</label>
                   </div>
                 </div>
                 <div
@@ -86,7 +95,7 @@
                   </div>
                   <div class="textView overflowText">
                     <label class="label-name">微信</label>
-                    <label class="label-amt" v-show="paytype=='微信'">应收：{{bookinfo.dis_total}}</label>
+                    <label class="label-amt" v-show="paytype=='微信'">应收：{{payPrice}}</label>
                   </div>
                 </div>
                 <div
@@ -99,7 +108,7 @@
                   </div>
                   <div class="textView overflowText">
                     <label class="label-name">现金</label>
-                    <label class="label-amt" v-show="paytype=='现金'">应收：{{bookinfo.dis_total}}</label>
+                    <label class="label-amt" v-show="paytype=='现金'">应收：{{payPrice}}</label>
                   </div>
                 </div>
                 <div
@@ -112,7 +121,7 @@
                   </div>
                   <div class="textView overflowText">
                     <label class="label-name">其他</label>
-                    <label class="label-amt" v-show="paytype=='其他'">应收：{{bookinfo.dis_total}}</label>
+                    <label class="label-amt" v-show="paytype=='其他'">应收：{{payPrice}}</label>
                   </div>
                 </div>
                 <div
@@ -126,7 +135,7 @@
                   </div>
                   <div class="textView overflowText">
                     <label class="label-name">会员卡</label>
-                    <label class="label-amt" v-show="paytype=='会员卡'">应收：{{bookinfo.dis_total}}</label>
+                    <label class="label-amt" v-show="paytype=='会员卡'">应收：{{payPrice}}</label>
                   </div>
                 </div>
                 <div
@@ -140,7 +149,7 @@
                   </div>
                   <div class="textView overflowText">
                     <label class="label-name">签账</label>
-                    <label class="label-amt" v-show="paytype=='签账'">应收：{{bookinfo.dis_total}}</label>
+                    <label class="label-amt" v-show="paytype=='签账'">应收：{{payPrice}}</label>
                   </div>
                 </div>
               </div>
@@ -175,12 +184,33 @@
     <div class="set_page" :class="{activePage:payend}">
       <payend @close="payend=false;getererima()" v-if="payend"></payend>
     </div>
+
+    <el-dialog
+      title="抵用券列表"
+      :visible.sync="quanDialog"
+      width="400px"
+      center
+      :modal-append-to-body="false"
+      custom-class="dialog"
+    >
+      <div class="contentView" style="max-height: 620px;">
+        <div class="quanItem" @click="chooseQuan(v)" v-for="(v,k) in quanlist" :key="k">
+          <div class="left">现金券</div>
+          <div class="right">
+            <p>{{v.v_amount}}元</p>
+            <p class="p1">使用时间：{{v.v_starttime|time}} 至 {{v.v_endtime|time}}</p>
+            <span class="el-icon-circle-check" :class="{select:choosquan.id==v.id}"></span>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import erweima from '@/views/lqy/erweimaPay'
 import payend from './payEnd'
+import moment from 'moment'
 export default {
   components: { erweima, payend },
   props: ['bookinfo'],
@@ -196,7 +226,17 @@ export default {
       erweima: false,
       dialogVisible: false,
       payend: false,
-      memberPrice: 0
+      memberPrice: 0,
+      isuseCard: true,
+      haveDistotal: false,
+      quanDialog: false,
+      choosquan: '',
+      quanlist: []
+    }
+  },
+  filters: {
+    time (value) {
+      return moment.unix(value).format("YYYY-MM-DD");
     }
   },
   methods: {
@@ -233,7 +273,10 @@ export default {
           storeid: this.storeid,
           pay_type: paytype,
           order_no: this.bookinfo.order_no,
-          order_id: this.bookinfo.id
+          order_id: this.bookinfo.id,
+          full_price: this.haveDistotal ? null : this.isuseCard ? null : this.fullPrice,
+          v_amount: this.choosquan ? this.choosquan.v_amount : 0,
+          v_id: this.choosquan ? this.choosquan.id : null,
         }
       })
       if (res.data.code == 1) {
@@ -245,13 +288,14 @@ export default {
       }
     },
     changepaytype (data) {
-      // if (this.bookinfo.customer_type != 2) {
-      //   this.paytype = data
-      // } else {
-      //   if (data == '签账' || data == '会员卡') {
-      //     this.paytype = data
-      //   }
-      // }
+      if (this.bookinfo.customer_type == 2) {
+        if (data != '会员卡') {
+          this.isuseCard = false
+          this.choosquan = ''
+        } else {
+          this.isuseCard = true
+        }
+      }
       this.paytype = data
     },
     type (val) {
@@ -270,6 +314,20 @@ export default {
           return 'card';
       }
     },
+    chooseQuan (v) {
+      if (this.paytype == '会员卡') {
+        let flag = moment.unix(v.v_starttime).format('YYYY-MM-DD') <= moment(new Date()).format('YYYY-MM-DD')
+        console.log(flag)
+        if (flag) {
+          this.choosquan = v
+          this.quanDialog = false
+        } else {
+          this.$message.error('未到可使用时间')
+        }
+      } else {
+        this.$message.error('仅限会员卡支付可抵用！')
+      }
+    },
     getererima () {
       this.$axios.get('/api?datatype=more&storeid=' + this.storeid).then(
         res => {
@@ -280,6 +338,20 @@ export default {
           sessionStorage.setItem('shopInfo', JSON.stringify(data))
         }
       )
+    },
+    async getvoucher () {
+      const res = await this.$axios.get('/api?datatype=get_member_voucher', {
+        params: {
+          storeid: this.storeid,
+          member_id: this.bookinfo.member_id,
+          status: 0
+        }
+      })
+      if (res.data.code == 1 && res.data.data) {
+        this.quanlist = res.data.data
+      } else {
+        this.quanlist = []
+      }
     },
     async getmember () {
       const res = await this.$axios.get("/api?datatype=get_one_member", {
@@ -302,8 +374,11 @@ export default {
       this.itemlist = this.bookinfo.orderinfo
       if (this.bookinfo.customer_type == 2) {
         this.paytype = '会员卡'
+        this.getmember()
       }
-      this.getmember()
+      if (this.bookinfo.dis_total != this.bookinfo.total) {
+        this.haveDistotal = true
+      }
     }
     let obj = JSON.parse(sessionStorage.getItem('shopInfo'))
     if (obj) {
@@ -316,7 +391,34 @@ export default {
   },
   mounted () { },
   watch: {},
-  computed: {}
+  computed: {
+    fullPrice () {
+      let sum = 0
+      this.bookinfo.orderinfo.forEach(item => {
+        sum += Number(item.num) * Number(item.price)
+      })
+      return sum
+    },
+    payPrice () {
+      let sum = 0
+      if (this.haveDistotal) {
+        sum = this.bookinfo.dis_total
+      } else {
+        if (this.isuseCard) {
+          sum = this.bookinfo.dis_total
+        } else {
+          sum = this.fullPrice
+        }
+      }
+      if (this.choosquan) {
+        sum = Number(sum) - Number(this.choosquan.v_amount)
+      }
+      if (sum < 0) {
+        sum = 0
+      }
+      return sum
+    }
+  }
 }
 </script>
 
@@ -398,6 +500,10 @@ export default {
           padding: 15px 35px 45px 35px;
           display: flex;
           background: #fff;
+          div.btnView {
+            width: 200px;
+            text-align: left;
+          }
           div.amtInfoView {
             flex: 1;
             text-align: right;
@@ -491,7 +597,7 @@ export default {
           }
         }
       }
-      .btnView {
+      > div.btnView {
         position: fixed;
         width: 100%;
         bottom: 0;
@@ -504,7 +610,7 @@ export default {
           font-size: 16px;
           font-family: PingFangSC-Medium;
           color: #fff;
-          background: #28282d;
+          background: #dc670b;
           border-radius: 0;
         }
       }
@@ -513,6 +619,72 @@ export default {
   .payEr {
     width: 500px;
     padding: 20px 100px;
+  }
+  .dialog {
+    .contentView {
+      padding: 20px;
+      display: block;
+      min-height: 400px;
+      .quanItem {
+        width: 100%;
+        height: 80px;
+        border-radius: 5px;
+        position: relative;
+        color: #fff;
+        display: flex;
+        margin-bottom: 10px;
+        background: radial-gradient(
+              circle at right top,
+              transparent 10px,
+              #ffb142 0
+            )
+            top left / 30% 51% no-repeat,
+          radial-gradient(circle at right bottom, transparent 10px, #ffb142 0)
+            bottom left / 30% 51% no-repeat,
+          radial-gradient(circle at left top, transparent 10px, #ffb142 0) top
+            right / 70% 51% no-repeat,
+          radial-gradient(circle at left bottom, transparent 10px, #ffb142 0)
+            bottom right / 70% 51% no-repeat;
+        .left {
+          width: 30%;
+          height: 100%;
+          border-right: 1px dashed #fff;
+          line-height: 80px;
+          font-size: 20px;
+          text-align: center;
+        }
+        .right {
+          flex: 1;
+          flex-direction: column;
+          display: flex;
+          padding: 10px;
+          font-size: 30px;
+          position: relative;
+          p {
+            flex: 1;
+            text-align: center;
+          }
+          .p1 {
+            font-size: 12px;
+          }
+          span {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #fff;
+            width: 26px;
+            height: 26px;
+            // margin-top: 17px;
+            border-radius: 100%;
+            color: #fff;
+            font-size: 26px;
+            &.select {
+              color: rgb(119, 224, 58);
+            }
+          }
+        }
+      }
+    }
   }
 }
 </style>

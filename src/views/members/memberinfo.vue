@@ -33,7 +33,7 @@
             name = '品项信息';
             getcicardInfo();
           "
-          :class="{select:show == 2&&name =='品项信息'}"
+          :class="{select:name =='品项信息'}"
         >品项信息</div>
         <div
           class="menuItem btn-audio"
@@ -41,10 +41,19 @@
             show = 2;
             name = '套餐信息';
             cikalist = [];
+            getTClist();
           "
-          :class="{select:show == 2&&name =='套餐信息'}"
+          :class="{select:name =='套餐信息'}"
         >套餐信息</div>
-        <div class="menuItem btn-audio" @click="$message('暂未开放')">抵用券信息</div>
+        <div
+          class="menuItem btn-audio"
+          @click="
+            show = 2;
+            name = '抵用券信息';
+            getvoucher();
+          "
+          :class="{select:name =='抵用券信息'}"
+        >抵用券信息</div>
         <div
           class="menuItem btn-audio"
           @click="
@@ -52,7 +61,7 @@
             name = '充值记录';
             getlist(1);
           "
-          :class="{select:show == 3&&name =='充值记录'}"
+          :class="{select:name =='充值记录'}"
         >充值记录</div>
         <div
           class="menuItem btn-audio"
@@ -61,7 +70,7 @@
             name = '消费记录';
             getlist(2);
           "
-          :class="{select:show == 3&&name =='消费记录'}"
+          :class="{select:name =='消费记录'}"
         >消费记录</div>
         <div
           class="menuItem btn-audio"
@@ -70,7 +79,7 @@
             name = '案例图片';
             getmemberPic()
           "
-          :class="{select:show == 4&&name =='案例图片'}"
+          :class="{select:name =='案例图片'}"
         >案例图片</div>
         <!-- <div class="menuItem btn-audio">沟通记录</div> -->
         <!-- <div class="menuItem btn-audio">产品寄存</div> -->
@@ -122,9 +131,15 @@
         <div class="accInfoView">
           <div class="accItem">
             <div class="valueView balanceView">
-              <label>{{ userinfo.balance }}</label>
+              <label>{{ userinfo.balance-userinfo.gift_money }}</label>
             </div>
             <div class="nameView">储值账户</div>
+          </div>
+          <div class="accItem">
+            <div class="valueView balanceView">
+              <label>{{ userinfo.balance-userinfo.gift_money>0?userinfo.gift_money:userinfo.balance }}</label>
+            </div>
+            <div class="nameView">赠送账户</div>
           </div>
         </div>
         <!-- <div class="tagsView">
@@ -166,14 +181,20 @@
     </div>
     <div class="contentView" v-show="show == 2">
       <div class="subTView">{{ name }}</div>
-      <div class="listView" style="height: 884px;">
+      <div class="listView" style="height: calc(100% - 85px);">
         <div class="memberEquityView">
-          <div class="menuView">
+          <div class="menuView" v-show="name!='套餐信息'">
             <div class="menuItem" :class="{ select: sign == 1 }" @click="sign = 1">可用</div>
             <div class="menuItem" :class="{ select: sign == 2 }" @click="sign = 2">已用</div>
             <div class="menuItem" :class="{ select: sign == 3 }" @click="sign = 3">过期</div>
           </div>
-          <el-table ref="Table" :data="cikalist" style="width: 100%">
+          <el-table
+            ref="Table"
+            :data="cikalist"
+            style="width: 100%"
+            v-show="name=='品项信息'"
+            height="90%"
+          >
             <el-table-column type="index" width="50"></el-table-column>
             <el-table-column prop="itemname" label="名称" width="180"></el-table-column>
             <el-table-column label="类型" width="150">
@@ -190,6 +211,52 @@
             </el-table-column>
             <el-table-column prop="rest_count" label="剩余次数"></el-table-column>
           </el-table>
+          <el-table
+            ref="Table"
+            :data="cikalist"
+            style="width: 100%"
+            v-show="name=='抵用券信息'"
+            height="90%"
+          >
+            <el-table-column type="index" width="50"></el-table-column>
+            <el-table-column label="抵用类型">
+              <template slot-scope="scope">{{ scope.row.v_typeid==1?'现金券':'现金券'}}</template>
+            </el-table-column>
+            <el-table-column prop="v_amount" label="抵用金额"></el-table-column>
+            <el-table-column label="有效期时间">
+              <template slot-scope="{row}">{{row.v_starttime|time}} 至 {{row.v_endtime|time}}</template>
+            </el-table-column>
+          </el-table>
+
+          <el-table
+            ref="Table"
+            :data="cikalist"
+            style="width: 100%"
+            height="100%"
+            v-show="name=='套餐信息'"
+          >
+            <el-table-column width="55" type="index" label="序号"></el-table-column>
+            <el-table-column prop="package_name" label="套餐名称"></el-table-column>
+            <el-table-column prop="pay_money" label="销售价"></el-table-column>
+            <el-table-column prop="fact_money" label="会员到账"></el-table-column>
+            <el-table-column prop="addtime" label="购买时间" width="220"></el-table-column>
+            <el-table-column type="expand">
+              <template slot-scope="props">
+                <div class="props_item" v-for="(v,k) in props.row.goodsinfo" :key="k">
+                  <span>产品名称：{{v.goods_name}}</span>
+                  <span>数量：{{v.count}}</span>
+                  <span>单价：{{v.price}}</span>
+                  <span>总价值：{{(Number(v.price)*Number(v.count)).toFixed(2)}}</span>
+                </div>
+                <div class="props_item" v-for="(v,k) in props.row.itemsinfo" :key="k+Math.random()">
+                  <span>次卡名称：{{v.itemname}}</span>
+                  <span>数量：{{v.typeid==1?v.count:v.num}}</span>
+                  <span>类型：{{v.typeid|type}}</span>
+                  <span>总价值：{{Number(v.price).toFixed(2)}}</span>
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
           <!-- <div class="tipView">
             <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_NoData_Bill.png" />
             <div>暂无数据</div>
@@ -199,13 +266,19 @@
     </div>
     <div class="contentView" v-show="show == 3">
       <div class="subTView">{{ name }}</div>
-      <div class="listView" style="height: 884px;">
-        <el-table ref="Table" :data="tableData" style="width: 100%" height="100%">
-          <el-table-column width="50"></el-table-column>
-          <el-table-column prop="itemname" label="日期" width="150">
+      <div class="listView" style="height: calc(100% - 85px);">
+        <el-table
+          ref="Table"
+          :data="tableData"
+          style="width: 100%"
+          height="100%"
+          v-show="name=='充值记录'"
+        >
+          <el-table-column width="50" type="index"></el-table-column>
+          <el-table-column prop="itemname" label="日期" width="100">
             <template slot-scope="scope">
               {{
-              scope.row.dateline | time
+              scope.row.dateline | Time
               }}
             </template>
           </el-table-column>
@@ -222,11 +295,49 @@
           <el-table-column prop="change" label="变动金额"></el-table-column>
           <el-table-column prop="balance" label="余额"></el-table-column>
         </el-table>
+        <el-table
+          ref="Table"
+          :data="tableData"
+          style="width: 100%"
+          height="100%"
+          v-show="name=='消费记录'"
+        >
+          <el-table-column width="50" type="index"></el-table-column>
+          <el-table-column prop="pay_sn" label="单号" width="200" show-overflow-tooltip>
+            <template slot-scope="scope">
+              {{
+              scope.row.pay_sn ? scope.row.pay_sn : scope.row.order_no
+              }}
+            </template>
+          </el-table-column>
+          <el-table-column label="支付方式">
+            <template slot-scope="scope">{{scope.row.pay_type |payType}}</template>
+          </el-table-column>
+          <el-table-column prop="change" label="支付金额"></el-table-column>
+          <el-table-column prop="itemname" label="时间">
+            <template slot-scope="scope">
+              {{
+              scope.row.dateline | Time
+              }}
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
     </div>
     <div class="contentView" v-show="show == 4">
       <div class="subTView">{{ name }}</div>
-      <p style="padding:10px 0 10px 30px;color:red">点击“+”添加图片, 点击相应图片可删除</p>
+      <p style="padding:10px 30px 0;color:red;display:flex">
+        <span style="flex:1">点击“+”添加图片, 点击相应图片可删除</span>
+        <el-dropdown @command="handleCommand">
+          <span class="el-dropdown-link">
+            {{nowcate.title}}
+            <i class="el-icon-arrow-down el-icon--right"></i>
+          </span>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item v-for="(v,k) in catelist" :key="k" :command="v">{{v.title}}</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </p>
       <div class="imageRoom">
         <el-image
           v-for="(v,k) in urls"
@@ -258,20 +369,20 @@
       <div class="textView">
         <div class="item">
           <span>充值金额：</span>
-          <el-input placeholder="请输入"></el-input>
+          <el-input placeholder="请输入" v-model="money" type="number"></el-input>
         </div>
         <div class="item">
           <span>赠送金额：</span>
-          <el-input placeholder="请输入"></el-input>
+          <el-input placeholder="请输入" v-model="gift_money" type="number"></el-input>
         </div>
         <div class="item">
           <span>合计：</span>
-          <el-input readonly></el-input>
+          <div>{{Number(money)+Number(gift_money)}}</div>
         </div>
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="showaddMoney = false">取消</el-button>
-        <el-button @click="showaddMoney = false" style="background-color:#dc670b;color:#fff">确定</el-button>
+        <el-button @click="addmoney" style="background-color:#dc670b;color:#fff">确定</el-button>
       </span>
     </el-dialog>
 
@@ -317,18 +428,46 @@ export default {
       tableData: [],
       cikalist: [],
       member_id: "",
-
+      catelist: [],
+      money: '',
+      gift_money: '',
+      nowcate: '',
       showaddMoney: false
     };
   },
   watch: {
     sign (val) {
-      this.getcicardInfo();
+      if (this.name == '品相信息') {
+        this.getcicardInfo();
+      } else if (this.name == '抵用券信息') {
+        this.getvoucher();
+      } else {
+        this.cikalist = []
+      }
     }
   },
   filters: {
     time (value) {
       return moment.unix(value).format("YYYY-MM-DD");
+    },
+    Time (value) {
+      return moment.unix(value).format("YYYY-MM-DD HH:mm:ss");
+    },
+    payType (val) {
+      switch (val) {
+        case 'card':
+          return '会员卡';
+        case 'zfb':
+          return '支付宝';
+        case 'wx':
+          return '微信';
+        case 'cash':
+          return '现金';
+        case 'signbill':
+          return '签帐';
+        default:
+          return '其他';
+      }
     },
     type (val) {
       switch (val) {
@@ -345,7 +484,32 @@ export default {
   },
   computed: {},
   methods: {
-    // 打开上传图片
+    handleCommand (command) {
+      this.nowcate = command
+      this.getmemberPic()
+    },
+    async  getTClist () {
+      const res = await this.$axios.get("/api?datatype=get_member_package", {
+        params: {
+          storeid: this.storeid,
+          member_id: this.member_id
+        }
+      })
+      if (res.data.code == 1 && res.data.data) {
+        this.cikalist = res.data.data
+        this.cikalist.forEach(item => {
+          if (item.goodsinfo) {
+            item.goodsinfo = JSON.parse(item.goodsinfo)
+          }
+          if (item.itemsinfo) {
+            item.itemsinfo = JSON.parse(item.itemsinfo)
+          }
+        })
+      } else {
+        this.cikalist = []
+      }
+    },
+    // 删除图片
     delPic (v) {
       this.$confirm('确认删除此图片吗?', '提示', {
         confirmButtonText: '确定',
@@ -378,7 +542,8 @@ export default {
           params: {
             storeid: this.storeid,
             member_id: this.member_id,
-            img: data
+            img: data,
+            item_id: this.nowcate.id
           }
         }).then(res => {
           if (res.data.code == 1) {
@@ -388,11 +553,26 @@ export default {
         })
       })
     },
+    async getvoucher () {
+      const res = await this.$axios.get('/api?datatype=get_member_voucher', {
+        params: {
+          storeid: this.storeid,
+          member_id: this.member_id,
+          status: this.sign
+        }
+      })
+      if (res.data.code == 1 && res.data.data) {
+        this.cikalist = res.data.data
+      } else {
+        this.cikalist = []
+      }
+    },
     async getmemberPic () {
       const res = await this.$axios.get('/api?datatype=get_photo_list', {
         params: {
           storeid: this.storeid,
-          member_id: this.member_id
+          member_id: this.member_id,
+          item_id: this.nowcate.id
         }
       })
       if (res.data.code == 1) {
@@ -407,15 +587,19 @@ export default {
       }
     },
     async addmoney () {
+      if (this.money == '') return this.$message.error('请输入充值金额')
+      if (Number(this.money) <= 0) return this.$message.error('请输入正确充值金额')
       const res = await this.$axios.get('/api?datatype=recharge', {
         params: {
           storeid: this.storeid,
           member_id: this.member_id,
-          money: value
+          money: Number(this.money),
+          gift_money: Number(this.gift_money)
         }
       })
       if (res.data.code == 1) {
         this.$message.success('充值成功')
+        this.showaddMoney = false
         this.getInfo(this.member_id)
       } else {
         this.$message.error('充值失败')
@@ -439,7 +623,13 @@ export default {
         }
       })
     },
-
+    // 获取项目分类
+    async getXMcate () {
+      const res = await this.$axios.get('/api?datatype=get_itemcate&storeid=' + this.storeid)
+      console.log(res)
+      this.catelist = res.data.data
+      this.nowcate = res.data.data[0]
+    },
     async getInfo (id) {
       const res = await this.$axios.get("/api?datatype=get_one_member", {
         params: {
@@ -470,8 +660,8 @@ export default {
         }
       });
       if (res.data.code == 1) {
-        this.cikalist = res.data.data;
-        this.$message.success("加载完成");
+        this.cikalist = res.data.data
+        this.$message.success("加载完成")
       }
     },
     async getlist (type) {
@@ -484,17 +674,18 @@ export default {
             type: type
           }
         }
-      );
+      )
       if (res.data.code == 1) {
-        this.$message.success("加载完成");
-        this.tableData = res.data.data;
+        this.$message.success("加载完成")
+        this.tableData = res.data.data
       }
     }
   },
   created () {
     if (this.choose) {
-      this.getInfo(this.choose.member_id);
-      this.member_id = this.choose.member_id;
+      this.getInfo(this.choose.member_id)
+      this.member_id = this.choose.member_id
+      this.getXMcate()
     }
   },
   mounted () { }
@@ -813,6 +1004,7 @@ export default {
     }
     .memberEquityView {
       padding: 0 20px 25px 20px;
+      height: 100%;
     }
     .tipView {
       margin-top: 35px;

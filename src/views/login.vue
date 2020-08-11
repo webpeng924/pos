@@ -54,6 +54,8 @@ export default {
           this.$store.commit('setJson', res.data.data);
           sessionStorage.setItem('userInfo', JSON.stringify(res.data.data));
           this.$router.push({ name: 'Home' })
+        } else {
+          this.$message.error(res.data.msg)
         }
       }
       catch (err) {

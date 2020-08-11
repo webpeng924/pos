@@ -3,7 +3,7 @@
     <div class="topView">
       <button class="btn-close btn-audio" @click="back"></button>
       <div class="tView">产品资料</div>
-      <button class="btn-audio btn-shopCart" @click="add=true"></button>
+      <button class="btn-audio btn-shopCart" @click="addNew"></button>
     </div>
     <div class="bomView">
       <el-table :data="tableData" stripe style="width: 100%" @row-click="toEdit">
@@ -55,12 +55,17 @@ export default {
         params: {
           storeid: sessionStorage.getItem('storeid'),
           status: this.status,
+          status2: this.status == 1 ? 1 : null,
           cate: this.cate,
           search: this.searchtxt
         }
       })
       console.log(res)
       this.tableData = res.data.data
+    },
+    addNew () {
+      this.choose = ''
+      this.add = true
     },
     toEdit (row) {
       if (this.from) {

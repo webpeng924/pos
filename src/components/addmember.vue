@@ -18,20 +18,29 @@
           <i class="el-icon-arrow-right"></i>
         </div>
         <div class="item">
-          <div class="left">编号</div>
+          <div class="left">
+            编号
+            <span class="xing">*</span>
+          </div>
           <div class="right">
             <div v-show="choose" style="font-size:14px;color:#000">{{jobNo}}</div>
             <input type="text" placeholder="请输入" v-model="jobNo" v-show="!choose" />
           </div>
         </div>
         <div class="item">
-          <div class="left">姓名</div>
+          <div class="left">
+            姓名
+            <span class="xing">*</span>
+          </div>
           <div class="right">
             <input type="text" placeholder="请输入" v-model="name" />
           </div>
         </div>
         <div class="item" @click="sexDialog=true">
-          <div class="left">性别</div>
+          <div class="left">
+            性别
+            <span class="xing">*</span>
+          </div>
           <div class="right">{{sex}}</div>
           <i class="el-icon-arrow-right"></i>
         </div>
@@ -49,7 +58,10 @@
           </div>
         </el-dialog>
         <div class="item">
-          <div class="left">手机号</div>
+          <div class="left">
+            手机号
+            <span class="xing">*</span>
+          </div>
           <div class="right">
             <input type="text" placeholder="请输入" v-model="mobile" />
           </div>
@@ -98,7 +110,10 @@
           </div>
         </el-dialog>
         <div class="item" @click="serviceJobDialog=true">
-          <div class="left">服务职称</div>
+          <div class="left">
+            服务职称
+            <span class="xing">*</span>
+          </div>
           <div class="right">
             <input type="text" placeholder="请选择" v-model="serviceJob" readonly />
           </div>
@@ -215,7 +230,10 @@
           </div>
         </el-dialog>
         <div class="item" @click="nowStatusDialog=true">
-          <div class="left">目前状态</div>
+          <div class="left">
+            目前状态
+            <span class="xing">*</span>
+          </div>
           <div class="right">
             <input type="text" placeholder="请选择" v-model="nowStatus" readonly />
           </div>
@@ -248,7 +266,10 @@
           </div>
         </el-dialog>
         <div class="item">
-          <div class="left">预约状态</div>
+          <div class="left">
+            预约状态
+            <span class="xing">*</span>
+          </div>
           <div class="right">
             <el-switch v-model="yyStatus" active-color="#13ce66"></el-switch>
           </div>
@@ -335,7 +356,7 @@ export default {
       if (!this.name) return this.$message.error('请输入姓名')
       if (!this.mobile) return this.$message.error('请输入手机号')
       if (!(/^1[3456789]\d{9}$/.test(this.mobile))) return this.$message.error('手机号不正确')
-      if (!this.section) return this.$message.error('请选择部门')
+      // if (!this.section) return this.$message.error('请选择部门')
       if (!this.serviceJob) return this.$message.error('请选择服务职称')
       if (!this.job) return this.$message.error('请选择职位')
       let nowStatus = ''
