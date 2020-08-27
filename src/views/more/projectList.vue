@@ -4,7 +4,7 @@
       <button class="btn-close btn-audio" @click="back"></button>
       <div class="tView">项目资料</div>
       <button class="btn-audio btn-filter" @click="drawer=true"></button>
-      <button class="btn-audio btn-shopCart" @click="add=true"></button>
+      <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="add=true">新增</button>
     </div>
     <div class="set_page" :class="{activePage:add}">
       <addproject @close="add=false;getList()" :choose="choose" v-if="add"></addproject>
@@ -70,7 +70,7 @@ export default {
       item: 1,
       tableData: [1, 2, 3],
       add: false,
-      status: 0,
+      status: false,
       drawer: false,
       cate: '',
       catetitle: '全部',
@@ -85,6 +85,26 @@ export default {
     back () {
       this.$emit('close')
     },
+    updateStatus (type) {
+      let parameter = null
+      if (type == 1) {
+        parameter = ' true=>隐藏停用，false=>全部显示'
+      }
+      this.$axios.get('/api?datatype=edit_store_config', {
+        params: {
+          storeid: sessionStorage.getItem('storeid'),
+          menu_name: 'item_state',
+          info: '项目列表筛选',
+          value: this.status,
+          parameter: parameter
+        }
+      }).then(res => {
+        if (type == 1) {
+          this.getList()
+        }
+        console.log(res)
+      })
+    },
     async getList () {
       const res = await this.$axios.get('/api?datatype=get_item_list', {
         params: {
@@ -95,19 +115,23 @@ export default {
         }
       })
       console.log(res)
-      this.tableData = res.data.data
-      this.cateList = []
-      res.data.data.forEach(item => {
-        if (this.cateList.length != 0) {
-          this.cateList.every(v => {
-            if (v.id != item.category_id) {
-              this.cateList.push({ 'id': item.category_id, 'title': item.title })
-            }
-          })
-        } else {
-          this.cateList.push({ 'id': item.category_id, 'title': item.title })
-        }
-      })
+      if (res.data.code == 1 && res.data.data != null) {
+        this.tableData = res.data.data
+        this.cateList = []
+        res.data.data.forEach(item => {
+          if (this.cateList.length != 0) {
+            this.cateList.every(v => {
+              if (v.id != item.category_id) {
+                this.cateList.push({ 'id': item.category_id, 'title': item.title })
+              }
+            })
+          } else {
+            this.cateList.push({ 'id': item.category_id, 'title': item.title })
+          }
+        })
+      } else {
+        this.tableData = []
+      }
     },
     toEdit (row) {
       if (this.from) {
@@ -118,10 +142,33 @@ export default {
         this.add = true
       }
     },
+    async getState () {
+      const res = await this.$axios.get('/api?datatype=get_store_config', {
+        params: {
+          storeid: sessionStorage.getItem('storeid'),
+          menu_name: 'item_state'
+        }
+      })
+      console.log(res)
+      if (res.data.code == 1) {
+        if (res.data.data != null) {
+          if (res.data.data.value == 'true') {
+            this.status = true
+          } else {
+            this.status = false
+          }
+          this.getList()
+        }
+      }
+      if (res.data.code == 3) {
+        this.updateStatus(1)
+      }
+    },
     handleClose (done) {
       this.getList()
         .then(_ => {
           done();
+          this.updateStatus()
         })
         .catch(_ => { });
     },
@@ -136,7 +183,12 @@ export default {
     }
   },
   created () {
-    this.getList()
+    if (this.from) {
+      this.status = true
+      this.getList()
+    } else {
+      this.getState()
+    }
   },
   mounted () { }
 }
@@ -171,9 +223,6 @@ export default {
       width: 40px;
       height: 40px;
       position: relative;
-      background: #fff
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Add.png)
-        center / 28px no-repeat;
     }
     .btn-filter {
       width: 40px;

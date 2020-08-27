@@ -2,19 +2,60 @@
   <div id="projectlist">
     <div class="topView">
       <button class="btn-close btn-audio" @click="back"></button>
-      <div class="tView">库存盘点</div>
-      <button class="btn-audio btn-shopCart" @click="add=true"></button>
+      <div class="tView">
+        <p>库存盘点</p>
+        <div class="dateView">
+          <el-date-picker
+            v-model="date"
+            type="daterange"
+            prefix-icon="a"
+            :clearable="false"
+            range-separator="-"
+            format="yyyy年MM月dd日"
+            @change="getList"
+          ></el-date-picker>
+          <!-- <i class="el-icon-arrow-right"></i> -->
+        </div>
+      </div>
+      <el-input
+        v-model="searchtxt"
+        placeholder="请输入产品名称"
+        style="width:180px;margin-right:20px"
+        clearable
+        @change="getList"
+      >
+        <i slot="prefix" class="el-input__icon el-icon-search" @change="getList"></i>
+      </el-input>
+      <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="add=true">新增</button>
     </div>
     <div class="set_page" :class="{activePage:add}">
       <add @close="add=false;getList()" :setid="choose" v-if="add"></add>
     </div>
     <div class="bomView">
-      <el-table :data="tableData" stripe style="width: 100%">
+      <el-table
+        :data="tableData"
+        stripe
+        style="width: 100%"
+        height="100%"
+        @row-click="rowClick"
+        ref="refTable"
+      >
+        <el-table-column type="expand">
+          <template slot-scope="props">
+            <div class="props_item" v-for="(v,k) in props.row.goodsinfo" :key="k">
+              <span>产品名称：{{v.goods_name}}</span>
+              <span>盘点前数量：{{v.old_num}}</span>
+              <span>当前数量：{{v.number}}</span>
+              <span>差值：{{v.new_num}}</span>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="stock_no" label="盘点单号"></el-table-column>
         <el-table-column prop="pan_date" label="盘点日期"></el-table-column>
         <el-table-column prop="pan_time" label="盘点时间"></el-table-column>
         <el-table-column prop="warehouse" label="仓库名称"></el-table-column>
         <el-table-column prop="name" label="盘点人"></el-table-column>
+
         <!-- <el-table-column label="操作" width="100">
           <template slot-scope="scope">
             <el-button @click="toEdit(scope.row)">详情</el-button>
@@ -42,6 +83,7 @@ export default {
       searchtxt: '',
       choose: '',
       cateList: [],
+      date: '',
       storeid: sessionStorage.getItem('storeid')
     }
   },
@@ -52,10 +94,14 @@ export default {
       this.$emit('close')
     },
     async getList () {
+      console.log(this.formatDate(new Date(this.date[0])))
       const res = await this.$axios.get('/api?datatype=get_stock_list', {
         params: {
           storeid: this.storeid,
-          sign: 3
+          sign: 3,
+          start: this.formatDate(new Date(this.date[0])),
+          end: this.formatDate(new Date(this.date[1])),
+          search: this.searchtxt
         }
       })
       console.log(res)
@@ -65,10 +111,21 @@ export default {
         this.tableData = []
       }
     },
+    rowClick (row, index, e) {
+      this.$refs.refTable.toggleRowExpansion(row)
+    },
     toEdit (row) {
       console.log(row)
       this.choose = row.id
       this.add = true
+    },
+    formatDate (date) {
+      var y = date.getFullYear()
+      var m = date.getMonth() + 1
+      m = m < 10 ? '0' + m : m
+      var d = date.getDate()
+      d = d < 10 ? ('0' + d) : d
+      return y + '-' + m + '-' + d
     },
     handleCommand (command) {
       this.cate = command
@@ -81,6 +138,8 @@ export default {
     }
   },
   created () {
+    const a = this.formatDate(new Date())
+    this.date = [a, a]
     this.getList()
   },
   mounted () { }
@@ -95,8 +154,8 @@ export default {
     display: flex;
     padding: 35px 20px 10px 20px;
     border-bottom: 0.5px solid rgba(220, 220, 220, 0.7);
-    height: 85px;
-    line-height: 40px;
+    height: 105px;
+    line-height: 55px;
     background: #fff;
     text-align: center;
     .btn-close {
@@ -110,7 +169,9 @@ export default {
       flex: 1;
       font-size: 24px;
       color: #28282d;
-      font-family: PingFangSC-Semibold;
+      /deep/.el-input__inner {
+        border: none;
+      }
     }
     button.btn-shopCart {
       width: 40px;
@@ -129,7 +190,8 @@ export default {
     }
   }
   .bomView {
-    padding: 0 20px;
+    height: calc(100% - 105px);
+    padding: 0 20px 20px;
   }
   .drawerlist {
     padding: 0 20px;

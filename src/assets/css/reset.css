@@ -240,6 +240,12 @@ i {
   text-overflow: ellipsis;
 }
 
+.overflowText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

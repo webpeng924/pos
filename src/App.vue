@@ -7,6 +7,7 @@
 
 <script>
 import nav from './views/nav.vue'
+import { userInfo } from 'os';
 
 export default {
   components: {
@@ -15,6 +16,25 @@ export default {
   data () {
     return {
     }
+  },
+  methods: {
+    browerStatus (e) {
+      console.log(e)
+      var that = this;
+      let id = localStorage.getItem('userId')
+      var n = window.event.screenX - window.screenLeft;
+      var b = n > document.documentElement.scrollWidth - 20;
+      if (b && window.event.clientY < 0 || window.event.altKey) {
+        that.$axios.get('/api?datatype=logout&id=' + id)
+      } else {
+        // that.$axios.get('/api?datatype=logout&id=7')
+      }
+    }
+  },
+  mounted () {
+    var that = this;
+    // 监听浏览器是否关闭
+    window.addEventListener("beforeunload", e => that.browerStatus())
   }
 }
 </script>

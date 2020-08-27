@@ -6,7 +6,11 @@
       <el-input placeholder="搜索员工" v-model="searchtxt" style="width:240px;border:#dc670b">
         <i slot="prefix" class="el-input__icon el-icon-search" @click="witchOne"></i>
       </el-input>
-      <button class="btn-audio btn-shopCart" @click="add=true;choosOne=''"></button>
+      <button
+        class="btn-audio"
+        style="font-size:18px;color:#dc670b"
+        @click="add=true;choosOne=''"
+      >新增</button>
     </div>
 
     <el-table :data="tableData" stripe style="width: 100%" @row-click="chooseOne">

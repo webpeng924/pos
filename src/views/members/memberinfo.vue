@@ -84,7 +84,12 @@
         <!-- <div class="menuItem btn-audio">沟通记录</div> -->
         <!-- <div class="menuItem btn-audio">产品寄存</div> -->
         <!-- <div class="menuItem btn-audio">皮肤检测</div> -->
-        <!-- <div class="menuItem btn-audio">个人档案</div> -->
+        <div
+          class="menuItem btn-audio"
+          @click="
+            show = 5;
+            name = '个人档案';"
+        >个人档案</div>
         <!-- <div class="menuItem btn-audio">扩展档案</div> -->
       </div>
       <div class="btnView">
@@ -140,6 +145,12 @@
               <label>{{ userinfo.balance-userinfo.gift_money>0?userinfo.gift_money:userinfo.balance }}</label>
             </div>
             <div class="nameView">赠送账户</div>
+          </div>
+          <div class="accItem">
+            <div class="valueView balanceView">
+              <label>{{ userinfo.signbill }}</label>
+            </div>
+            <div class="nameView">欠款账户</div>
           </div>
         </div>
         <!-- <div class="tagsView">
@@ -352,6 +363,47 @@
             <i class="el-icon-plus" @click="openCropper"></i>
           </div>
         </el-image>
+      </div>
+    </div>
+    <div class="contentView" v-show="show == 5">
+      <div class="subTView">{{ name }}</div>
+      <div class="baseInfoView1">
+        <div class="infoItem">
+          <div class="leftView">姓名</div>
+          <div class="valView overflowText">{{userinfo.name?userinfo.name:'-'}}</div>
+        </div>
+        <div class="infoItem">
+          <div class="leftView">性别</div>
+          <div class="valView overflowText">{{userinfo.sex==1?'男':'女'}}</div>
+        </div>
+        <div class="infoItem">
+          <div class="leftView">手机号码</div>
+          <div class="valView overflowText">{{userinfo.mobile?userinfo.mobile:'-'}}</div>
+        </div>
+        <!-- <div class="infoItem">
+          <div class="leftView">微信openId</div>
+          <div class="valView overflowText">-</div>
+        </div>-->
+        <!-- <div class="infoItem">
+          <div class="leftView">家庭住址</div>
+          <div class="valView overflowText">-</div>
+        </div>-->
+        <div class="infoItem">
+          <div class="leftView">证件号码</div>
+          <div class="valView overflowText">{{userinfo.IDcard?userinfo.IDcard:'-'}}</div>
+        </div>
+        <!-- <div class="infoItem">
+          <div class="leftView">客户来源</div>
+          <div class="valView overflowText">-</div>
+        </div>-->
+        <!-- <div class="infoItem">
+          <div class="leftView">阳历生日</div>
+          <div class="valView overflowText">-</div>
+        </div>-->
+        <div class="infoItem">
+          <div class="leftView">生日</div>
+          <div class="valView overflowText">{{userinfo.birthday?userinfo.birthday:'-'}}</div>
+        </div>
       </div>
     </div>
     <div class="set_page" :class="{activePage:huankuan}">
@@ -1033,6 +1085,30 @@ export default {
             line-height: 200px;
           }
         }
+      }
+    }
+    .baseInfoView1 {
+      padding: 0 15px;
+      background: #fff;
+      height: calc(100% - 85px);
+      overflow-y: auto;
+    }
+    .infoItem {
+      display: flex;
+      border-bottom: 0.5px solid rgba(220, 220, 220, 0.7);
+      padding: 15px 15px 15px 30px;
+      line-height: 20px;
+      .leftView {
+        width: 120px;
+        min-width: 120px;
+        font-size: 15px;
+        color: #28282d;
+      }
+      .valView {
+        flex: 1;
+        font-size: 15px;
+        color: #5a5a5a;
+        text-align: right;
       }
     }
   }

@@ -2,7 +2,7 @@
   <div id="cardHome">
     <div class="tView">注册会员</div>
     <div class="cView">
-      <p>清扫面下方二维码，进入会员专用小程序注册会员</p>
+      <p>请扫描下方二维码，进入会员专用小程序注册会员</p>
       <img src="../../assets/images/zhuceewm.jpg" alt />
     </div>
   </div>
@@ -35,14 +35,15 @@ export default {
   }
   .cView {
     width: 100%;
+    height: calc(100% - 85px);
     text-align: center;
-    padding-top: 100px;
+    padding-top: 80px;
     p {
       font-size: 14px;
     }
     img {
-      width: 300px;
-      margin-top: 50px;
+      height: calc(100% - 100px);
+      margin-top: 30px;
     }
   }
 }

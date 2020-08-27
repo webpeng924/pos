@@ -4,19 +4,15 @@
       <button class="btn-close btn-audio" @click="back"></button>
       <div class="tView">抵用券信息</div>
       <div class="checkbox">
-        <el-checkbox v-model="checked" @change="getList">隐藏已停用</el-checkbox>
+        <el-checkbox v-model="checked" @change="getList();updateStatus()">隐藏已停用</el-checkbox>
       </div>
-      <button class="btn-audio btn-shopCart" @click="addnew"></button>
+      <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="addnew">新增</button>
     </div>
     <div class="bomView">
       <el-table :data="tableData" stripe style="width: 100%" @row-click="toEdit">
-        <el-table-column prop="id" label="编号" width="120"></el-table-column>
+        <el-table-column prop="id" label="编号" width="100"></el-table-column>
         <el-table-column prop="name" label="名称" width="180"></el-table-column>
-        <el-table-column label="类别">
-          <template slot-scope="scope">
-            <span>{{scope.row.typeid==1?'项目':'产品'}}抵用券</span>
-          </template>
-        </el-table-column>
+        <el-table-column prop="type" label="类别"></el-table-column>
         <el-table-column label="开始时间">
           <template slot-scope="scope">
             <span>{{scope.row.starttime|Time}}</span>
@@ -27,6 +23,7 @@
             <span>{{scope.row.endtime|Time}}</span>
           </template>
         </el-table-column>
+        <el-table-column prop="remark" label="使用说明" show-overflow-tooltip></el-table-column>
         <el-table-column label="当前状态">
           <template slot-scope="scope">
             <span
@@ -44,28 +41,36 @@
       title="添加抵用券"
       :visible.sync="add"
       width="500px"
-      custom-class="formDialog"
+      custom-class="formDialog quickmoney"
       :modal-append-to-body="false"
       center
     >
       <div class="contant">
         <el-form label-position="right" label-width="100px" ref="form">
-          <!-- <el-form-item>
+          <el-form-item>
             <span slot="label">
               <span class="xing">*</span>
               抵用类型
             </span>
             <el-radio-group v-model="typeid">
-              <el-radio label="1">项目</el-radio>
-              <el-radio label="2">产品</el-radio>
+              <el-radio label="现金券">现金券</el-radio>
+              <el-radio label="亲友券">亲友券</el-radio>
+              <el-radio label="免费券">免费券</el-radio>
             </el-radio-group>
-          </el-form-item>-->
+          </el-form-item>
           <el-form-item>
             <span slot="label">
               <span class="xing">*</span>
               抵用金额
             </span>
-            <el-input v-model="amount"></el-input>
+            <el-input v-model="amount" type="number" :min="0"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <span slot="label">
+              <span class="xing">*</span>
+              使用说明
+            </span>
+            <el-input v-model="remark"></el-input>
           </el-form-item>
           <el-form-item>
             <span slot="label">
@@ -112,12 +117,13 @@ export default {
       type: 1,
       tableData: [],
       add: false,
-      status: 0,
+      // status: 0,
       amount: '',
       date: '',
       is_stop: '0',
-      typeid: '1',
+      typeid: '现金券',
       choose: '',
+      remark: '',
       storeid: sessionStorage.getItem('storeid'),
       checked: false
     }
@@ -147,11 +153,54 @@ export default {
         this.tableData = []
       }
     },
+    updateStatus (type) {
+      let parameter = null
+      if (type == 1) {
+        parameter = ' true=>隐藏停用，false=>全部显示'
+      }
+      this.$axios.get('/api?datatype=edit_store_config', {
+        params: {
+          storeid: sessionStorage.getItem('storeid'),
+          menu_name: 'quan_state',
+          info: '抵用券列表筛选',
+          value: this.checked,
+          parameter: parameter
+        }
+      }).then(res => {
+        if (type == 1) {
+          this.getList()
+        }
+        console.log(res)
+      })
+    },
+    async getState () {
+      const res = await this.$axios.get('/api?datatype=get_store_config', {
+        params: {
+          storeid: sessionStorage.getItem('storeid'),
+          menu_name: 'quan_state'
+        }
+      })
+      console.log(res)
+      if (res.data.code == 1) {
+        if (res.data.data != null) {
+          if (res.data.data.value == 'true') {
+            this.checked = true
+          } else {
+            this.checked = false
+          }
+          this.getList()
+        }
+      }
+      if (res.data.code == 3) {
+        this.updateStatus(1)
+      }
+    },
     addnew () {
       this.amount = ''
+      this.remark = ''
       this.date = ''
       this.is_stop = '0'
-      this.typeid = '1'
+      this.typeid = '现金券'
       this.choose = ''
       this.add = true
       this.type = 1
@@ -163,23 +212,26 @@ export default {
       this.date = [starttime, endtime]
       this.is_stop = row.is_stop
       this.typeid = row.typeid
+      this.remark = row.remark
       this.choose = row
       this.add = true
       this.type = 2
     },
     async submit () {
       if (!this.amount) return this.$message.error('请输入抵用券金额')
+      if (!this.remark) return this.$message.error('请输入使用说明')
       if (!this.date) return this.$message.error('请设置使用时间')
       const res = await this.$axios.get('/api?datatype=insert_voucher', {
         params: {
           storeid: this.storeid,
-          type: this.type,
-          typeid: 1,
+          sign: this.type,
+          type: this.typeid,
           amount: this.amount,
           starttime: this.date[0],
           endtime: this.date[1],
           is_stop: this.is_stop,
-          id: this.type == 1 ? 0 : this.choose.id
+          id: this.type == 1 ? 0 : this.choose.id,
+          remark: this.remark
         }
       })
       if (res.data.code == 1) {
@@ -196,7 +248,7 @@ export default {
     }
   },
   created () {
-    this.getList()
+    this.getState()
   },
   mounted () { }
 }

@@ -314,12 +314,16 @@ export default {
       d = d < 10 ? '0' + d : d
       return y + '-' + m + '-' + d
     },
+    // print () {
+    //   let news = document.querySelector('#print').innerHTML
+    //   document.body.innerHTML = news
+    //   window.print()
+    //   this.dialogVisible = false
+    //   window.location.reload()
+    // },
     print () {
-      let news = document.querySelector('#print').innerHTML
-      document.body.innerHTML = news
-      window.print()
-      this.dialogVisible = false
-      window.location.reload()
+      var a = "wellcome to sunmi"; javascript: lee.funAndroid(a);
+      return false;
     },
     async getData () {
       const res = await this.$axios.get('/api?datatype=day_money_index', {

@@ -20,6 +20,15 @@
         <!-- <i class="el-icon-arrow-right"></i> -->
       </div>
       <div class="btnView">
+        <el-input
+          v-model="searchtxt"
+          placeholder="请输入产品名称"
+          style="width:180px;margin-right:20px"
+          clearable
+          @change="getDate"
+        >
+          <i slot="prefix" class="el-input__icon el-icon-search" @change="getDate"></i>
+        </el-input>
         <button class="btn-audio btn-green" @click="turnIn">入库</button>
         <button class="btn-audio btn-black" @click="turnOut">出库</button>
       </div>
@@ -47,9 +56,7 @@
         <el-table-column prop="stype" label="类型"></el-table-column>
         <el-table-column prop="warehouse" label="仓库名称"></el-table-column>
         <el-table-column prop="amount" label="金额合计"></el-table-column>
-        <el-table-column label="数量合计" width="100">
-          <template slot-scope="scope">{{scope.row.goodsinfo?scope.row.goodsinfo.length:0}}</template>
-        </el-table-column>
+        <el-table-column prop="allnum" label="数量合计" width="100"></el-table-column>
         <el-table-column prop="checkman" label="操作人"></el-table-column>
         <el-table-column label="操作时间" width="100">
           <template slot-scope="scope">{{Timer(scope.row.check_time)}}</template>
@@ -71,9 +78,7 @@
         <el-table-column prop="stype" label="类型"></el-table-column>
         <el-table-column prop="warehouse" label="仓库名称"></el-table-column>
         <el-table-column prop="amount" label="金额合计"></el-table-column>
-        <el-table-column prop="address" label="数量合计" width="100">
-          <template slot-scope="scope">{{scope.row.goodsinfo?scope.row.goodsinfo.length:0}}</template>
-        </el-table-column>
+        <el-table-column prop="allnum" label="数量合计" width="100"></el-table-column>
         <el-table-column prop="checkman" label="操作人"></el-table-column>
         <el-table-column label="操作时间" width="100">
           <template slot-scope="scope">{{Timer(scope.row.check_time)}}</template>
@@ -108,6 +113,7 @@ export default {
       pageIn: false,
       pageOut: false,
       sign: 1,
+      searchtxt: '',
       setid: ''
     }
   },
@@ -131,12 +137,22 @@ export default {
           storeid: this.storeid,
           sign: this.sign,
           start: this.formatDate(new Date(this.date[0])),
-          end: this.formatDate(new Date(this.date[1]))
+          end: this.formatDate(new Date(this.date[1])),
+          search: this.searchtxt ? this.searchtxt : null
         }
       })
       console.log(res)
       this.tableData = []
       if (res.data.code == 1 && res.data.data) {
+        res.data.data.forEach(item => {
+          let allnum = 0
+          if (item.goodsinfo) {
+            item.goodsinfo.forEach(v => {
+              allnum += Number(v.number)
+            })
+          }
+          this.$set(item, 'allnum', allnum)
+        })
         this.tableData = res.data.data
       }
     },

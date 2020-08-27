@@ -50,7 +50,7 @@
       width="70%"
       center
       :modal-append-to-body="false"
-      custom-class="cardDialog"
+      custom-class="cardDialog quickmoney"
     >
       <el-table ref="cardTable" :data="cardList" style="width: 100%" @row-click="choosed">
         <el-table-column width="55">
@@ -70,19 +70,26 @@
       </el-table>
       <span slot="footer" class="dialog-footer">
         <el-button @click="menuDialog = false">取 消</el-button>
-        <el-button type="primary" @click="innerVisible = true">确 定</el-button>
+        <el-button type="primary" @click="choosePay" style="background-color:#dc670b;">确 定</el-button>
       </span>
 
-      <el-dialog width="50%" title="请选择支付方式" :visible.sync="innerVisible" append-to-body center>
+      <el-dialog
+        width="500px"
+        title="请选择支付方式"
+        :visible.sync="innerVisible"
+        append-to-body
+        center
+        custom-class="quickmoney"
+      >
         <el-radio-group v-model="paytype" style="padding:50px">
           <el-radio label="zfb">支付宝</el-radio>
           <el-radio label="wx">微信</el-radio>
           <el-radio label="cash">现金</el-radio>
           <el-radio label="other">其他</el-radio>
-          <el-radio label="card">会员卡余额</el-radio>
+          <el-radio label="card" style="margin-top:30px" v-show="shoptype==5">会员卡余额</el-radio>
         </el-radio-group>
         <span slot="footer" class="dialog-footer">
-          <el-button type="primary" @click="setCard">支付</el-button>
+          <el-button type="primary" @click="setCard" style="background-color:#dc670b;">支付</el-button>
         </span>
       </el-dialog>
     </el-dialog>
@@ -94,7 +101,7 @@
       width="70%"
       center
       :modal-append-to-body="false"
-      custom-class="cardDialog"
+      custom-class="cardDialog quickmoney"
     >
       <el-table ref="cardTable" :data="TCList" style="width: 100%" @row-click="choosed">
         <el-table-column width="55">
@@ -103,7 +110,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="id" label="套餐编号"></el-table-column>
-        <el-table-column prop="name" label="套餐名称"></el-table-column>
+        <el-table-column prop="name" label="套餐名称" show-overflow-tooltip></el-table-column>
         <el-table-column prop="pay_money" label="销售价"></el-table-column>
         <el-table-column prop="fact_money" label="会员到账"></el-table-column>
         <el-table-column label="套餐可售时间" width="220">
@@ -134,13 +141,20 @@
         <el-button type="primary" @click="choosePay">确 定</el-button>
       </span>
 
-      <el-dialog width="50%" title="请选择支付方式" :visible.sync="innerVisible" append-to-body center>
+      <el-dialog
+        width="500px"
+        title="请选择支付方式"
+        :visible.sync="innerVisible"
+        append-to-body
+        center
+        custom-class="quickmoney"
+      >
         <el-radio-group v-model="paytype" style="padding:50px">
           <el-radio label="zfb">支付宝</el-radio>
           <el-radio label="wx">微信</el-radio>
           <el-radio label="cash">现金</el-radio>
           <el-radio label="other">其他</el-radio>
-          <el-radio label="card">会员卡余额</el-radio>
+          <el-radio label="card" v-show="shoptype==5" style="margin-top:30px">会员卡余额</el-radio>
         </el-radio-group>
         <span slot="footer" class="dialog-footer">
           <el-button type="primary" @click="setCard">支付</el-button>
@@ -168,8 +182,9 @@ export default {
       menuDialog: false,
       TCDialog: false,
       innerVisible: false,
+      shoptype: sessionStorage.getItem('shoptype'),
       choose: '',
-      paytype: 'card',
+      paytype: 'zfb',
       check: 0,
       checkData: '',
       storeid: sessionStorage.getItem('storeid')
@@ -312,7 +327,7 @@ export default {
 #members {
   height: 100%;
   .topView {
-    background: #eee;
+    background: linear-gradient(to right, #f3e7e9 0%, #e3eeff 100%);
     position: fixed;
     left: 120px;
   }

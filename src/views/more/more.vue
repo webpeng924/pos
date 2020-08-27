@@ -14,7 +14,7 @@
             <img :src="shopInfo.avatar?shopInfo.avatar:'/upload/shop/moren.jpg'|imgUrl" />
           </div>
           <div class="textView">
-            <div class="userNameView overflowText">admin</div>
+            <div class="userNameView overflowText">{{shopInfo.username}}</div>
             <div class="shopNameView overflowText">{{shopInfo.shop_name}}</div>
           </div>
         </div>
@@ -181,6 +181,10 @@
               <img src="../../assets/images/msg.png" />
               <div>短信营销</div>
             </div>
+            <div class="listItem btn-audio" @click="orderlist=true">
+              <img src="../../assets/images/yuangong.png" />
+              <div>预约/占用历史</div>
+            </div>
           </div>
         </div>
         <!-- <div class="groupView">
@@ -245,6 +249,9 @@
     <div class="set_page" :class="{activePage:panku}">
       <panku @close="panku=false" v-if="panku"></panku>
     </div>
+    <div class="set_page" :class="{activePage:orderlist}">
+      <orderlist @close="orderlist=false" v-if="orderlist"></orderlist>
+    </div>
   </div>
 </template>
 
@@ -264,8 +271,9 @@ import memberView from '../member/index'
 import panku from '../store/panku'
 import cikalist from './cikalist'
 import quanlist from './quanlist'
+import orderlist from '../order/orderlist'
 export default {
-  components: { product, memberlist, projectlist, shopInfo, zhekou, xiaohao, baobiao, kucun, setCard, msg, erweima, memberView, panku, cikalist, quanlist },
+  components: { product, memberlist, projectlist, shopInfo, zhekou, xiaohao, baobiao, kucun, setCard, msg, erweima, memberView, panku, cikalist, quanlist, orderlist },
   props: {},
   data () {
     return {
@@ -280,6 +288,7 @@ export default {
       xiaohao: false,
       baobiao: false,
       kucun: false,
+      orderlist: false,
       msg: false,
       erweima: false,
       setcard: false,
@@ -328,8 +337,12 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        sessionStorage.clear()
-        this.$router.push({ name: 'login' })
+        let id = JSON.parse(sessionStorage.getItem('userInfo')).id
+        this.$axios.get('/api?datatype=logout&id=' + id)
+        setTimeout(() => {
+          sessionStorage.clear()
+          this.$router.push({ name: 'login' })
+        })
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -375,9 +388,9 @@ export default {
     flex: 1;
     border-right: 0.5px solid rgba(220, 220, 220, 0.7);
     .listView {
-      overflow-x: hidden;
       overflow-y: auto;
       padding: 30px 0;
+      height: calc(100% - 85px);
       .menuItem {
         cursor: pointer;
         padding: 17px 22px;

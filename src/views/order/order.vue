@@ -23,14 +23,17 @@
         <!-- <el-tag type="danger" effect="dark">占用</el-tag> -->
       </div>
       <div class="btnView">
-        <el-input prefix-icon="el-icon-search" placeholder="输入手机号查询"></el-input>
+        <i class="el-icon-search" @click="listDialog=true"></i>
       </div>
     </div>
     <div class="timeLineView" style="left: 1215px;"></div>
     <div class="CView">
       <div class="box">
         <div class="left">
-          <div v-for="(v,k) in workerlist" :key="k" class="a_item">{{v.name}}</div>
+          <div v-for="(v,k) in workerlist" :key="k" class="a_item">
+            <p>{{v.name}}</p>
+            <p class="one-txt-cut">{{v.service_job}}({{v.job_no}})</p>
+          </div>
         </div>
         <div class="right">
           <div class="top">
@@ -139,6 +142,48 @@
         <div @click="cancel(showcurrent.id)" v-show="showcurrent.status==4">取消占用</div>
       </span>
     </el-dialog>
+    <el-dialog
+      :visible.sync="listDialog"
+      center
+      custom-class="quickmoney"
+      width="600px"
+      :before-close="handleClose"
+    >
+      <div class="inputView">
+        <input prefix-icon="el-icon-search" placeholder="输入手机号查询" v-model="keyword" />
+        <button class="btn-search btn-black btn-audio" @click="toSearch">搜索</button>
+      </div>
+      <div class="contentView" style="height: 500px;">
+        <div class="tipView" v-show="!searchlist.length">没有相关的预约哟~</div>
+        <div class="groupItem" v-show="searchlist.length">
+          <div class="resItem btn-audio" v-for="(v,k) in searchlist" :key="k" @click="chooseOne(v)">
+            <div class="timeView">
+              <label>{{v.yytime}}</label>
+            </div>
+            <div class="empView">
+              <!-- <div class="imgView">
+                <img
+                  src="https://static.bokao2o.com/wisdomCashier/images/Icon_noLogo.jpg?imageView2/1/w/200/h/200/interlace/1/q/100"
+                />
+              </div>-->
+              <div class="textView">
+                <div class="nameView overflowText">{{v.name}}</div>
+                <div class="jobView overflowText">{{v.mobile}}</div>
+              </div>
+            </div>
+            <div class="resUserView overflowText">
+              <label class="label-name">{{v.itemname}}</label>&nbsp;
+              <!-- <label class="label-resLen">
+                <span>1小时</span>
+              </label>&nbsp;-->
+            </div>
+            <div class="resUserView overflowText">
+              <label class="label-tags">服务人员：{{v.staff}}</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -150,24 +195,28 @@ export default {
   props: {},
   data () {
     return {
+      listDialog: false,
       workerlist: [],
-      timelist: [],
+      timelist: [{ shi: '08', fen: '00' }, { shi: '08', fen: '30' }, { shi: '09', fen: '00' }, { shi: '09', fen: '30' }],
       dialogVisible: false,
       date: '',
       storeid: sessionStorage.getItem('storeid'),
       addyuyue: false,
       choosOne: '',
+      searchlist: [],
       typeDialog: false,
       yylist: [],
       showcurrent: '',
       yuyueDialog: false,
       worker: '',
       workerid: '',
+      keyword: '',
       staTime: ''
     }
   },
   watch: {
     date (val) {
+      this.keyword = ''
       this.getworkerlist()
     }
   },
@@ -203,11 +252,33 @@ export default {
         this.checkyy()
       }
     },
+    async toSearch () {
+      console.log(this.keyword)
+      if (!this.keyword) return this.$message.errer('请输入查询手机号')
+      const res = await this.$axios.get('/api?datatype=get_yylist', {
+        params: {
+          storeid: this.storeid,
+          mobile: this.keyword,
+        }
+      })
+      if (res.data.code == 1 && res.data.data) {
+        this.searchlist = res.data.data
+      } else {
+        this.searchlist = []
+      }
+    },
+    chooseOne (v) {
+      this.showcurrent = v
+      this.yuyueDialog = true
+      this.listDialog = false
+      this.handleClose()
+    },
     checktime (v, val) {
       console.log(val, v)
       this.worker = val.name
       this.workerid = val.id
-      this.staTime = moment(this.date).format('YYYY-MM-DD') + ' ' + v.shi + ':' + v.fen
+      this.staTime = moment(this.date).format('YYYY-MM-DD') + ' ' + v.shi + ':' + v.fen + ':00'
+      console.log(this.staTime)
       if (val.shilist.length) {
         let a = v.shi + ':' + v.fen
         let flag = val.shilist.some(item => a == item)
@@ -217,9 +288,25 @@ export default {
           this.showcurrent = this.yylist.find(k => k.id == data)
           this.yuyueDialog = true
         } else {
+          let now = new Date
+          if (moment(this.date) < moment(this.formatDate(now))) return this.$message.error('时间已过，不可预约')
+          let flag1 = this.date == this.formatDate(now)
+          let nowshi = moment(now).format('HH')
+          let nowfen = moment(now).format('m')
+          if (flag1 && (v.shi <= nowshi && v.fen < nowfen)) {
+            return this.$message.error('时间已过，不可预约')
+          }
           this.typeDialog = true
         }
       } else {
+        let now = new Date
+        if (moment(this.date) < moment(this.formatDate(now))) return this.$message.error('时间已过，不可预约')
+        let flag1 = this.date == this.formatDate(now)
+        let nowshi = moment(now).format('HH')
+        let nowfen = moment(now).format('m')
+        if (flag1 && (v.shi <= nowshi && v.fen < nowfen)) {
+          return this.$message.error('时间已过，不可预约')
+        }
         this.typeDialog = true
       }
     },
@@ -274,18 +361,26 @@ export default {
         this.delyuyue(id)
       })
     },
-    async delyuyue (id) {
-      const res = await this.$axios.get('/api?datatype=cancel_yy', {
-        params: {
-          storeid: this.storeid,
-          id: id
+    delyuyue (id) {
+      this.$prompt('', '取消原因', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPattern: /^[\s\S]*.*[^\s][\s\S]*$/,
+        inputErrorMessage: '请输入取消原因'
+      }).then(async ({ value }) => {
+        const res = await this.$axios.get('/api?datatype=cancel_yy', {
+          params: {
+            storeid: this.storeid,
+            id: id,
+            remark: value
+          }
+        })
+        if (res.data.code == 1) {
+          this.yuyueDialog = false
+          this.$message.error('取消成功')
+          this.getworkerlist()
         }
       })
-      if (res.data.code == 1) {
-        this.yuyueDialog = false
-        this.$message.error('取消成功')
-        this.getworkerlist()
-      }
     },
     async submit () {
       let params = {
@@ -318,6 +413,11 @@ export default {
       day1.setTime(day1.getTime() + 24 * 60 * 60 * 1000)
       this.date = this.formatDate(day1)
       // this.getworkerlist()
+    },
+    handleClose () {
+      this.listDialog = false
+      this.keyword = ''
+      this.searchlist = []
     }
   },
   created () {
@@ -325,10 +425,12 @@ export default {
     for (let i = 10; i < 22; i++) {
       for (let j = 0; j < 2; j++) {
         if (j == 0) {
-          const a = { shi: i, fen: '00' }
-          this.timelist.push(a)
+          if (i != 10) {
+            const a = { shi: i - 1, fen: '30' }
+            this.timelist.push(a)
+          }
         } else {
-          const a = { shi: i, fen: '30' }
+          const a = { shi: i, fen: '00' }
           this.timelist.push(a)
         }
       }
@@ -449,6 +551,7 @@ export default {
     }
     .btnView i {
       font-size: 26px;
+      line-height: 40px;
       cursor: pointer;
     }
   }
@@ -497,13 +600,17 @@ export default {
       }
       .a_item {
         position: relative;
-        display: flex;
         width: 150px;
         height: 150px;
         overflow-y: hidden;
         background: #f4f4f4;
         border-right: 0.5px solid rgba(220, 220, 220, 0.7);
         padding: 30px 10px 30px 20px;
+        p {
+          font-size: 16px;
+          line-height: 40px;
+          width: 100%;
+        }
       }
       .b_item {
         cursor: pointer;
@@ -570,6 +677,78 @@ export default {
           height: 12px;
           border-radius: 50%;
         }
+      }
+    }
+  }
+  .quickmoney {
+    .inputView {
+      position: relative;
+      min-width: 520px;
+      left: 0;
+      right: 0;
+      margin: auto;
+      height: 40px;
+      background: #f4f4f4
+        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Search.png)
+        13px center / 24px no-repeat;
+      border-radius: 5px;
+      overflow: hidden;
+      padding: 5px 65px 5px 44px;
+      margin: 20px;
+      input {
+        width: 100%;
+        line-height: 30px;
+        height: 30px;
+        padding: 0;
+        background: transparent;
+        font-size: 14px;
+        color: #28282d;
+        border: none;
+      }
+      .btn-search {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 65px;
+        padding: 0 10px;
+        line-height: 40px;
+        height: 40px;
+        background: #28282d;
+        font-size: 15px;
+        color: #fff;
+      }
+    }
+    .tipView {
+      font-size: 13px;
+      color: #8a8a8a;
+      text-align: center;
+      line-height: 120px;
+    }
+    .resItem {
+      display: flex;
+      padding: 10px 15px;
+      background: #fff;
+      color: #28282d;
+      cursor: pointer;
+      .timeView {
+        font-size: 14px;
+        line-height: 22px;
+        width: 100px;
+        min-width: 13px;
+        border-right: 2px solid #47bf7c;
+        padding-right: 10px;
+        text-align: center;
+      }
+      .empView {
+        display: flex;
+        flex: 1;
+        margin-left: 10px;
+      }
+      .resUserView {
+        flex: 1.2;
+        margin-left: 10px;
+        line-height: 44px;
+        font-size: 14px;
       }
     }
   }

@@ -45,7 +45,7 @@
             </div>
           </div>
         </div>
-        <div class="empTypeView listView" style="height: 597px;">
+        <div class="empTypeView listView">
           <div class="empSetView listItem btn-audio select">
             <div class="defView" v-if="!choosegong">
               大工
@@ -173,7 +173,7 @@ export default {
 <style lang="scss" scoped>
 .popView-contentView {
   width: 1024px;
-  height: 748px;
+  height: 80vh;
   border-radius: 6px;
   background: rgb(255, 255, 255);
   overflow: auto;
@@ -240,7 +240,7 @@ export default {
   }
   .bcView {
     position: relative;
-    min-height: 425px;
+    height: calc(80vh - 150px);
     .contentView {
       position: relative;
       height: 100%;

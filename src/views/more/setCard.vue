@@ -15,6 +15,7 @@
         <el-table-column prop="card_no" label="类别编号"></el-table-column>
         <el-table-column prop="name" label="类别名称"></el-table-column>
         <el-table-column prop="deposit_amount" label="储值金额"></el-table-column>
+        <el-table-column prop="gift_money" label="赠送金额"></el-table-column>
         <el-table-column prop="recharge_money" label="起充金额"></el-table-column>
         <el-table-column prop="item_discount" label="项目折扣">
           <template slot-scope="scope">
@@ -27,7 +28,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="usetime" label="有效期"></el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="操作" min-width="150">
           <template slot-scope="scope">
             <el-button @click="edit(scope.row)" icon="el-icon-edit" type="primary" circle plain></el-button>
             <el-button @click="del(scope.row.id)" icon="el-icon-delete" type="danger" circle plain></el-button>
@@ -50,11 +51,14 @@
           <el-form-item label="类别编号" prop="card_no">
             <el-input v-model="form.card_no"></el-input>
           </el-form-item>
-          <el-form-item label="卡名称" prop="name">
+          <el-form-item label="卡片名称" prop="name">
             <el-input v-model="form.name"></el-input>
           </el-form-item>
           <el-form-item label="储值金额" prop="deposit_amount">
             <el-input v-model="form.deposit_amount"></el-input>
+          </el-form-item>
+          <el-form-item label="赠送金额" prop="deposit_amount">
+            <el-input v-model="form.gift_money"></el-input>
           </el-form-item>
           <el-form-item label="起充金额" prop="recharge_money">
             <el-input v-model="form.recharge_money"></el-input>
@@ -81,19 +85,25 @@
             </div>
           </el-form-item>
           <el-form-item label="项目折扣">
-            <el-col :span="20">
-              <el-input type="number" v-model="form.item_discount"></el-input>
+            <el-col :span="12">
+              <el-input-number v-model="form.item_discount" :max="10" :min="0"></el-input-number>
             </el-col>
-            <el-col :span="4">
+            <el-col :span="2">
               <p style="text-align:center">折</p>
+            </el-col>
+            <el-col :span="10">
+              <p style="text-align:center">（ 默认：10-无折扣 ）</p>
             </el-col>
           </el-form-item>
           <el-form-item label="产品折扣">
-            <el-col :span="20">
-              <el-input type="number" v-model="form.goods_discount"></el-input>
+            <el-col :span="12">
+              <el-input-number v-model="form.goods_discount" :max="10" :min="0"></el-input-number>
             </el-col>
-            <el-col :span="4">
+            <el-col :span="2">
               <p style="text-align:center">折</p>
+            </el-col>
+            <el-col :span="10">
+              <p style="text-align:center">（ 默认：10-无折扣 ）</p>
             </el-col>
           </el-form-item>
         </el-form>
@@ -126,10 +136,11 @@ export default {
         img: '',
         deposit_amount: '',
         recharge_money: '',
+        gift_money: '',
         usetime: '',
         dateType: '年',
-        item_discount: '',
-        goods_discount: ''
+        item_discount: '10',
+        goods_discount: '10'
       },
       rules: {
         card_no: [
@@ -143,6 +154,9 @@ export default {
         ],
         recharge_money: [
           { required: true, message: '请输入起充金额', trigger: 'focus' }
+        ],
+        gift_money: [
+          { required: true, message: '请输入赠送金额', trigger: 'focus' }
         ],
         usetime: [
           { required: true, message: '请输入有效期限', trigger: 'focus' }
@@ -211,11 +225,12 @@ export default {
         name: '',
         img: '',
         deposit_amount: '',
+        gift_money: '',
         recharge_money: '',
         usetime: '',
         dateType: '年',
-        item_discount: '',
-        goods_discount: ''
+        item_discount: '10',
+        goods_discount: '10'
       }
       this.form = data
     },
@@ -228,7 +243,7 @@ export default {
       }
     },
     async submit () {
-      if (!this.form.card_no || !this.form.name || !this.form.deposit_amount || !this.form.recharge_money || !this.form.usetime) return this.$message.error('缺少必填信息')
+      if (!this.form.card_no || !this.form.name || !this.form.deposit_amount || !this.form.recharge_money || !this.form.usetime || !this.form.gift_money) return this.$message.error('缺少必填信息')
       let data = qs.stringify({
         storeid: this.storeid,
         type: this.type,//1增加  2编辑
@@ -237,6 +252,7 @@ export default {
         name: this.form.name,
         img: this.form.img,
         deposit_amount: this.form.deposit_amount,//储值金额
+        gift_money: this.form.gift_money,
         recharge_money: this.form.recharge_money,//起充金额
         usetime: this.form.usetime + this.form.dateType,
         item_discount: this.form.item_discount,

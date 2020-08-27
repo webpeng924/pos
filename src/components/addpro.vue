@@ -20,32 +20,46 @@
             <i class="el-icon-arrow-right"></i>
           </div>
           <div class="subItem type-input">
-            <label class="label-leftText">产品编号</label>
+            <label class="label-leftText">
+              产品编号
+              <span class="xing">*</span>
+            </label>
             <div class="valView">
               <input type="text" placeholder="请输入" v-model="goodsInfo.goods_no" />
             </div>
           </div>
           <div class="subItem type-input">
-            <label class="label-leftText">产品名称</label>
+            <label class="label-leftText">
+              产品名称
+              <span class="xing">*</span>
+            </label>
             <div class="valView">
               <input type="text" placeholder="请输入" v-model="goodsInfo.goods_name" />
             </div>
           </div>
           <div class="subItem type-input">
-            <label class="label-leftText">标准价格</label>
+            <label class="label-leftText">
+              标准价格
+              <span class="xing">*</span>
+            </label>
             <div class="valView">
               <input type="text" placeholder="请输入" v-model="goodsInfo.price" />
             </div>
           </div>
           <div class="subItem type-input">
-            <label class="label-leftText">采购价格</label>
+            <label class="label-leftText">
+              采购价格
+              <span class="xing">*</span>
+            </label>
             <div class="valView">
               <input type="text" placeholder="请输入" v-model="goodsInfo.in_cost" />
             </div>
-            <i class="el-icon-arrow-right"></i>
           </div>
           <div class="subItem type-select">
-            <label class="label-leftText">统计分类</label>
+            <label class="label-leftText">
+              统计分类
+              <span class="xing">*</span>
+            </label>
             <div class="valView" @click="categoryDialog=true">
               <input type="text" placeholder="请选择" v-model="categoryName" readonly />
             </div>
@@ -70,14 +84,20 @@
             </div>
           </el-dialog>
           <div class="subItem type-select">
-            <label class="label-leftText">存放仓库</label>
+            <label class="label-leftText">
+              存放仓库
+              <span class="xing">*</span>
+            </label>
             <div class="valView">
               <input type="text" placeholder="请选择" v-model="goodsInfo.warehouse" readonly />
             </div>
             <i class="el-icon-arrow-right"></i>
           </div>
           <div class="subItem type-select">
-            <label class="label-leftText">标准单位</label>
+            <label class="label-leftText">
+              标准单位
+              <span class="xing">*</span>
+            </label>
             <div class="valView" @click="unitDialog=true">
               <input type="text" placeholder="请选择" v-model="goodsInfo.goods_unit" readonly />
             </div>
@@ -218,6 +238,7 @@ export default {
       })
     },
     async submit () {
+      if (!this.goodsInfo.goods_name || !this.goodsInfo.goods_no || !this.goodsInfo.price || !this.goodsInfo.in_cost || !this.goodsInfo.category_id || !this.goodsInfo.goods_unit) return this.$message.error('请完善产品信息')
       let params = {
         storeid: this.goodsInfo.storeid,
         type: this.goodsInfo.type,
@@ -244,6 +265,10 @@ export default {
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)
         this.back()
+      } else if (res.data.code == 2) {
+        this.$message.error(res.data.msg)
+      } else {
+        this.$message.error('添加失败')
       }
     }
   },

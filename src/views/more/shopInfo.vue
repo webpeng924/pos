@@ -21,11 +21,11 @@
       <div class="groupView codeView">
         <div>
           <label class="label-leftText">本店编号</label>
-          <label class="label-value">001</label>
+          <label class="label-value">{{shopInfo.shop_code}}</label>
         </div>
         <div>
           <label class="label-leftText">连锁代码</label>
-          <label class="label-value">SKINPA</label>
+          <label class="label-value">{{shopInfo.chain_code}}</label>
         </div>
       </div>
       <div class="groupView">
@@ -41,7 +41,7 @@
         </div>
         <div class="selectView">
           <label class="label-leftText">门店级别</label>
-          <label class="label-value">总部</label>
+          <label class="label-value">{{shopInfo.typename}}</label>
         </div>
         <div class="inputView">
           <label class="label-leftText">门店电话</label>

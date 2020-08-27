@@ -26,7 +26,24 @@
           value-format="yyyy-MM-dd"
         ></el-date-picker>
       </div>
+      <button class="btn-audio btn-filter" @click="drawer=true"></button>
     </div>
+    <el-drawer :visible.sync="drawer" direction="rtl" :modal-append-to-body="false">
+      <h2 slot="title" style="text-align: center;">筛选条件</h2>
+      <div class="drawerlist">
+        <div class="draweritem">
+          <el-input placeholder="请输入客户名称/手机" v-model="searchphone" clearable>
+            <i slot="prefix" class="el-input__icon el-icon-search"></i>
+          </el-input>
+        </div>
+        <div class="draweritem">
+          <el-input placeholder="请输入项目/产品名称" v-model="searchtxt" clearable>
+            <i slot="prefix" class="el-input__icon el-icon-search"></i>
+          </el-input>
+        </div>
+        <button class="btn" @click="getList();drawer=false">确认</button>
+      </div>
+    </el-drawer>
     <div class="menuView" v-show="title == '营收明细'">
       <div class="menuItem btn-audio" @click="chos = 3" :class="{ select: chos == 3 }">
         <label>收银</label>
@@ -113,7 +130,7 @@
             }}
           </template>
         </el-table-column>
-        <el-table-column prop="name" label="结账时间" width="110">
+        <el-table-column prop="name" label="结账时间" width="200">
           <template slot-scope="scope">
             {{
             scope.row.dateline && scope.row.dateline | time
@@ -287,11 +304,14 @@ export default {
       stock_no: '',
       tableData: [],
       tuilist: [],
+      searchphone: '',
+      searchtxt: '',
       chosOrder: '',
       add: false,
       title: "营收明细",
       storeid: sessionStorage.getItem('storeid'),
       chos: 3,
+      drawer: false,
       option: [
         { text: "收银", value: "收银" },
         { text: "售卡", value: "售卡" },
@@ -342,6 +362,8 @@ export default {
       }
     },
     async getOneOrder (id) {
+      let role = JSON.parse(sessionStorage.getItem('userInfo')).role
+      if (role != 1) this.$message.error('没有权限')
       // 获取单个订单
       // this.$message('开发中')
       const res = await this.$axios.get('/api?datatype=get_one_order', {
@@ -456,7 +478,9 @@ export default {
           storeid: this.storeid,
           type: this.chos,
           start: this.date[0],
-          end: this.date[1]
+          end: this.date[1],
+          search: this.searchphone,
+          itemname: this.searchtxt
         }
       });
       if (res.code !== 1 && !res.data.data) return this.tableData = [];
@@ -529,6 +553,13 @@ export default {
       background: transparent
         url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_X_Black.png)
         left center / 24px no-repeat;
+    }
+    .btn-filter {
+      width: 40px;
+      height: 40px;
+      background: #fff
+        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Filter.png)
+        center / 28px no-repeat;
     }
     .tView {
       flex: 1;
@@ -609,6 +640,29 @@ export default {
         color: #8a8a8a;
         margin-right: 15px;
       }
+    }
+  }
+  .drawerlist {
+    padding: 0 20px;
+    font-size: 16px;
+    position: relative;
+    height: 100%;
+    .draweritem {
+      line-height: 50px;
+      display: flex;
+      justify-content: space-between;
+      .el-switch {
+        margin-top: 15px;
+      }
+    }
+    .btn {
+      position: absolute;
+      bottom: 20px;
+      width: calc(100% - 40px);
+      line-height: 40px;
+      background-color: #000;
+      color: #fff;
+      border-radius: 5px;
     }
   }
 }

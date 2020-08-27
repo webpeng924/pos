@@ -195,7 +195,7 @@
     >
       <div class="contentView" style="max-height: 620px;">
         <div class="quanItem" @click="chooseQuan(v)" v-for="(v,k) in quanlist" :key="k">
-          <div class="left">现金券</div>
+          <div class="left">{{v.v_type}}</div>
           <div class="right">
             <p>{{v.v_amount}}元</p>
             <p class="p1">使用时间：{{v.v_starttime|time}} 至 {{v.v_endtime|time}}</p>
@@ -449,7 +449,7 @@ export default {
     display: flex;
     position: relative;
     height: calc(100% - 85px);
-    overflow: auto;
+    // overflow: auto;
     .orderView {
       flex: 1;
       position: relative;
@@ -457,15 +457,18 @@ export default {
       height: 100%;
       background: #f4f4f4;
       overflow: hidden;
-      padding-bottom: 68px;
+      padding-bottom: 60px;
       .contentView {
-        overflow-x: hidden;
-        overflow-y: auto;
-        height: calc(100%);
+        // overflow-x: hidden;
+        // overflow-y: auto;
+        height: 100%;
         .orderInfoView {
           width: 100%;
+          height: calc(100% - 200px);
         }
         .itemsView {
+          height: calc(100% - 90px);
+          overflow: auto;
           padding: 0 15px 25px 15px;
           min-height: 100px;
           background: #fff;
@@ -475,21 +478,25 @@ export default {
             color: #5a5a5a;
             background: transparent;
           }
-          .toPayView > .listItem {
-            background: #f4f4f4;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            overflow: hidden;
-            &:last-child {
-              margin-bottom: 0;
-            }
-            .masterView,
-            .branchItem {
-              position: relative;
-              display: flex;
-              padding: 20px 20px 20px 60px;
-              line-height: 28px;
-              justify-content: space-between;
+          .toPayView {
+            height: calc(100% - 40px);
+            overflow: auto;
+            & > .listItem {
+              background: #f4f4f4;
+              margin-bottom: 10px;
+              border-radius: 6px;
+
+              &:last-child {
+                margin-bottom: 0;
+              }
+              .masterView,
+              .branchItem {
+                position: relative;
+                display: flex;
+                padding: 20px 20px 20px 60px;
+                line-height: 28px;
+                justify-content: space-between;
+              }
             }
           }
         }
@@ -535,7 +542,7 @@ export default {
           }
         }
         .paymentView {
-          padding: 15px 0 0 15px;
+          padding-left: 15px;
           background: #f4f4f4;
           .tView {
             line-height: 40px;
@@ -544,7 +551,7 @@ export default {
             background: transparent;
           }
           .paymentList {
-            padding: 0 0 50px 8px;
+            padding: 0 0 0 8px;
             overflow-x: hidden;
             overflow-y: auto;
             .paymentItem {

@@ -1,6 +1,13 @@
 <template>
   <div class="cash">
     <div class="top_select" v-show="!merge">
+      <div class="right">
+        <div class="btn" @click="page=true">收银</div>
+        <span class="i" @click="quickmoney=true">快速收银</span>
+        <el-input placeholder="手牌号或员工信息查询" v-model="likeName" style="width:240px;border:#dc670b">
+          <i slot="prefix" class="el-input__icon el-icon-search"></i>
+        </el-input>
+      </div>
       <div class="left">
         <div class="one">
           <el-select v-model="value">
@@ -23,12 +30,7 @@
           <img src="../assets/images/Def_Icon_ArrowUp.png" :class="{imgs:rotate}" alt />
         </div>
       </div>
-      <el-input placeholder="手牌号或员工信息查询" v-model="likeName" style="width:240px;border:#dc670b">
-        <i slot="prefix" class="el-input__icon el-icon-search"></i>
-      </el-input>
-      <span class="i" @click="quickmoney=true">快速收款</span>
       <!-- <span class="i" @click="merge=true">合并</span> -->
-      <div class="btn" @click="page=true">收银</div>
     </div>
     <div class="top_select" v-show="merge">
       <div class="mergeHeaderView">
@@ -140,7 +142,7 @@
             >{{v.remark}}</div>
             <div class="serTimeView">
               <div
-                v-show="v.status<3"
+                v-show="v.status!=4"
                 class="btn-closeTimeDwon btn-audio"
                 @click.stop="cancelorder(v.id)"
               >取消订单</div>
@@ -229,10 +231,6 @@
           <el-button type="primary" @click="setCard">支付</el-button>
         </span>
       </el-dialog>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="quickmoney = false">取 消</el-button>
-        <el-button @click="toSubmit" style="background-color:#dc670b;color:#fff">确 定</el-button>
-      </span>
     </el-dialog>
 
     <el-dialog title="备注" :visible.sync="showMemo" width="430px" center custom-class="quickmoney">
@@ -257,6 +255,14 @@
       append-to-body
     >
       <chooseworker @close="setdata" :setinfo="setinfo" v-if="showworker"></chooseworker>
+    </el-dialog>
+
+    <!-- 签名 -->
+    <el-dialog :visible.sync="showSign" width="30%">
+      <div style="text-align: center;padding:20px;font-size:16px">今天是 {{new Date()|moment1}}</div>
+      <div style="text-align: center;padding:20px">
+        <el-button type="primary" @click="toSign" style="width:80%">点击签到</el-button>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -293,6 +299,7 @@ export default {
       showswitch: false,
       showMemo: false,
       showworker: false,
+      shopInfo: JSON.parse(sessionStorage.getItem('shopInfo')),
       radio: '1',
       num: '1',
       workerlist: [],
@@ -304,7 +311,8 @@ export default {
       modifyid: '',
       remark: '',
       statuslist: [{ name: '服务中', status: "1", num: "0", color: 'rgb(237, 179, 57)' }, { name: '待结账', status: "2", num: "0", color: 'rgb(244, 78, 78)' }, { name: '已结账', status: "3", num: "0", color: 'rgb(71, 191, 124)' }, { name: '已作废', status: "4", num: "0", color: 'rgb(221, 221, 221)' }],
-      nowModifyOrder: ''
+      nowModifyOrder: '',
+      showSign: false
     }
   },
   watch: {
@@ -329,6 +337,9 @@ export default {
   filters: {
     moment (val) {
       return moment.unix(val).format('HH:mm')
+    },
+    moment1 (val) {
+      return moment(val).format('YYYY年MM月DD日')
     }
   },
   computed: {},
@@ -389,6 +400,8 @@ export default {
       }
     },
     cancelorder (id) {
+      let role = JSON.parse(sessionStorage.getItem('userInfo')).role
+      if (role != 1) return this.$message.error('没有权限')
       this.$confirm('确定取消改消费单吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -430,6 +443,16 @@ export default {
         this.$message.error('收款失败')
       }
     },
+    toSign () {
+      this.$axios.get('/api?datatype=insert_sign&storeid=' + this.storeid).then(res => {
+        if (res.data.code == 1) {
+          this.$message.success('签到成功')
+          this.shopInfo.is_sign = 1
+          sessionStorage.setItem('shopInfo', JSON.stringify(this.shopInfo))
+        }
+        this.showSign = false
+      })
+    },
     // 打开整单
     modifyorder (v) {
       if (v.status < 3) {
@@ -470,7 +493,7 @@ export default {
           title: val.itemname,
           serverfor: v.member_name ? v.member_name : '客A',
           num: val.num,
-          money: Number(val.discount_price) / Number(val.num),
+          money: Number(val.discount_price),
           worker: val
         }
         this.modifyid = val.id
@@ -506,7 +529,7 @@ export default {
       let obj = qs.stringify({
         storeid: this.storeid,
         id: this.modifyid,
-        staff1: data.choose ? data.choose.id : 0,
+        staff1: data.choose.gong ? data.choose.gong.id : 0,
         num: data.num,
         subtotal: data.price
       })
@@ -584,6 +607,12 @@ export default {
     if (this.from == 'car') {
       this.page = true
     }
+    let isSign = this.shopInfo.is_sign
+    if (isSign == 1) {
+
+    } else {
+      this.showSign = true
+    }
     this.getworkerlist()
     this.getorderlist(1)
   },
@@ -636,7 +665,7 @@ export default {
 
 .el-dialog.popView-contentView {
   width: 1024px;
-  height: 748px;
+  height: 80vh;
   border-radius: 6px;
   background: rgb(255, 255, 255);
   overflow: auto;
@@ -704,8 +733,10 @@ export default {
         color: #fff;
       }
     }
-    .left {
+    .right {
       flex: 1;
+    }
+    .left {
       display: flex;
       > div {
         float: left;
@@ -745,7 +776,7 @@ export default {
       }
     }
     .i {
-      margin-left: 20px;
+      margin: 0 20px;
       height: 40px;
       line-height: 40px;
       font-size: 18px;
@@ -1301,7 +1332,7 @@ export default {
     }
     .bcView {
       position: relative;
-      min-height: 425px;
+      height: calc(80vh - 150px);
       .contentView {
         position: relative;
         height: 100%;

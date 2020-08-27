@@ -5,18 +5,16 @@
       <button class="btn-back btn-audio" @click="$emit('close')"></button>
     </div>
     <div class="member-content">
-      <el-table :data="tableData" stripe header-row-class-name="table-header">
+      <el-table :data="tableData" stripe header-row-class-name="table-header" height="90%">
         <el-table-column prop="account" label="会员编号" width="180"></el-table-column>
         <el-table-column prop="name" label="会员名称"></el-table-column>
         <el-table-column prop="account" label="会员卡号"></el-table-column>
         <el-table-column prop="mobile" label="手机号码"></el-table-column>
         <el-table-column prop="cardtype" label="会员类型"></el-table-column>
         <el-table-column prop="balance" label="余额"></el-table-column>
-
         <el-table-column label="性别">
           <template #default="{row}">{{ row.sex == 1 ? "男" : "女" }}</template>
         </el-table-column>
-
         <el-table-column label="操作">
           <template #default="{row}">
             <span class="icon" @click="detail(row)">查看详情</span>
@@ -29,8 +27,8 @@
         :current-page="page_num"
         :page-sizes="[5, 10, 15, 20]"
         :page-size="page_size"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="2"
+        layout=" sizes, prev, pager, next,total"
+        :total="total"
         class="page"
       ></el-pagination>
     </div>
@@ -88,7 +86,7 @@ export default {
       dialogVisible: false,
       page_size: 5,
       page_num: 1,
-      total: "",
+      total: 0,
       storeid: sessionStorage.getItem('storeid'),
       onceList: []
     };
@@ -107,7 +105,9 @@ export default {
       });
       if (res.data.code == 1) {
         this.tableData = res.data.data;
-        this.total = res.data.count;
+        if (this.page_num == 1) {
+          this.total = Number(res.data.count);
+        }
       }
     },
     detail (row) {
@@ -128,6 +128,7 @@ export default {
 
 <style lang="scss" scoped>
 .member-index {
+  height: 100%;
   .topView {
     position: relative;
     background: #fff;
@@ -149,6 +150,8 @@ export default {
   }
   .member-content {
     padding: 50px;
+    box-sizing: border-box;
+    height: calc(100% - 85px);
     .icon {
       color: rgb(100, 180, 195);
     }

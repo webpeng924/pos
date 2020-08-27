@@ -8,18 +8,20 @@
           <button class="btn-audio" :class="{select:id==3}" @click="id=3">选择预约</button>
         </div>
         <button class="btn-back btn-audio" @click="$emit('close')"></button>
-        <div class="btnView">
-          <i class="el-icon-search" @click="showSearch = !showSearch;getXMlist()"></i>
-        </div>
       </div>
+
       <div class="orderAddBoxView" v-show="id!=3">
         <div class="headerView">
-          <div
-            id="categoryView"
-            class="collView listView"
-            style="height: 44px;"
-            v-show="!showSearch"
-          >
+          <div class="btnView" v-show="id!=3">
+            <!-- <i class="el-icon-search" @click="showSearch = !showSearch;getXMlist()"></i> -->
+            <div class="keywordView">
+              <div class="inputView">
+                <input placeholder="请输入编号或者名称查询" v-model="keyword" />
+                <button class="btn-audio btn-search" @click="getXMlist">搜索</button>
+              </div>
+            </div>
+          </div>
+          <div id="categoryView" class="collView listView" style="height: 44px;">
             <div class="line">
               <div class="categoryItem btn-audio" v-for="(v,k) in catelist" :key="k">
                 <label :class="{select:active==v.id}" @click="changeActive(v.id)">
@@ -46,48 +48,45 @@
               <label @click="delcate=false">完成</label>
             </div>
           </div>
-          <div class="keywordView" v-show="showSearch">
-            <div class="inputView">
-              <input placeholder="请输入编号或者名称查询" v-model="keyword" />
-              <button class="btn-audio btn-search" @click="getXMlist">搜索</button>
+        </div>
+        <div class="bview">
+          <div class="boxView listView">
+            <div
+              class="serviceItem boxItem btn-audio"
+              v-for="(v,k) in XMlist"
+              :key="k"
+              @click="openworker(v,'',1)"
+            >
+              <div
+                class="nameView"
+                :style="`background:url('http://hb.rgoo.com${v.img?v.img:'/upload/shop/moren.jpg'}') no-repeat 0 0 /100% 100%;`"
+              ></div>
+              <div class="priceView">{{id==1?v.name:v.goods_name}}</div>
+              <div class="priceView">￥{{v.price}}</div>
             </div>
           </div>
-        </div>
-        <div class="boxView listView" style="height:50%; overflow-y: auto;">
-          <div
-            class="serviceItem boxItem btn-audio"
-            v-for="(v,k) in XMlist"
-            :key="k"
-            @click="openworker(v,'',1)"
-          >
-            <div
-              class="nameView"
-              :style="`background:url('http://hb.rgoo.com${v.img?v.img:'/upload/shop/moren.jpg'}') no-repeat 0 0 /100% 100%;`"
-            ></div>
-            <div class="priceView">{{id==1?v.name:v.goods_name}} ￥{{v.price}}</div>
+          <div class="boxView listView" v-show="member">
+            <p style="color:#dc670b">已购买次卡</p>
+            <el-table
+              :data="cikalist"
+              highlight-current-row
+              @current-change="handleCurrentChange"
+              style="width: 100%"
+              height="90%"
+              @row-click="choosecika"
+            >
+              <el-table-column type="index" width="50"></el-table-column>
+              <el-table-column property="itemname" label="名称" width="120"></el-table-column>
+              <el-table-column label="卡类型">
+                <template slot-scope="scope">{{scope.row.typeid|type}}</template>
+              </el-table-column>
+              <el-table-column property="first_count" label="购买次数"></el-table-column>
+              <el-table-column property="address" label="使用次数">
+                <template slot-scope="scope">{{scope.row.first_count-scope.row.rest_count}}</template>
+              </el-table-column>
+              <el-table-column property="rest_count" label="剩余次数"></el-table-column>
+            </el-table>
           </div>
-        </div>
-        <div class="boxView listView" style="height:50%;" v-show="member">
-          <p style="color:#dc670b">已购买次卡</p>
-          <el-table
-            :data="cikalist"
-            highlight-current-row
-            @current-change="handleCurrentChange"
-            style="width: 100%"
-            height="80%"
-            @row-click="choosecika"
-          >
-            <el-table-column type="index" width="50"></el-table-column>
-            <el-table-column property="itemname" label="名称" width="120"></el-table-column>
-            <el-table-column label="卡类型">
-              <template slot-scope="scope">{{scope.row.typeid|type}}</template>
-            </el-table-column>
-            <el-table-column property="first_count" label="购买次数"></el-table-column>
-            <el-table-column property="address" label="使用次数">
-              <template slot-scope="scope">{{scope.row.first_count-scope.row.rest_count}}</template>
-            </el-table-column>
-            <el-table-column property="rest_count" label="剩余次数"></el-table-column>
-          </el-table>
         </div>
       </div>
 
@@ -142,12 +141,8 @@
             <button class="btn-del btn-audio" @click="clearMember"></button>
           </div>
           <div class="sexView">
-            <button
-              class="btn-female"
-              :class="{select:male=='female'}"
-              @click="changemale('female')"
-            ></button>
-            <button class="btn-male" :class="{select:male=='male'}" @click="changemale('male')"></button>
+            <button class="btn-female" :class="{select:male=='female'}"></button>
+            <button class="btn-male" :class="{select:male=='male'}"></button>
           </div>
           <div class="normalView" v-show="!member">
             <button class="btn-selectVip" @click="getList();memberView=true">选择会员</button>
@@ -162,8 +157,12 @@
                 &nbsp;x{{v.num}}
               </div>
               <i
+                style="color:#EDB339;height:20px;line-height: 16px;padding:2px 6px;border-radius:3px;margin-right:10px;font-size:13px;margin-top:10px;background:#876c37;"
+                v-show="v.discount&&v.discount!=1&&v.is_usecard!=1"
+              >折扣 {{v.discount}}</i>
+              <i
                 style="color:orange;margin-right:10px"
-                @click="modifyOnePrice(v,k)"
+                @click="toEditPrice(v,k)"
                 v-show="v.is_usecard!=1"
               >修改价格</i>
               <div class="priceView">￥&nbsp;{{(Number(v.price)*v.num*v.discount).toFixed(2)}}</div>
@@ -178,7 +177,10 @@
               </div>
               <div class="empItem" v-show="v.worker">
                 <img :src="v.worker.avatar?v.worker.avatar:'/upload/shop/moren.jpg'|imgUrl" />
-                <label class="label-name overflowText">{{v.worker.name}}（No：{{v.worker.job_no}}）</label>
+                <label
+                  class="label-name overflowText"
+                  @click="openworker(v,k,2)"
+                >{{v.worker.name}}（No：{{v.worker.job_no}}）</label>
                 <label class="label-job overflowText">服务人员</label>
               </div>
             </div>
@@ -194,15 +196,15 @@
         </div>
       </div>
       <div class="bottomView">
-        <button class="btn-audio btn-black btn-save" @click="confirmDiscount(1)">挂单</button>
-        <button
-          class="btn-audio btn-red btn-checkout"
-          @click="confirmDiscount(2)"
-        >结账&nbsp;&nbsp;￥&nbsp;{{sumprice}}</button>
+        <button class="btn-audio btn-black btn-save" @click="submit(1)">挂单</button>
         <button class="btn-audio btn-save" @click="modifytotalPrice">
           <i class="iconfont icon-edit1-act" style="color:orange;margin-right:5px"></i>
           优惠总价￥{{newprice?newprice:sumprice}}
         </button>
+        <button
+          class="btn-audio btn-red btn-checkout"
+          @click="submit(2)"
+        >结账&nbsp;&nbsp;￥&nbsp;{{sumprice}}</button>
       </div>
     </div>
     <el-dialog
@@ -213,7 +215,10 @@
       title="选择会员"
       center
     >
-      <div class="searchResView" style="background-color:pink">
+      <div
+        class="searchResView"
+        style="background: linear-gradient(to right, #f3e7e9 0%, #e3eeff 100%)"
+      >
         <div class="topSearchView">
           <div class="inputView">
             <el-select v-model="type" placeholder="请选择">
@@ -225,7 +230,7 @@
           </div>
           <button class="btn-audio" :class="{search:keyword}">查询</button>
         </div>
-        <el-table :data="tableData" style="width: 100%" height="500" @row-click="choosMember">
+        <el-table :data="tableData" style="width: 100%" height="400px" @row-click="choosMember">
           <el-table-column prop="address">
             <template slot-scope="scope">
               <img :src="scope.row.img|imgUrl" alt style="width:80px" />
@@ -247,6 +252,34 @@
       <span slot="footer" class="dialog-footer">
         <el-button @click="addcate = false">取 消</el-button>
         <el-button @click="submitadd">确 定</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog
+      title="修改价格"
+      :visible.sync="editDialog"
+      width="40%"
+      :modal-append-to-body="false"
+      center
+      custom-class="quickmoney"
+    >
+      <div style="padding:20px">
+        <div style="display:flex;margin-bottom:35px">
+          <span style="width:80px">原价：</span>
+          <span>{{editprice}}</span>
+        </div>
+        <div style="display:flex;margin-bottom:20px">
+          <span style="width:80px">折扣：</span>
+          <el-input v-model="editdiscount" placeholder="0~1"></el-input>
+        </div>
+        <div style="display:flex">
+          <span style="width:80px">折后价：</span>
+          <el-input v-model="editdisprice" @input="changeDisprice"></el-input>
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editDialog = false">取 消</el-button>
+        <el-button type="primary" @click="modifyPrice">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -341,6 +374,11 @@ export default {
       tableData: [],
       yyitem: '',
       page: false,
+      editDialog: false,
+      editprice: '',
+      editIndex: '',
+      editdiscount: '',
+      editdisprice: '',
       bookinfo: '',
       newprice: '',
       ModifyW: ''
@@ -363,12 +401,24 @@ export default {
         this.getInfo(val.member_id)
         this.getcicardInfo()
         this.getmembercount()
+        if (val.sex == 1) {
+          this.male = 'male'
+        } else {
+          this.male = 'female'
+        }
       } else {
         this.yyitem = ''
+        this.male = ''
         // this.chooslist.forEach(item => item.discount = 1)
         this.chooslist = []
       }
     },
+    editdiscount (val) {
+      this.editdisprice = this.editprice * val
+    },
+    // editdisprice (val) {
+    //   this.editdiscount = this.editprice / val
+    // },
     yyitem (val) {
       this.chooslist = this.chooslist.filter(item => item.typeid != 3)
       if (val != '') {
@@ -418,8 +468,31 @@ export default {
           : this.$message('留在当前页面')
       })
     },
+    toEditPrice (v, k) {
+      this.editDialog = true
+      this.editIndex = k
+      this.editprice = v.price
+      this.editdiscount = v.discount
+      // this.editdisprice = v.price * v.discount
+    },
+    changeDisprice () {
+      this.editdiscount = this.editdisprice / this.editprice
+    },
+    modifyPrice () {
+      this.chooslist.forEach((item, idx) => {
+        if (idx == this.editIndex) {
+          // item.price = this.editdisprice
+          item.discount = Number(this.editdiscount)
+          item.subtotal = Number(this.editdisprice) * Number(item.num)
+        }
+      })
+      this.editDialog = false
+    },
     async submit (status) {
-      sessionStorage.removeItem('carlist')
+      if (!this.chooslist.length) return this.$message.error('请至少选择一个项目或产品')
+      if (this.from == 'car') {
+        sessionStorage.removeItem('carlist')
+      }
       let type = 1
       let id = 0
       if (this.info || this.bookinfo) {
@@ -485,10 +558,12 @@ export default {
         }
         if (this.chooslist.length) {
           this.chooslist.forEach(item => {
-            if (item.typeid == 2) {
-              item.discount = Number(this.member.goods_discount) / 10
-            } else {
-              item.discount = Number(this.member.item_discount) / 10
+            if (item.discount == 1) {
+              if (item.typeid == 2) {
+                item.discount = Number(this.member.goods_discount) / 10
+              } else {
+                item.discount = Number(this.member.item_discount) / 10
+              }
             }
           })
         }
@@ -595,14 +670,14 @@ export default {
         this.$message('更换关联预约，将移除已选预约项目')
       }
       if (v.member_id != 0) {
-        if (!this.member || this.member.member_id != v.member_id) {
-          this.member = this.tableData.find(item => item.member_id == v.member_id)
-          this.$set(v, 'discount', 1)
-          let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
-          let worker = workerlist.find(j => j.id == v.staffid)
-          this.yyitem = JSON.parse(JSON.stringify(v))
-          this.$set(this.yyitem, 'worker', worker)
-        }
+        // if (!this.member || this.member.member_id != v.member_id) {
+        this.member = this.tableData.find(item => item.member_id == v.member_id)
+        this.$set(v, 'discount', 1)
+        let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
+        let worker = workerlist.find(j => j.id == v.staffid)
+        this.yyitem = JSON.parse(JSON.stringify(v))
+        this.$set(this.yyitem, 'worker', worker)
+        // }
       } else {
         if (this.member) {
           this.$confirm('确定将此预约关联到当前会员吗?', '提示', {
@@ -657,10 +732,12 @@ export default {
       console.log(v)
       if (sign == 2) {
         this.ModifyW = k
+        let worker = ''
         let option = {
           title: v.itemname,
           serverfor: this.member ? this.member.name : '客B',
           money: v.price,
+          worker: v,
           num: v.num,
           maxNum: v.maxNum ? v.maxNum : ''
         }
@@ -896,6 +973,8 @@ export default {
           if (this.info.member_id != 0) {
             this.member = this.tableData.find(item => item.member_id == this.info.member_id)
           }
+          this.newprice = this.info.dis_total
+          this.memo = this.info.remark
           let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
           if (this.info.orderinfo != 'null') {
             this.info.orderinfo.forEach(v => {
@@ -905,21 +984,21 @@ export default {
                 v['worker'] = ''
               }
             })
-          }
-          this.newprice = this.info.dis_total
-          this.memo = this.info.remark
-          this.chooslist = this.info.orderinfo
-          this.chooslist.forEach(item => {
-            if (this.member) {
-              if (item.typeid == 2) {
-                this.$set(item, 'discount', Number(this.member.goods_discount) / 10)
-              } else {
-                this.$set(item, 'discount', Number(this.member.item_discount) / 10)
+            this.chooslist = this.info.orderinfo
+            this.chooslist.forEach(item => {
+              if (!item.discount) {
+                if (this.member) {
+                  if (item.typeid == 2) {
+                    this.$set(item, 'discount', Number(this.member.goods_discount) / 10)
+                  } else {
+                    this.$set(item, 'discount', Number(this.member.item_discount) / 10)
+                  }
+                } else {
+                  this.$set(item, 'discount', 1)
+                }
               }
-            } else {
-              this.$set(item, 'discount', 1)
-            }
-          })
+            })
+          }
         }
       }
     }
@@ -943,9 +1022,9 @@ export default {
       let arr = JSON.parse(sessionStorage.getItem('carlist'))
       this.chooslist = arr
     }
+    console.log(this.info)
     this.getXMcate()
     this.getList(1)
-
   },
   mounted () { }
 }
@@ -956,14 +1035,14 @@ export default {
   display: flex;
   height: 100%;
 
-  button {
-    background: transparent;
-    border: none;
-    outline: none;
-    box-sizing: border-box;
-    cursor: pointer;
-    padding: 0;
-  }
+  // button {
+  //   background: transparent;
+  //   border: none;
+  //   outline: none;
+  //   box-sizing: border-box;
+  //   cursor: pointer;
+  //   padding: 0;
+  // }
   .btn-back {
     width: 40px;
     height: 40px;
@@ -984,17 +1063,6 @@ export default {
       background: #fff;
       padding: 25px 0 15px 78px;
 
-      .btnView {
-        position: absolute;
-        top: 25px;
-        right: 15px;
-        height: 40px;
-        i {
-          font-size: 28px;
-          padding: 10px;
-          vertical-align: top;
-        }
-      }
       .switchView {
         display: inline-flex;
         height: 40px;
@@ -1024,6 +1092,7 @@ export default {
         left: 15px;
       }
     }
+
     .orderAddBoxView {
       position: relative;
       // background: #f4f4f4;
@@ -1073,79 +1142,48 @@ export default {
             }
           }
         }
-        .keywordView {
-          height: 44px;
-          .inputView {
-            position: relative;
-            background: #f4f4f4
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Search.png)
-              8px center / 24px no-repeat;
-            line-height: 44px;
-            border-radius: 6px;
-            padding: 0 60px 0 38px;
-            overflow: hidden;
-            button {
-              position: absolute;
-              top: 0;
-              right: 0;
-              background: #28282d;
-              font-size: 14px;
-              color: #fff;
-              text-align: center;
-              width: 60px;
-              line-height: 44px;
-              height: 44px;
-              padding: 0;
-            }
-            input {
-              border: none;
-              display: block;
-              width: 100%;
-              height: 44px;
-              line-height: 30px;
-              padding: 12px 0;
-              font-size: 14px;
-              color: #28282d;
-              background: transparent;
-            }
-          }
-        }
       }
-      .boxView {
-        position: relative;
-        background: #fff;
-        overflow-x: hidden;
-        overflow-y: auto;
-        padding: 5px 18px 25px 18px;
-        .boxItem {
+      .bview {
+        height: calc(100% - 109px);
+        display: flex;
+        flex-direction: column;
+        .boxView {
+          flex: 1;
           position: relative;
-          float: left;
-          width: 136px;
-          height: 105px;
-          background: #f8f8f8;
-          border-radius: 6px;
-          text-align: center;
-          margin: 0 15px 15px 0;
-          box-shadow: 0 2px 2px 1px #ddd;
-          .nameView {
-            height: 71px;
-            font-size: 15px;
-            color: #28282d;
-            line-height: 20px;
-            padding: 23px 5px 0 5px;
-            overflow: hidden;
-            border-top-left-radius: 6px;
-            border-top-right-radius: 6px;
-          }
-          .priceView {
-            height: 34px;
-            line-height: 34px;
-            background: #f4f4f4;
-            color: #28282d;
-            font-size: 16px;
-            font-family: DINAlternate-Bold;
-            border-bottom-left-radius: 6px;
-            border-bottom-right-radius: 6px;
+          background: #fff;
+          overflow-x: hidden;
+          overflow-y: auto;
+          padding: 5px 18px 25px 18px;
+          .boxItem {
+            position: relative;
+            float: left;
+            width: 136px;
+            height: 128px;
+            background: #f8f8f8;
+            border-radius: 6px;
+            text-align: center;
+            margin: 0 15px 15px 0;
+            box-shadow: 0 2px 2px 1px #ddd;
+            .nameView {
+              height: 71px;
+              font-size: 15px;
+              color: #28282d;
+              line-height: 20px;
+              padding: 23px 5px 0 5px;
+              overflow: hidden;
+              border-top-left-radius: 6px;
+              border-top-right-radius: 6px;
+            }
+            .priceView {
+              height: 28px;
+              overflow: hidden;
+              line-height: 28px;
+              background: #f4f4f4;
+              color: #28282d;
+              font-size: 16px;
+              border-bottom-left-radius: 6px;
+              border-bottom-right-radius: 6px;
+            }
           }
         }
       }
@@ -1228,6 +1266,55 @@ export default {
         opacity: 0;
       }
     }
+  }
+
+  .btnView {
+    top: 25px;
+    right: 15px;
+    height: 50px;
+    width: 100%;
+    .keywordView {
+      height: 44px;
+      .inputView {
+        position: relative;
+        background: #f4f4f4
+          url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Search.png)
+          8px center / 24px no-repeat;
+        line-height: 44px;
+        border-radius: 6px;
+        padding: 0 60px 0 38px;
+        overflow: hidden;
+        button {
+          position: absolute;
+          top: 0;
+          right: 0;
+          background: #28282d;
+          font-size: 14px;
+          color: #fff;
+          text-align: center;
+          width: 60px;
+          line-height: 44px;
+          height: 44px;
+          padding: 0;
+        }
+        input {
+          border: none;
+          display: block;
+          width: 100%;
+          height: 44px;
+          line-height: 30px;
+          padding: 12px 0;
+          font-size: 14px;
+          color: #28282d;
+          background: transparent;
+        }
+      }
+    }
+    // i {
+    //   font-size: 28px;
+    //   padding: 10px;
+    //   vertical-align: top;
+    // }
   }
   #orderInfoView {
     position: absolute;

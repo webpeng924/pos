@@ -39,12 +39,12 @@
         <span>日结</span>
       </div>
     </router-link>
-    <router-link :to="{name:'brand'}">
+    <!-- <router-link :to="{name:'brand'}">
       <div class="nav_item">
         <i class="iconfont icon-biaoqian"></i>
         <span>流水牌</span>
       </div>
-    </router-link>
+    </router-link>-->
     <router-link :to="{name:'store'}">
       <div class="nav_item">
         <i class="iconfont icon-stock"></i>

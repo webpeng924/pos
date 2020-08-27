@@ -216,7 +216,7 @@
           <el-table-column prop="mobile" label="手机号"></el-table-column>
           <el-table-column prop="cardtype" label="卡类型"></el-table-column>
           <el-table-column prop="balance" label="储值余额"></el-table-column>
-          <el-table-column prop="expiry_date" label="有效期"></el-table-column>
+          <!-- <el-table-column prop="expiry_date" label="有效期"></el-table-column> -->
         </el-table>
       </div>
     </el-dialog>
@@ -326,7 +326,7 @@ export default {
       workerlist: [],
       workercate: [],
       workerid: '',
-      timelist: [],
+      timelist: [{ shi: '08', fen: '00', isyy: false }, { shi: '08', fen: '30', isyy: false }, { shi: '09', fen: '00', isyy: false }, { shi: '09', fen: '30', isyy: false }],
       hours: '',
       remark: '',
       cikalist: []
@@ -511,39 +511,32 @@ export default {
     },
     chosdate () {
       let now = new Date
-      this.timelist = []
+      this.timelist = [{ shi: '08', fen: '00', isyy: false }, { shi: '08', fen: '30', isyy: false }, { shi: '09', fen: '00', isyy: false }, { shi: '09', fen: '30', isyy: false }]
       let flag = this.formatDate(this.yudate) == this.formatDate(now)
       if (moment(this.yudate) > moment(this.formatDate(now))) {
-        let nowshi = moment(now).format('HH')
-        let nowfen = moment(now).format('m')
-        console.log(nowshi, nowfen)
-        if (flag) {
-          for (let i = 10; i < 22; i++) {
-            if (i >= nowshi) {
-              for (let j = 0; j < 2; j++) {
-                if (j == 0 && i != nowshi) {
-                  const a = { shi: i, fen: '00', isyy: false }
-                  this.timelist.push(a)
-                } else if (j == 1 && nowfen < 30) {
-                  const a = { shi: i, fen: '30', isyy: false }
-                  this.timelist.push(a)
-                }
-              }
-            }
-          }
-        } else {
-          for (let i = 10; i < 22; i++) {
-            for (let j = 0; j < 2; j++) {
-              if (j == 0) {
-                const a = { shi: i, fen: '00', isyy: false }
-                this.timelist.push(a)
-              } else {
-                const a = { shi: i, fen: '30', isyy: false }
+        for (let i = 10; i < 22; i++) {
+          for (let j = 0; j < 2; j++) {
+            if (j == 0) {
+              if (i != 10) {
+                const a = { shi: i - 1, fen: '30', isyy: false }
                 this.timelist.push(a)
               }
+            } else {
+              const a = { shi: i, fen: '00', isyy: false }
+              this.timelist.push(a)
             }
           }
         }
+        if (flag) {//当天的
+          let nowshi = moment(now).format('HH')
+          let nowfen = moment(now).format('m')
+          this.timelist = this.timelist.filter(item => {
+            console.log(nowshi, item.shi, item.fen, nowfen)
+            return item.shi > nowshi || item.shi == nowshi && nowfen < 30
+          })
+        }
+      } else {
+        this.timelist = []
       }
       console.log(this.timelist)
       this.checkyy()
@@ -586,10 +579,10 @@ export default {
       this.staTime = date + ' ' + this.hours
     },
     async submit () {
-      if (!this.workerid) return this.$message.error('请选择预约员工')
       if (!this.cusMobile) return this.$message.error('请输入顾客电话')
       if (!(/^1[3456789]\d{9}$/.test(this.cusMobile))) return this.$message.error('请输入正确手机号')
       if (!this.cusName) return this.$message.error('请输入顾客姓名')
+      if (!this.workerid) return this.$message.error('请选择预约员工')
       if (!this.staTime) return this.$message.error('请选择预约时间')
       if (!this.chosItem) return this.$message.error('请选择预约项目')
       // let date = moment(this.yudate).format('YYYY-MM-DD')

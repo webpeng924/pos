@@ -327,7 +327,6 @@ export default {
       serviceJobDialog: false,
       jobDialog: false,
       nowStatusDialog: false,
-      tcProDialog: false,
       storeid: sessionStorage.getItem('storeid'),
     }
   },

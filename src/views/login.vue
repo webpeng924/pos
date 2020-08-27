@@ -49,17 +49,28 @@ export default {
         const res = await this.$axios.post('/api?datatype=login', data)
         console.log(res)
         if (res.data.code == 1) {
+          this.getInfo(res.data.data.storeid)
           this.$message.success(res.data.msg)
           sessionStorage.setItem('storeid', res.data.data.storeid)
           this.$store.commit('setJson', res.data.data);
+          localStorage.setItem('userId', res.data.data.id)
           sessionStorage.setItem('userInfo', JSON.stringify(res.data.data));
-          this.$router.push({ name: 'Home' })
         } else {
           this.$message.error(res.data.msg)
         }
       }
       catch (err) {
         alert('登录出错')
+      }
+    },
+    async getInfo (id) {
+      const res = await this.$axios.get('/api?datatype=more&storeid=' + id)
+      console.log(res)
+      if (res.data.code == 1) {
+        let data = res.data.data
+        sessionStorage.setItem('shopInfo', JSON.stringify(data))
+        sessionStorage.setItem('shoptype', data.type_id)
+        this.$router.push({ name: 'Home' })
       }
     }
   },

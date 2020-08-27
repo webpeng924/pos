@@ -3,20 +3,26 @@
     <div class="topView">
       <button class="btn-close btn-audio" @click="back"></button>
       <div class="tView">活动套餐</div>
-      <div class="checkbox">
-        <el-checkbox v-model="checked" @change="getList">隐藏已停用</el-checkbox>
-      </div>
       <el-input
         v-model="searchtxt"
         placeholder="输入套餐编号/名称"
-        style="width:200px;position: absolute;right: 80px;"
+        style="width:200px;position: absolute;right: 200px;"
       >
         <i slot="prefix" class="el-input__icon el-icon-search" @click="getList"></i>
       </el-input>
+      <div class="checkbox">
+        <el-checkbox v-model="checked" @change="getList();updateStatus()">隐藏已停用</el-checkbox>
+      </div>
       <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="addNew">新增</button>
     </div>
     <div class="bView">
-      <el-table :data="tableData" style="width: 100%" height="100%">
+      <el-table
+        :data="tableData"
+        style="width: 100%"
+        height="100%"
+        @row-click="rowClick"
+        ref="refTable"
+      >
         <el-table-column type="expand">
           <template slot-scope="props">
             <div class="props_item" v-for="(v,k) in props.row.goodsinfo" :key="k">
@@ -34,7 +40,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="id" label="套餐编号"></el-table-column>
-        <el-table-column prop="name" label="套餐名称"></el-table-column>
+        <el-table-column prop="name" label="套餐名称" min-width="150"></el-table-column>
         <el-table-column prop="pay_money" label="销售价"></el-table-column>
         <el-table-column prop="fact_money" label="会员到账"></el-table-column>
         <el-table-column label="套餐可售时间" width="220">
@@ -50,10 +56,22 @@
             >{{scope.row.is_stop==1?'停用':'正常'}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150">
+        <el-table-column label="操作" min-width="150">
           <template slot-scope="scope">
-            <el-button type="primary" icon="el-icon-edit" circle @click="toEdit(scope.row)"></el-button>
-            <el-button type="danger" icon="el-icon-delete" circle @click="del(scope.row.id)"></el-button>
+            <el-button
+              type="primary"
+              plain
+              icon="el-icon-edit"
+              circle
+              @click.stop="toEdit(scope.row)"
+            ></el-button>
+            <el-button
+              type="danger"
+              plain
+              icon="el-icon-delete"
+              circle
+              @click.stop="del(scope.row.id)"
+            ></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -338,6 +356,51 @@ export default {
         }
       }
     },
+    updateStatus (type) {
+      let parameter = null
+      if (type == 1) {
+        parameter = ' true=>隐藏停用，false=>全部显示'
+      }
+      this.$axios.get('/api?datatype=edit_store_config', {
+        params: {
+          storeid: sessionStorage.getItem('storeid'),
+          menu_name: 'tc_state',
+          info: '套餐列表筛选',
+          value: this.checked,
+          parameter: parameter
+        }
+      }).then(res => {
+        if (type == 1) {
+          this.getList()
+        }
+        console.log(res)
+      })
+    },
+    rowClick (row, index, e) {
+      this.$refs.refTable.toggleRowExpansion(row)
+    },
+    async getState () {
+      const res = await this.$axios.get('/api?datatype=get_store_config', {
+        params: {
+          storeid: sessionStorage.getItem('storeid'),
+          menu_name: 'tc_state'
+        }
+      })
+      console.log(res)
+      if (res.data.code == 1) {
+        if (res.data.data != null) {
+          if (res.data.data.value == 'true') {
+            this.checked = true
+          } else {
+            this.checked = false
+          }
+          this.getList()
+        }
+      }
+      if (res.data.code == 3) {
+        this.updateStatus(1)
+      }
+    },
     async getList () {
       const res = await this.$axios.get('/api?datatype=get_package_list', {
         params: {
@@ -362,6 +425,7 @@ export default {
       }
       this.$message.success('加载完成')
     },
+
     removeitem (k) {
       this.itemsInfo.splice(k, 1)
     },
@@ -396,7 +460,7 @@ export default {
     }
   },
   created () {
-    this.getList()
+    this.getState()
   },
   mounted () { }
 }
@@ -507,7 +571,7 @@ export default {
     }
     .checkbox {
       position: absolute;
-      right: 300px;
+      right: 80px;
     }
   }
 
