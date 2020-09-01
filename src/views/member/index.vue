@@ -6,18 +6,25 @@
     </div>
     <div class="member-content">
       <el-table :data="tableData" stripe header-row-class-name="table-header" height="90%">
-        <el-table-column prop="account" label="会员编号" width="180"></el-table-column>
-        <el-table-column prop="name" label="会员名称"></el-table-column>
-        <el-table-column prop="account" label="会员卡号"></el-table-column>
-        <el-table-column prop="mobile" label="手机号码"></el-table-column>
-        <el-table-column prop="cardtype" label="会员类型"></el-table-column>
-        <el-table-column prop="balance" label="余额"></el-table-column>
-        <el-table-column label="性别">
+        <el-table-column prop="account" label="会员编号" min-width="180"></el-table-column>
+        <el-table-column prop="name" label="会员姓名" min-width="150"></el-table-column>
+        <el-table-column prop="cardtype" label="会员类型" min-width="120"></el-table-column>
+        <el-table-column label="性别" min-width="100">
           <template #default="{row}">{{ row.sex == 1 ? "男" : "女" }}</template>
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column prop="account" label="会员卡号" min-width="180"></el-table-column>
+        <el-table-column label="归属门店" min-width="120">{{shopName}}</el-table-column>
+        <el-table-column prop="mobile" label="手机号码" min-width="150"></el-table-column>
+        <el-table-column label="累计卡销售" min-width="100">0</el-table-column>
+        <el-table-column prop="balance" label="账户余额" min-width="150"></el-table-column>
+        <el-table-column prop="instore_count" label="消费次数" min-width="100"></el-table-column>
+        <el-table-column label="最后消费日期" min-width="150">
+          <template #default="{row}">{{ row.last_time |time }}</template>
+        </el-table-column>
+        <el-table-column prop="card_addtime" label="开卡日期" min-width="150"></el-table-column>
+        <el-table-column label="操作" min-width="120">
           <template #default="{row}">
-            <span class="icon" @click="detail(row)">查看详情</span>
+            <span class="icon" @click="detail(row)">查看更多</span>
           </template>
         </el-table-column>
       </el-table>
@@ -32,44 +39,6 @@
         class="page"
       ></el-pagination>
     </div>
-    <!-- <el-dialog
-      title="会员信息"
-      width="30%"
-      :visible.sync="dialogVisible"
-      :modal-append-to-body="false"
-      center
-    >
-      <div class="info">
-        <div class="info-item">
-          <span>会员编号：</span>
-          <span>{{ onceList.account }}</span>
-        </div>
-        <div class="info-item">
-          <span>会员姓名：</span>
-          <span>{{ onceList.name }}</span>
-        </div>
-        <div class="info-item">
-          <span>会员卡号：</span>
-          <span>{{ onceList.account }}</span>
-        </div>
-        <div class="info-item">
-          <span>手机号码：</span>
-          <span>{{ onceList.mobile }}</span>
-        </div>
-        <div class="info-item">
-          <span>会员类型：</span>
-          <span>{{ onceList.cardtype }}</span>
-        </div>
-        <div class="info-item">
-          <span>余 额：</span>
-          <span>{{ onceList.balance }}</span>
-        </div>
-        <div class="info-item">
-          <span>性 别：</span>
-          <span>{{ onceList.sex == 1 ? "男" : "女" }}</span>
-        </div>
-      </div>
-    </el-dialog>-->
     <div class="set_page" :class="{activePage:dialogVisible}">
       <detail @close="dialogVisible=false" v-if="dialogVisible" :info="onceList"></detail>
     </div>
@@ -78,6 +47,7 @@
 
 <script>
 import detail from './detail'
+import moment from 'moment'
 export default {
   components: { detail },
   data () {
@@ -87,12 +57,22 @@ export default {
       page_size: 5,
       page_num: 1,
       total: 0,
+      shopName: JSON.parse(sessionStorage.getItem('shopInfo')).shop_name,
       storeid: sessionStorage.getItem('storeid'),
       onceList: []
     };
   },
   created () {
     this.getList();
+  },
+  filters: {
+    time (val) {
+      if (val != 0) {
+        return moment.unix(val).format('YYYY-MM-DD')
+      } else {
+        return ''
+      }
+    }
   },
   methods: {
     async getList () {
@@ -110,8 +90,8 @@ export default {
         }
       }
     },
-    detail (row) {
-      this.onceList = row;
+    async detail (row) {
+      this.onceList = row
       this.dialogVisible = true;
     },
     handleSizeChange (val) {

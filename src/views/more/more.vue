@@ -11,10 +11,10 @@
           @click="selectOption('登陆信息')"
         >
           <div class="imgView">
-            <img :src="shopInfo.avatar?shopInfo.avatar:'/upload/shop/moren.jpg'|imgUrl" />
+            <img :src="userInfo.avatar?userInfo.avatar:'/upload/shop/moren.jpg'|imgUrl" />
           </div>
           <div class="textView">
-            <div class="userNameView overflowText">{{shopInfo.username}}</div>
+            <div class="userNameView overflowText">{{userInfo.username}}</div>
             <div class="shopNameView overflowText">{{shopInfo.shop_name}}</div>
           </div>
         </div>
@@ -49,7 +49,7 @@
           <div class="avatarView">
             <img :src="shopInfo.avatar?shopInfo.avatar:'/upload/shop/moren.jpg'|imgUrl" />
           </div>
-          <div class="nameView">admin</div>
+          <div class="nameView">{{userInfo.username}}</div>
         </div>
         <div class="shopView">
           <div>
@@ -66,7 +66,7 @@
           </div>
           <div>
             <span>门店电话：</span>
-            {{shopInfo.tel}}
+            {{shopInfo.mobile}}
           </div>
           <div>
             <span>门店地址：</span>
@@ -297,6 +297,7 @@ export default {
       panku: false,
       cikalist: false,
       quanlist: false,
+      userInfo: JSON.parse(sessionStorage.getItem('userInfo')),
       role: JSON.parse(sessionStorage.getItem('userInfo')).role,
       shopInfo: {
         avatar: '',

@@ -174,6 +174,14 @@
       ></opennew>
     </div>
 
+    <div class="set_page" :class="{activePage:printpage}">
+      <printpage
+        @close="printpage=false;getorderlist(3);server='已结账';info=''"
+        :info="info"
+        v-if="printpage"
+      ></printpage>
+    </div>
+
     <div class="statusView">
       <div class="flagView">
         <div class="flagItem" v-for="(v,k) in statuslist" :key="k">
@@ -206,6 +214,9 @@
           @focus="chosIput(1)"
         ></el-input>
         <i>￥</i>
+        <div style="text-align: center">
+          <el-button @click="toSubmit" style="background-color:#dc670b;color:#fff">选择支付方式</el-button>
+        </div>
         <!-- <el-input
           class="keyboardInputView"
           :class="{select:chosIpu==2}"
@@ -269,11 +280,12 @@
 
 <script>
 import opennew from '@/components/addnew.vue'
+import printpage from '@/components/printpage.vue'
 import chooseworker from '@/components/choosmember.vue'
 import qs from 'qs'
 import moment from 'moment'
 export default {
-  components: { chooseworker, opennew },
+  components: { chooseworker, opennew, printpage },
   props: {},
   data () {
     return {
@@ -292,6 +304,7 @@ export default {
       gongzhong: 1,
       storeid: sessionStorage.getItem('storeid'),
       page: false,
+      printpage: false,
       Quickprice: '0',
       quickmoney: false,
       chosIpu: 0,
@@ -317,7 +330,18 @@ export default {
   },
   watch: {
     value (val) {
-      this.getorderlist(1)
+      switch (this.server) {
+        case '全部':
+          return this.getorderlist(0);
+        case '服务中':
+          return this.getorderlist(1);
+        case '待结账':
+          return this.getorderlist(2);
+        case '已结账':
+          return this.getorderlist(3);
+        case '已作废':
+          return this.getorderlist(4);
+      }
     },
     server (val) {
       switch (val) {
@@ -402,7 +426,7 @@ export default {
     cancelorder (id) {
       let role = JSON.parse(sessionStorage.getItem('userInfo')).role
       if (role != 1) return this.$message.error('没有权限')
-      this.$confirm('确定取消改消费单吗?', '提示', {
+      this.$confirm('确定取消该消费单吗?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
@@ -458,6 +482,9 @@ export default {
       if (v.status < 3) {
         this.info = v
         this.page = true
+      } else if (v.status == 3) {
+        this.info = v
+        this.printpage = true
       }
     },
     choosetype (v) {
@@ -680,6 +707,7 @@ export default {
 .cash {
   background: #f4f4f4;
   position: relative;
+
   .top_select {
     position: relative;
     z-index: 10;

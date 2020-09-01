@@ -20,7 +20,12 @@ export default {
   computed: {},
   methods: {},
   created () { },
-  mounted () { }
+  mounted () {
+    console.log('创建')
+    var a = 'FLAG_2'
+    javascript: jsSzb.smClientScreen(a)
+    return false;
+  }
 }
 </script>
 

@@ -15,26 +15,46 @@ export default {
   },
   data () {
     return {
+      id: localStorage.getItem('userId'),
+      beforeUnloadTime: '',
+      gapTime: ''
     }
+  },
+  destroyed () {
+    window.addEventListener('beforeunload', e => this.beforeunloadHandler(e))
+    window.addEventListener('unload', e => this.unloadHandler(e))
   },
   methods: {
     browerStatus (e) {
       console.log(e)
       var that = this;
-      let id = localStorage.getItem('userId')
       var n = window.event.screenX - window.screenLeft;
       var b = n > document.documentElement.scrollWidth - 20;
       if (b && window.event.clientY < 0 || window.event.altKey) {
-        that.$axios.get('/api?datatype=logout&id=' + id)
+        that.$axios.get('/api?datatype=logout&id=' + that.id)
+        return false
       } else {
-        // that.$axios.get('/api?datatype=logout&id=7')
+        console.log('刷新')
+      }
+    },
+    beforeunloadHandler () {
+      this.beforeUnloadTime = new Date().getTime();
+    },
+    unloadHandler (e) {
+      this.gapTime = new Date().getTime() - this.beforeUnloadTime;
+      //判断是窗口关闭还是刷新
+      if (this.gapTime <= 5) {
+        var img = document.createElement("img");
+        //src是自己的后端地址以及参数(参数看自己需求)
+        img.src = this.$axios.get('/api?datatype=logout&id=' + this.id);
+        //将img加到body中时就会立刻发送请求
+        document.body.appendChild(img);
       }
     }
   },
   mounted () {
-    var that = this;
-    // 监听浏览器是否关闭
-    window.addEventListener("beforeunload", e => that.browerStatus())
+    window.addEventListener('beforeunload', e => this.beforeunloadHandler(e))
+    window.addEventListener('unload', e => this.unloadHandler(e))
   }
 }
 </script>

@@ -42,7 +42,7 @@
       </div>
     </el-drawer>
     <div class="bomView">
-      <el-table :data="tableData" stripe style="width: 100%" @row-click="toEdit">
+      <el-table :data="tableData" stripe style="width: 100%" @row-click="toEdit" height="100%">
         <el-table-column prop="id" label="编号"></el-table-column>
         <el-table-column prop="itemname" label="项目名称"></el-table-column>
         <el-table-column label="次卡类型">
@@ -277,6 +277,7 @@ export default {
   }
   .bomView {
     padding: 0 20px;
+    height: calc(100% - 90px);
   }
 }
 </style>

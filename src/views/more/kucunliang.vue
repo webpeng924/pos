@@ -15,7 +15,7 @@
       </el-dialog>-->
     </div>
     <div class="bomView">
-      <el-table :data="tableData" stripe style="width: 100%">
+      <el-table :data="tableData" stripe style="width: 100%" height="100%">
         <el-table-column prop="goods_no" label="产品编号"></el-table-column>
         <el-table-column prop="goods_name" label="产品名称"></el-table-column>
         <el-table-column prop="title" label="统计类别"></el-table-column>
@@ -131,6 +131,7 @@ export default {
   }
   .bomView {
     padding: 0 20px;
+    height: calc(100% - 85px);
   }
 }
 </style>

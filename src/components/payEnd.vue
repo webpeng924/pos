@@ -23,6 +23,9 @@ export default {
   methods: {
     back () {
       window.history.go(0)
+      var a = 'FLAG_1'
+      javascript: jsSzb.smClientScreen(a)
+      return false;
     },
   },
 }

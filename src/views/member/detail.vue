@@ -2,11 +2,11 @@
   <div class="member-detail">
     <div class="topView">
       <button class="btn-back" @click="$emit('close')"></button>
-      <div class="tView">会员详情</div>
+      <div class="tView">会员案例图</div>
     </div>
     <div class="contentView">
       <div class="listView">
-        <div class="item">
+        <!-- <div class="item">
           <div class="left">会员编号：</div>
           <div class="right">{{info.account}}</div>
         </div>
@@ -33,7 +33,7 @@
         <div class="item">
           <div class="left">余 额：</div>
           <div class="right">{{info.balance}}</div>
-        </div>
+        </div>-->
         <div class="item">
           <div class="left">案例图片：</div>
           <div class="right">

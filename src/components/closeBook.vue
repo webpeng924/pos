@@ -195,9 +195,12 @@
     >
       <div class="contentView" style="max-height: 620px;">
         <div class="quanItem" @click="chooseQuan(v)" v-for="(v,k) in quanlist" :key="k">
-          <div class="left">{{v.v_type}}</div>
-          <div class="right">
+          <div class="left">
             <p>{{v.v_amount}}元</p>
+            <div>{{v.type}}</div>
+          </div>
+          <div class="right">
+            <p class="p1">内容：{{v.content}}</p>
             <p class="p1">使用时间：{{v.v_starttime|time}} 至 {{v.v_endtime|time}}</p>
             <span class="el-icon-circle-check" :class="{select:choosquan.id==v.id}"></span>
           </div>
@@ -389,7 +392,12 @@ export default {
       this.getererima()
     }
   },
-  mounted () { },
+  mounted () {
+    console.log('创建')
+    var a = 'FLAG_0'
+    javascript: jsSzb.smClientScreen(a)
+    return false;
+  },
   watch: {},
   computed: {
     fullPrice () {
@@ -656,16 +664,16 @@ export default {
           width: 30%;
           height: 100%;
           border-right: 1px dashed #fff;
-          line-height: 80px;
           font-size: 20px;
           text-align: center;
+          padding: 10px 0;
         }
         .right {
           flex: 1;
           flex-direction: column;
           display: flex;
-          padding: 10px;
-          font-size: 30px;
+          padding: 10px 20px 10px 10px;
+          font-size: 22px;
           position: relative;
           p {
             flex: 1;
@@ -673,18 +681,19 @@ export default {
           }
           .p1 {
             font-size: 12px;
+            text-align: left;
           }
           span {
             position: absolute;
             top: 10px;
-            right: 10px;
+            right: 5px;
             background-color: #fff;
-            width: 26px;
-            height: 26px;
+            width: 20px;
+            height: 20px;
             // margin-top: 17px;
             border-radius: 100%;
             color: #fff;
-            font-size: 26px;
+            font-size: 20px;
             &.select {
               color: rgb(119, 224, 58);
             }

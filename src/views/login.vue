@@ -45,6 +45,7 @@ export default {
         username: this.name,
         password: this.password
       })
+      console.log('成功')
       try {
         const res = await this.$axios.post('/api?datatype=login', data)
         console.log(res)
@@ -75,7 +76,18 @@ export default {
     }
   },
   created () { },
-  mounted () { }
+  mounted () {
+    if ((/Android/gi).test(navigator.userAgent)) {
+      window.addEventListener('resize', function () {
+        if (document.activeElement.tagName == 'INPUT' ||
+          document.activeElement.tagName == 'TEXTAREA') {
+          window.setTimeout(function () {
+            document.activeElement.scrollIntoViewIfNeeded();
+          }, 0);
+        }
+      });
+    }
+  }
 }
 </script>
 

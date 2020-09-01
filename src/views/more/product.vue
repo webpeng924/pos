@@ -254,7 +254,7 @@ export default {
     }
   }
   .bomView {
-    height: calc(100% - 85px);
+    height: calc(100% - 90px);
     padding: 0 20px;
   }
 }

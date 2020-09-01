@@ -322,7 +322,47 @@ export default {
     //   window.location.reload()
     // },
     print () {
-      var a = "wellcome to sunmi"; javascript: lee.funAndroid(a);
+      let arr = [{ "name": JSON.parse(sessionStorage.getItem('shopInfo')).shop_name, "style": "1" }, { "name": "营收汇总", "style": "1" }]
+      let time = ''
+      if (this.date[0] == this.date[1]) {
+        time = '记账日期：' + this.date[0]
+      } else {
+        time = '记账日期：' + this.date[0] + '至' + this.date[1]
+      }
+      arr.push({ "name": time, "style": "1" }, { "name": "---" })
+      if (this.list1.length != 0) {
+        arr.push({ "name": "现金类:", "value": "" })
+        this.list1.forEach(item => {
+          let bb = {
+            "name": this.$options.filters['paytype'](item.pay_type), "value": item.stotal
+          }
+          arr.push(bb)
+        })
+      }
+      if (this.list2.length != 0) {
+        arr.push({ "name": "卡付类:", "value": "" })
+        this.list2.forEach(item => {
+          let bb = {
+            "name": this.$options.filters['paytype'](item.pay_type), "value": item.stotal
+          }
+          arr.push(bb)
+        })
+      }
+      if (this.list3.length != 0) {
+        arr.push({ "name": "欠款类:", "value": "" })
+        this.list2.forEach(item => {
+          let bb = {
+            "name": this.$options.filters['paytype'](item.pay_type), "value": item.stotal
+          }
+          arr.push(bb)
+        })
+      }
+      let printTime = '打印日期：' + this.formatDate(new Date)
+      let checkmen = '操作员：' + JSON.parse(sessionStorage.getItem('userInfo')).username
+      arr.push({ "name": "---" }, { "name": printTime }, { "name": checkmen }, { "name": "签名：" })
+      console.log(JSON.stringify(arr))
+      var a = JSON.stringify(arr);
+      javascript: jsSzb.smPrint(a);
       return false;
     },
     async getData () {
@@ -364,6 +404,7 @@ export default {
               this.list1.push(item)
             }
           })
+          this.total = this.total.toFixed(2)
         }
         if (res.data.data.customer1) {
           res.data.data.customer1.forEach(item => {
@@ -399,7 +440,9 @@ export default {
     const a = this.formatDate(new Date())
     this.date = [a, a]
   },
-  mounted () { }
+  mounted () {
+    window.callJsFunction = this.callJsFunction
+  }
 }
 </script>
 <style>

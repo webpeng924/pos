@@ -45,8 +45,8 @@
         </div>
         <div class="inputView">
           <label class="label-leftText">门店电话</label>
-          <label class="label-value" v-show="!isEdit">{{shopInfo.tel}}</label>
-          <el-input type="text" v-model="shopInfo.tel" v-show="isEdit" />
+          <label class="label-value" v-show="!isEdit">{{shopInfo.mobile}}</label>
+          <el-input type="text" v-model="shopInfo.mobile" v-show="isEdit" />
         </div>
         <div class="inputView addressView">
           <label class="label-leftText">详细地址</label>
@@ -169,7 +169,7 @@ export default {
           storeid: sessionStorage.getItem('storeid'),
           shop_name: this.shopInfo.shop_name,
           short_name: this.shopInfo.short_name,
-          tel: this.shopInfo.tel,
+          mobile: this.shopInfo.mobile,
           gzh: this.shopInfo.gzh,
           url: this.shopInfo.url,
           scope: this.shopInfo.scope,

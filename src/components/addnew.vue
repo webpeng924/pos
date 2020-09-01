@@ -228,7 +228,7 @@
             <input placeholder="请输入手机号或会员卡号" v-model="keyword" />
             <button class="btn-close btn-audio" @click="keyword=''"></button>
           </div>
-          <button class="btn-audio" :class="{search:keyword}">查询</button>
+          <button class="btn-audio" :class="{search:keyword}" @click="getList">查询</button>
         </div>
         <el-table :data="tableData" style="width: 100%" height="400px" @row-click="choosMember">
           <el-table-column prop="address">
@@ -414,7 +414,7 @@ export default {
       }
     },
     editdiscount (val) {
-      this.editdisprice = this.editprice * val
+      this.editdisprice = Number(this.editprice * val).toFixed(2)
     },
     // editdisprice (val) {
     //   this.editdiscount = this.editprice / val
@@ -500,8 +500,8 @@ export default {
         id = this.info ? this.info.id : this.bookinfo.id
       }
       this.chooslist.forEach(item => {
-        item['discount_price'] = Number(item.price) * item.discount * item.num
-        item['subtotal'] = Number(item.price) * item.discount * item.num
+        item['discount_price'] = (Number(item.price) * item.discount * item.num).toFixed(2)
+        item['subtotal'] = (Number(item.price) * item.discount * item.num).toFixed(2)
       })
       let obj = {
         storeid: this.storeid,
@@ -815,10 +815,14 @@ export default {
           search: this.keyword
         }
       })
-
       console.log(res)
       if (res.data.data) {
         this.XMlist = res.data.data
+        this.XMlist.forEach(item => {
+          if (item.img == 0) {
+            this.$set(item, 'img', item.pic)
+          }
+        })
       } else {
         if (this.showSearch) {
           this.$message.error('未搜索到该分类下项目或产品')
@@ -1017,6 +1021,12 @@ export default {
       }
     }
   },
+  beforeDestroy () {
+    console.log('消毁')
+    var a = 'FLAG_1'
+    javascript: jsSzb.smClientScreen(a)
+    return false;
+  },
   created () {
     if (this.from == 'car') {
       let arr = JSON.parse(sessionStorage.getItem('carlist'))
@@ -1026,7 +1036,12 @@ export default {
     this.getXMcate()
     this.getList(1)
   },
-  mounted () { }
+  mounted () {
+    console.log('创建')
+    var a = 'FLAG_0'
+    javascript: jsSzb.smClientScreen(a)
+    return false;
+  }
 }
 </script>
 

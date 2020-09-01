@@ -26,6 +26,7 @@
         <el-table-column prop="mobile" label="手机号"></el-table-column>
         <el-table-column prop="cardtype" label="卡类型"></el-table-column>
         <el-table-column prop="balance" label="储值余额"></el-table-column>
+        <el-table-column prop="card_addtime" label="开卡日期"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             <div>
@@ -36,7 +37,6 @@
             </div>
           </template>
         </el-table-column>
-        <!-- <el-table-column prop="expiry_date" label="有效期"></el-table-column> -->
       </el-table>
     </div>
     <div class="set_page" :class="{activePage:info}">

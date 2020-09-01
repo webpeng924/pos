@@ -338,7 +338,6 @@
     <div class="contentView" v-show="show == 4">
       <div class="subTView">{{ name }}</div>
       <p style="padding:10px 30px 0;color:red;display:flex">
-        <span style="flex:1">点击“+”添加图片, 点击相应图片可删除</span>
         <el-dropdown @command="handleCommand">
           <span class="el-dropdown-link">
             {{nowcate.title}}
@@ -348,21 +347,27 @@
             <el-dropdown-item v-for="(v,k) in catelist" :key="k" :command="v">{{v.title}}</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
+        <span style="flex:1;text-align:right">点击“+”添加图片, 点击相应图片可删除</span>
       </p>
       <div class="imageRoom">
-        <el-image
-          v-for="(v,k) in urls"
-          :key="k"
-          style="width: 200px; height: 200px;"
-          :src="v.img|imgUrl"
-          fit="scale-down"
-          @click="delPic(v)"
-        ></el-image>
-        <el-image style="width: 200px; height: 200px" fit="scale-down">
-          <div slot="error" class="image-slot">
-            <i class="el-icon-plus" @click="openCropper"></i>
-          </div>
-        </el-image>
+        <div v-for="(v,k) in urls" :key="k">
+          <el-image
+            style="width: 150px; height: 150px;"
+            :src="v.img|imgUrl"
+            fit="scale-down"
+            @click="delPic(v)"
+          ></el-image>
+          <el-popover placement="top" width="200" trigger="click" :content="v.desc">
+            <p slot="reference" style="width:150px;padding:5px 10px" class="one-txt-cut">{{v.desc}}</p>
+          </el-popover>
+        </div>
+        <div>
+          <el-image style="width: 150px; height: 150px" fit="scale-down">
+            <div slot="error" class="image-slot">
+              <i class="el-icon-plus" @click="openCropper"></i>
+            </div>
+          </el-image>
+        </div>
       </div>
     </div>
     <div class="contentView" v-show="show == 5">
@@ -456,6 +461,21 @@
 
     <!-- 图片上传 -->
     <xcropper ref="cropper"></xcropper>
+    <el-dialog
+      title="描述"
+      :visible.sync="showDesc"
+      width="430px"
+      center
+      custom-class="quickmoney"
+      :modal-append-to-body="false"
+    >
+      <div class="textView">
+        <textarea placeholder="填写描述" maxlength="500" v-model="desc"></textarea>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setDesc" style="background-color:#dc670b;color:#fff">保 存</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -472,6 +492,9 @@ export default {
       show: 1,
       name: "",
       showMemo: false,
+      showDesc: false,
+      img: '',
+      desc: '',
       huankuan: false,
       remark: '',
       userinfo: '',
@@ -585,24 +608,30 @@ export default {
     },
     openCropper () {
       let option = {
-        title: '项目图',
+        title: '案例图',
         msg: '建议图片大小：2M'
       };
       this.$refs.cropper.open(option, (data) => {
         console.log(data)
-        this.$axios.get('/api?datatype=insert_member_photo', {
-          params: {
-            storeid: this.storeid,
-            member_id: this.member_id,
-            img: data,
-            item_id: this.nowcate.id
-          }
-        }).then(res => {
-          if (res.data.code == 1) {
-            this.$message.success('添加成功')
-            this.getmemberPic()
-          }
-        })
+        this.showDesc = true
+        this.img = data
+      })
+    },
+    setDesc () {
+      this.$axios.get('/api?datatype=insert_member_photo', {
+        params: {
+          storeid: this.storeid,
+          member_id: this.member_id,
+          img: this.img,
+          desc: this.desc,
+          item_id: this.nowcate.id
+        }
+      }).then(res => {
+        if (res.data.code == 1) {
+          this.$message.success('添加成功')
+          this.showDesc = false
+          this.getmemberPic()
+        }
       })
     },
     async getvoucher () {
@@ -1073,16 +1102,19 @@ export default {
       height: calc(100% - 100px);
       overflow-y: auto;
       padding: 0 20px;
-      /deep/ .el-image {
-        margin: 10px;
+      > div {
+        float: left;
         border: 1px dashed #ccc;
+        margin: 10px;
+      }
+      /deep/ .el-image {
         .image-slot {
           text-align: center;
           vertical-align: middle;
           i {
-            font-size: 100px;
+            font-size: 80px;
             color: #ccc;
-            line-height: 200px;
+            line-height: 150px;
           }
         }
       }

@@ -9,21 +9,22 @@
       <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="addnew">新增</button>
     </div>
     <div class="bomView">
-      <el-table :data="tableData" stripe style="width: 100%" @row-click="toEdit">
-        <el-table-column prop="id" label="编号" width="100"></el-table-column>
-        <el-table-column prop="name" label="名称" width="180"></el-table-column>
+      <el-table :data="tableData" stripe style="width: 100%" height="100%">
+        <el-table-column prop="id" label="编号" width="60"></el-table-column>
         <el-table-column prop="type" label="类别"></el-table-column>
-        <el-table-column label="开始时间">
+        <el-table-column prop="name" label="名称" min-width="120" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="content" label="内容" min-width="150" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="remark" label="使用说明" min-width="150" show-overflow-tooltip></el-table-column>
+        <el-table-column label="开始时间" min-width="100">
           <template slot-scope="scope">
             <span>{{scope.row.starttime|Time}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="过期时间">
+        <el-table-column label="过期时间" min-width="100">
           <template slot-scope="scope">
             <span>{{scope.row.endtime|Time}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="remark" label="使用说明" show-overflow-tooltip></el-table-column>
         <el-table-column label="当前状态">
           <template slot-scope="scope">
             <span
@@ -31,8 +32,10 @@
             >{{scope.row.is_stop==1?'停用':'正常'}}</span>
           </template>
         </el-table-column>
-        <el-table-column width="50">
-          <i class="el-icon-arrow-right"></i>
+        <el-table-column label="操作" width="100">
+          <template slot-scope="scope">
+            <el-button @click="toEdit(scope.row)">编辑</el-button>
+          </template>
         </el-table-column>
       </el-table>
     </div>
@@ -50,12 +53,19 @@
           <el-form-item>
             <span slot="label">
               <span class="xing">*</span>
+              券名称
+            </span>
+            <el-input v-model="name"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <span slot="label">
+              <span class="xing">*</span>
               抵用类型
             </span>
-            <el-radio-group v-model="typeid">
-              <el-radio label="现金券">现金券</el-radio>
+            <el-radio-group v-model="type">
+              <el-radio label="体验券">体验券</el-radio>
               <el-radio label="亲友券">亲友券</el-radio>
-              <el-radio label="免费券">免费券</el-radio>
+              <el-radio label="现金券">现金券</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item>
@@ -66,11 +76,15 @@
             <el-input v-model="amount" type="number" :min="0"></el-input>
           </el-form-item>
           <el-form-item>
+            <span slot="label">内容</span>
+            <el-input v-model="content" type="textarea"></el-input>
+          </el-form-item>
+          <el-form-item>
             <span slot="label">
               <span class="xing">*</span>
               使用说明
             </span>
-            <el-input v-model="remark"></el-input>
+            <el-input v-model="remark" type="textarea"></el-input>
           </el-form-item>
           <el-form-item>
             <span slot="label">
@@ -114,16 +128,17 @@ export default {
   props: ['from'],
   data () {
     return {
-      type: 1,
+      sign: 1,
       tableData: [],
       add: false,
-      // status: 0,
+      name: '',
+      type: '',
       amount: '',
+      content: '',
+      remark: '',
       date: '',
       is_stop: '0',
-      typeid: '现金券',
       choose: '',
-      remark: '',
       storeid: sessionStorage.getItem('storeid'),
       checked: false
     }
@@ -197,13 +212,15 @@ export default {
     },
     addnew () {
       this.amount = ''
+      this.name = ''
       this.remark = ''
       this.date = ''
+      this.content = ''
       this.is_stop = '0'
-      this.typeid = '现金券'
+      this.type = ''
       this.choose = ''
       this.add = true
-      this.type = 1
+      this.sign = 1
     },
     toEdit (row) {
       let starttime = moment.unix(row.starttime).format('YYYY-MM-DD')
@@ -211,31 +228,36 @@ export default {
       this.amount = row.amount
       this.date = [starttime, endtime]
       this.is_stop = row.is_stop
-      this.typeid = row.typeid
+      this.type = row.type
+      this.content = row.content
+      this.name = row.name
       this.remark = row.remark
       this.choose = row
       this.add = true
-      this.type = 2
+      this.sign = 2
     },
     async submit () {
+      if (!this.type) return this.$message.error('请选择抵用类型')
       if (!this.amount) return this.$message.error('请输入抵用券金额')
       if (!this.remark) return this.$message.error('请输入使用说明')
       if (!this.date) return this.$message.error('请设置使用时间')
       const res = await this.$axios.get('/api?datatype=insert_voucher', {
         params: {
           storeid: this.storeid,
-          sign: this.type,
-          type: this.typeid,
+          name: this.name,
+          sign: this.sign,
+          type: this.type,
+          content: this.content,
           amount: this.amount,
           starttime: this.date[0],
           endtime: this.date[1],
           is_stop: this.is_stop,
-          id: this.type == 1 ? 0 : this.choose.id,
+          id: this.sign == 1 ? 0 : this.choose.id,
           remark: this.remark
         }
       })
       if (res.data.code == 1) {
-        if (this.type == 1) {
+        if (this.sign == 1) {
           this.$message.success('添加成功')
         } else {
           this.$message.success('修改成功')
@@ -294,6 +316,7 @@ export default {
   }
   .bomView {
     padding: 0 20px;
+    height: calc(100% - 90px);
   }
 }
 </style>

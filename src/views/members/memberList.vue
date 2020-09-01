@@ -13,29 +13,31 @@
       >新增</button>
     </div>
 
-    <el-table :data="tableData" stripe style="width: 100%" @row-click="chooseOne">
-      <el-table-column width="70">
-        <template slot-scope="scope">
-          <img :src="'https://hb.rgoo.com'+scope.row.avatar" alt style="width:44px;height:44px" />
-        </template>
-      </el-table-column>
-      <el-table-column prop="job_no" label="编号" width="150"></el-table-column>
-      <el-table-column prop="name" label="姓名" width="150"></el-table-column>
-      <el-table-column prop="mobile" label="手机"></el-table-column>
-      <el-table-column prop="section" label="部门"></el-table-column>
-      <el-table-column prop="service_job" label="服务职称"></el-table-column>
-      <el-table-column prop="job" label="行政职位"></el-table-column>
-      <el-table-column label="目前状态">
-        <template
-          slot-scope="scope"
-        >{{scope.row.now_status=='1'?'在职':scope.row.now_status=='2'?'未在职':'离职'}}</template>
-      </el-table-column>
-      <el-table-column prop="mobile" label="预约状态">
-        <template slot-scope="scope">
-          <el-switch v-model="scope.row.yy_status" active-color="#13ce66" disabled></el-switch>
-        </template>
-      </el-table-column>
-    </el-table>
+    <div class="bomView">
+      <el-table :data="tableData" stripe style="width: 100%" @row-click="chooseOne" height="100%">
+        <el-table-column width="70">
+          <template slot-scope="scope">
+            <img :src="'https://hb.rgoo.com'+scope.row.avatar" alt style="width:44px;height:44px" />
+          </template>
+        </el-table-column>
+        <el-table-column prop="job_no" label="编号" width="150"></el-table-column>
+        <el-table-column prop="name" label="姓名" width="150"></el-table-column>
+        <el-table-column prop="mobile" label="手机"></el-table-column>
+        <el-table-column prop="section" label="部门"></el-table-column>
+        <el-table-column prop="service_job" label="服务职称"></el-table-column>
+        <el-table-column prop="job" label="行政职位"></el-table-column>
+        <el-table-column label="目前状态">
+          <template
+            slot-scope="scope"
+          >{{scope.row.now_status=='1'?'在职':scope.row.now_status=='2'?'未在职':'离职'}}</template>
+        </el-table-column>
+        <el-table-column prop="mobile" label="预约状态">
+          <template slot-scope="scope">
+            <el-switch v-model="scope.row.yy_status" active-color="#13ce66" disabled></el-switch>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
 
     <div class="set_page" :class="{activePage:add}">
       <addmember @close="add=false;getList()" :choose="choosOne" v-if="add"></addmember>
@@ -51,7 +53,7 @@ export default {
   data () {
     return {
       item: 1,
-      tableData: [1, 2, 3],
+      tableData: [],
       add: false,
       choosOne: '',
       searchtxt: '',
@@ -73,17 +75,21 @@ export default {
         }
       })
       console.log(res)
-      res.data.data.forEach(item => {
-        if (!item.avatar) {
-          item.avatar = '/upload/shop/moren.jpg'
-        }
-        if (item.yy_status == 1) {
-          item.yy_status = true
-        } else {
-          item.yy_status = false
-        }
-      })
-      this.tableData = res.data.data
+      if (res.data.code == 1 && res.data.data) {
+        res.data.data.forEach(item => {
+          if (!item.avatar) {
+            item.avatar = '/upload/shop/moren.jpg'
+          }
+          if (item.yy_status == 1) {
+            item.yy_status = true
+          } else {
+            item.yy_status = false
+          }
+        })
+        this.tableData = res.data.data
+      } else {
+        this.tableData = []
+      }
     },
     witchOne () {
       if (this.searchtxt) {
@@ -163,6 +169,7 @@ export default {
   }
   .bomView {
     padding: 0 20px;
+    height: calc(100% - 90px);
   }
 }
 </style>

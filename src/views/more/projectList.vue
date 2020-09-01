@@ -10,7 +10,7 @@
       <addproject @close="add=false;getList()" :choose="choose" v-if="add"></addproject>
     </div>
     <div class="bomView">
-      <el-table :data="tableData" stripe style="width: 100%" @row-click="toEdit">
+      <el-table :data="tableData" stripe style="width: 100%" @row-click="toEdit" height="100%">
         <el-table-column prop="item_no" label="编号" width="180"></el-table-column>
         <el-table-column prop="name" label="项目名称" width="180"></el-table-column>
         <el-table-column prop="price" label="标准价格"></el-table-column>
@@ -68,7 +68,7 @@ export default {
   data () {
     return {
       item: 1,
-      tableData: [1, 2, 3],
+      tableData: [],
       add: false,
       status: false,
       drawer: false,
@@ -234,6 +234,7 @@ export default {
   }
   .bomView {
     padding: 0 20px;
+    height: calc(100% - 90px);
   }
   .drawerlist {
     padding: 0 20px;
