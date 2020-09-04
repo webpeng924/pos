@@ -21,10 +21,14 @@
         <div class="btn" @click="login">登陆</div>
       </div>
     </div>
+    <div class="set_page" :class="{activePage:signPage}">
+      <xiaohao @close="signPage=false" v-if="signPage"></xiaohao>
+    </div>
   </div>
 </template>
 
 <script>
+import signPage from '@/components/signPage'
 import qs from 'qs'
 export default {
   components: {},
@@ -32,7 +36,8 @@ export default {
   data () {
     return {
       password: '',
-      name: ''
+      name: '',
+      signPage: false
     }
   },
   watch: {},

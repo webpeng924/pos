@@ -6,7 +6,7 @@
       <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="addnew">添加</button>
     </div>
     <div class="bView">
-      <el-table :data="tableData" style="width: 100%">
+      <el-table :data="tableData" style="width: 100%" height="100%">
         <el-table-column>
           <template slot-scope="scope">
             <img :src="scope.row.img|imgUrl" alt style="width:80px" />
@@ -36,8 +36,6 @@
         </el-table-column>
       </el-table>
     </div>
-    <!-- 图片上传 -->
-    <xcropper ref="cropper"></xcropper>
 
     <el-dialog
       title="添加卡类"
@@ -54,14 +52,14 @@
           <el-form-item label="卡片名称" prop="name">
             <el-input v-model="form.name"></el-input>
           </el-form-item>
-          <el-form-item label="储值金额" prop="deposit_amount">
+          <!-- <el-form-item label="储值金额" prop="deposit_amount">
             <el-input v-model="form.deposit_amount"></el-input>
-          </el-form-item>
-          <el-form-item label="赠送金额" prop="deposit_amount">
-            <el-input v-model="form.gift_money"></el-input>
-          </el-form-item>
+          </el-form-item>-->
           <el-form-item label="起充金额" prop="recharge_money">
             <el-input v-model="form.recharge_money"></el-input>
+          </el-form-item>
+          <el-form-item label="赠送金额" prop="gift_money">
+            <el-input v-model="form.gift_money"></el-input>
           </el-form-item>
           <el-form-item label="有效期限" prop="usetime">
             <el-col :span="11">
@@ -108,6 +106,8 @@
           </el-form-item>
         </el-form>
       </div>
+      <!-- 图片上传 -->
+      <xcropper ref="cropper" @close="add=true"></xcropper>
       <div slot="footer" class="dialog-footer">
         <el-button @click="add = false">取 消</el-button>
         <el-button type="primary" @click="submit">确 定</el-button>
@@ -134,7 +134,7 @@ export default {
         card_no: '',
         name: '',
         img: '',
-        deposit_amount: '',
+        // deposit_amount: '',
         recharge_money: '',
         gift_money: '',
         usetime: '',
@@ -149,9 +149,9 @@ export default {
         name: [
           { required: true, message: '请输入卡名称', trigger: 'focus' }
         ],
-        deposit_amount: [
-          { required: true, message: '请输入储值金额', trigger: 'focus' }
-        ],
+        // deposit_amount: [
+        //   { required: true, message: '请输入储值金额', trigger: 'focus' }
+        // ],
         recharge_money: [
           { required: true, message: '请输入起充金额', trigger: 'focus' }
         ],
@@ -172,6 +172,7 @@ export default {
     },
     // 打开上传图片
     openCropper () {
+      this.add = false
       let option = {
         title: '卡图片',
         msg: '建议图片大小：2M',
@@ -179,6 +180,7 @@ export default {
       };
       this.$refs.cropper.open(option, (data) => {
         console.log(data)
+        this.add = true
         this.form.img = data
       })
     },
@@ -224,7 +226,7 @@ export default {
         card_no: '',
         name: '',
         img: '',
-        deposit_amount: '',
+        // deposit_amount: '',
         gift_money: '',
         recharge_money: '',
         usetime: '',
@@ -243,7 +245,7 @@ export default {
       }
     },
     async submit () {
-      if (!this.form.card_no || !this.form.name || !this.form.deposit_amount || !this.form.recharge_money || !this.form.usetime || !this.form.gift_money) return this.$message.error('缺少必填信息')
+      if (!this.form.card_no || !this.form.name || !this.form.recharge_money || !this.form.usetime || !this.form.gift_money) return this.$message.error('缺少必填信息')
       let data = qs.stringify({
         storeid: this.storeid,
         type: this.type,//1增加  2编辑
@@ -251,7 +253,7 @@ export default {
         card_no: this.form.card_no,//编号
         name: this.form.name,
         img: this.form.img,
-        deposit_amount: this.form.deposit_amount,//储值金额
+        // deposit_amount: this.form.deposit_amount,//储值金额
         gift_money: this.form.gift_money,
         recharge_money: this.form.recharge_money,//起充金额
         usetime: this.form.usetime + this.form.dateType,
@@ -263,9 +265,7 @@ export default {
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)
         this.add = false
-        if (res.data.msg == '更新成功') {
-          this.getList()
-        }
+        this.getList()
       }
     }
   },

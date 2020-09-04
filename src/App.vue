@@ -7,7 +7,6 @@
 
 <script>
 import nav from './views/nav.vue'
-import { userInfo } from 'os';
 
 export default {
   components: {

@@ -400,10 +400,12 @@ export default {
               console.log(2)
               item.orderinfo.forEach(k => {
                 this.$set(k, 'workername', '')
+                this.$set(k, 'workerNo', '')
                 if (k.staff1 && k.staff1 != 0) {
                   let workername = workerlist.find(w => w.id == k.staff1)
                   console.log(workerlist, k.staff1, workername)
                   k.workername = workername.name
+                  k.workerNo = workername.job_no
                 }
               })
             }

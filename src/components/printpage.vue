@@ -28,8 +28,8 @@
           </div>
           <div class="empView" v-show="v.staff1!=0">
             <label>
-              <span class="span-name">凯撒</span>
-              <span class="span-job">No.</span>
+              <span class="span-name">{{v.workername}}</span>
+              <span class="span-job">No.{{v.workerNo}}</span>
             </label>
           </div>
         </div>
@@ -70,7 +70,7 @@ export default {
   },
   filters: {
     moment (val) {
-      return moment.unix(val).format('YYYY-MM-DD')
+      return moment.unix(val).format('YYYY-MM-DD HH:mm')
     },
     type (val) {
       switch (val) {
@@ -94,18 +94,26 @@ export default {
       this.$emit('close')
     },
     print () {
-      let obj = {
-        shopName: JSON.parse(sessionStorage.getItem('shopInfo')).shop_name,
-        type: '结账单',
-        time: moment(this.info.dateline).format('YYYY-MM-DD'),
-        list: this.orderInfo,
-        printTime: this.formatDate(new Date),
-        payType: this.$options.filters['type'](this.info.pay_type),
-        dis_total: this.info.dis_total
-      }
-      var a = JSON.stringify(obj); javascript: lee.funAndroid(a);
+      let arr = [{ "name": JSON.parse(sessionStorage.getItem('shopInfo')).shop_name, "style": "1" }, { "name": "收银单", "style": "1" }, { "name": "---" }, { "name": "消费单号：" + this.info.order_no }]
+      let time = moment.unix(this.info.dateline).format('YYYY-MM-DD HH:mm')
+      arr.push({ "name": "消费日期：" + time }, { "name": "---" }, { "name": "消费明细", "value": "" }, { "name": "标准价", "value": "数量 #A# 折扣 #A# 金额" }, { "name": "---" })
+      this.orderInfo.forEach(v => {
+        let type = " 服务: "
+        if (v.typeid == 2) {
+          type = " "
+        }
+        arr.push({ "name": v.itemname + type + v.workername })
+        let discount = v.discount == 1 ? '原价' : v.discount + '折'
+        let discount_price = v.discount == 1 ? '-' : "v.discount_price"
+        arr.push({ name: v.price, value: v.num + "#A#" + discount + "#A# " + discount_price })
+      })
+      let remark = this.info.remark == null ? '' : this.info.remark
+      arr.push({ "name": "---" }, { "name": "支付方式", "value": "合计" }, { name: this.$options.filters['type'](this.info.pay_type), value: this.info.dis_total }, { "name": "---" }, { "name": "备注: " + remark }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" })
+      var a = JSON.stringify(arr);
+      console.log(a)
+      javascript: jsSzb.smPrint(a);
       return false;
-    },
+    }
   },
   created () {
     if (this.info) {
@@ -198,6 +206,9 @@ export default {
         margin-top: 5px;
         line-height: 25px;
         font-size: 13px;
+        .span-name {
+          margin-right: 10px;
+        }
       }
     }
     > .payTypeView {

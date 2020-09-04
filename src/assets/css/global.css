@@ -193,6 +193,11 @@
     border-color:#dc670b;
     background-color:#dc670b;
   }
+  .el-button:focus, .el-button:hover {
+    color: #ee8637;
+    border-color: #ffb277;
+    background-color: #ffefe3;
+  }
   .el-dialog {
     border-radius: 6px;
     background: rgb(255, 255, 255);

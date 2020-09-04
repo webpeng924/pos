@@ -176,7 +176,10 @@
           </div>
         </el-dialog>
         <div class="item" @click="jobDialog=true">
-          <div class="left">职位</div>
+          <div class="left">
+            职位
+            <span class="xing">*</span>
+          </div>
           <div class="right">
             <input type="text" placeholder="请选择" v-model="job" readonly />
           </div>
@@ -393,6 +396,8 @@ export default {
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)
         this.back()
+      } else {
+        this.$message.error(res.data.msg)
       }
     }
   },

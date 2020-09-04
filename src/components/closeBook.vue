@@ -182,7 +182,7 @@
       <erweima @close="erweima=false;getererima()" v-if="erweima"></erweima>
     </div>
     <div class="set_page" :class="{activePage:payend}">
-      <payend @close="payend=false;getererima()" v-if="payend"></payend>
+      <payend :info="info" v-if="payend"></payend>
     </div>
 
     <el-dialog
@@ -234,7 +234,8 @@ export default {
       haveDistotal: false,
       quanDialog: false,
       choosquan: '',
-      quanlist: []
+      quanlist: [],
+      info: ''
     }
   },
   filters: {
@@ -284,11 +285,32 @@ export default {
       })
       if (res.data.code == 1) {
         this.$message.success('完成')
-        this.payend = true
         this.dialogVisible = false
+        this.getinfo()
       } else {
         this.$message.error(res.data.msg)
       }
+    },
+    async getinfo () {
+      const res = await this.$axios.get('/api?datatype=get_one_order', {
+        params: {
+          storeid: this.storeid,
+          order_id: this.bookinfo.id
+        }
+      })
+      let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
+      res.data.list.info.forEach(k => {
+        this.$set(k, 'workername', '')
+        this.$set(k, 'workerNo', '')
+        if (k.staff1 && k.staff1 != 0) {
+          let workername = workerlist.find(w => w.id == k.staff1)
+          console.log(workerlist, k.staff1, workername)
+          k.workername = workername.name
+          k.workerNo = workername.job_no
+        }
+      })
+      this.info = res.data.list
+      this.payend = true
     },
     changepaytype (data) {
       if (this.bookinfo.customer_type == 2) {

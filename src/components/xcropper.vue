@@ -1,5 +1,11 @@
 <template>
-  <el-dialog append-to-body :title="title" :visible.sync="cropperVisible" width="800px">
+  <el-dialog
+    append-to-body
+    :title="title"
+    :visible.sync="cropperVisible"
+    width="800px"
+    @close="$emit('close')"
+  >
     <div>
       <el-alert :title="msg" type="error" :closable="false"></el-alert>
       <div id="cro">

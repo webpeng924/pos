@@ -27,6 +27,14 @@
           报表
         </div>
         <div
+          class="menuItem"
+          :class="{p100:!show,active:active=='签到日历'}"
+          @click="selectOption('签到日历')"
+        >
+          <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Calendar.png" />
+          签到日历
+        </div>
+        <div
           class="menuItem select"
           :class="{p100:!show,active:active=='管理中心'}"
           @click="selectOption('管理中心')"
@@ -83,6 +91,10 @@
               <img src="../../assets/images/xiaofeimingxi.png" />
               <div>消费明细表</div>
             </div>
+            <div class="listItem btn-audio" @click="openTable('cardSale')">
+              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Report_JCTJ.png" />
+              <div>会员卡销售统计</div>
+            </div>
           </div>
         </div>
         <div class="groupView">
@@ -92,12 +104,28 @@
               <img src="../../assets/images/kucuntongji.png" />
               <div>库存量统计</div>
             </div>
-            <!-- <div class="listItem btn-audio">
+            <div class="listItem btn-audio" @click="openTable('churutongji')">
               <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Report_JCTJ.png" />
-              <div>寄存统计</div>
-            </div>-->
+              <div>出入库统计表</div>
+            </div>
           </div>
         </div>
+      </div>
+      <div class="reportView" v-show="active=='签到日历'">
+        <p style="font-size:15px">累计签到：{{attendDays}} 天</p>
+        <el-calendar v-if="active=='签到日历'">
+          <template slot="dateCell" slot-scope="{date, data}">
+            <div
+              class="calendar-day"
+              v-if="data.day.substring(0, 7)==month"
+              :class="{bgo:handleSelected(data.day) == 1,today:data.day==formatDate(new Date)}"
+            >{{ data.day.split('-').slice(2).join('-') }}</div>
+            <!-- <div v-show="handleSelected"> -->
+            <!-- //判断显示当前页，value是显示当前月份 -->
+            <!-- <p v-if="handleSelected(data.day) == 1" style="line-height:30px">✔️</p> -->
+            <!-- </div> -->
+          </template>
+        </el-calendar>
       </div>
       <div class="featureView" v-show="active=='功能'">
         <div class="groupView">
@@ -252,10 +280,15 @@
     <div class="set_page" :class="{activePage:orderlist}">
       <orderlist @close="orderlist=false" v-if="orderlist"></orderlist>
     </div>
+    <div class="set_page" :class="{activePage:showTable}">
+      <churutongji @close="showTable=false;tableName=''" v-if="tableName=='churutongji'"></churutongji>
+      <cardSale @close="showTable=false;tableName=''" v-if="tableName=='cardSale'"></cardSale>
+    </div>
   </div>
 </template>
 
 <script>
+import moment from 'moment'
 import product from './product'
 import shopInfo from './shopInfo'
 import projectlist from './projectList'
@@ -272,8 +305,10 @@ import panku from '../store/panku'
 import cikalist from './cikalist'
 import quanlist from './quanlist'
 import orderlist from '../order/orderlist'
+import churutongji from './churutongji'
+import cardSale from '../table/cardSale'
 export default {
-  components: { product, memberlist, projectlist, shopInfo, zhekou, xiaohao, baobiao, kucun, setCard, msg, erweima, memberView, panku, cikalist, quanlist, orderlist },
+  components: { product, memberlist, projectlist, shopInfo, zhekou, xiaohao, baobiao, kucun, setCard, msg, erweima, memberView, panku, cikalist, quanlist, orderlist, churutongji, cardSale },
   props: {},
   data () {
     return {
@@ -295,19 +330,43 @@ export default {
       memberView: false,
       dinghuo: false,
       panku: false,
+      churutongji: false,
       cikalist: false,
       quanlist: false,
+      showTable: false,
+      tableName: '',
       userInfo: JSON.parse(sessionStorage.getItem('userInfo')),
       role: JSON.parse(sessionStorage.getItem('userInfo')).role,
       shopInfo: {
         avatar: '',
         shop_name: ''
-      }
+      },
+      attendData: [],
+      attendDays: '',
+      month: ''
     }
   },
-  watch: {},
+  watch: {
+    month () {
+      this.getSignList()
+    }
+  },
   computed: {},
   methods: {
+    openTable (name) {
+      this.showTable = true
+      this.tableName = name
+    },
+    handleSelected (day) {
+      let flag = 0; //默认显示为0
+      this.attendData.forEach(item => { //this.attendanceDetailsData是后台返回的数据
+        if (item == day) {  //判断显示数据
+          flag = 1;
+          return
+        }
+      })
+      return flag
+    },
     changeEWM () {
       this.$axios.get('/api?datatype=more&storeid=' + this.storeid).then(
         res => {
@@ -315,6 +374,14 @@ export default {
           sessionStorage.setItem('shopInfo', JSON.stringify(data))
         }
       )
+    },
+    formatDate (date) {
+      var y = date.getFullYear()
+      var m = date.getMonth() + 1
+      m = m < 10 ? '0' + m : m
+      var d = date.getDate()
+      d = d < 10 ? '0' + d : d
+      return y + '-' + m + '-' + d
     },
     selectOption (data) {
       if (this.role != 1) return this.$message.error('没有权限')
@@ -330,6 +397,42 @@ export default {
           this.active = data
           this.show = true
         }
+      }
+      if (data == '签到日历') {
+        let now = new Date()
+        this.month = moment(now).format('YYYY-MM')
+        this.$nextTick(() => {
+          // 点击上个月
+          let prevBtn1 = document.querySelector('.el-calendar__button-group .el-button-group>button:nth-child(1)');
+          prevBtn1.addEventListener('click', () => {
+            console.log('上个月');
+            this.month = moment(new Date(this.month)).subtract(1, "months").format('YYYY-MM')
+          })
+          // 点击今天
+          let prevBtn2 = document.querySelector('.el-calendar__button-group .el-button-group>button:nth-child(2)');
+          prevBtn2.addEventListener('click', () => {
+            console.log('今天');
+            this.month = moment(now).format('YYYY-MM')
+          })
+          // 点击下个月
+          let prevBtn3 = document.querySelector('.el-calendar__button-group .el-button-group>button:nth-child(3)');
+          prevBtn3.addEventListener('click', () => {
+            console.log('下个月');
+            this.month = moment(new Date(this.month)).add(1, 'months').format('YYYY-MM')
+          })
+        })
+      }
+    },
+    async getSignList (month) {
+      const res = await this.$axios.get('/api?datatype=get_sign_list', {
+        params: {
+          storeid: this.storeid,
+          month: this.month
+        }
+      })
+      if (res.data.code == 1) {
+        this.attendData = res.data.data
+        this.attendDays = res.data.count
       }
     },
     logOut () {
@@ -509,6 +612,39 @@ export default {
   }
   .rightView.show {
     flex: 3;
+  }
+  /deep/.el-calendar-table {
+    td,
+    tr:first-child td,
+    tr td:first-child {
+      border: none;
+      pointer-events: none;
+    }
+
+    td.is-selected {
+      background-color: transparent;
+    }
+    .el-calendar-day:hover {
+      background-color: transparent;
+    }
+    .el-calendar-day {
+      height: 50px;
+      line-height: 50px;
+      padding: 0;
+      .calendar-day {
+        line-height: 50px;
+        text-align: center;
+        color: #ccc;
+      }
+      .bgo {
+        background-color: #ffe6d3;
+        color: #28282d;
+      }
+      .today {
+        color: #fff;
+        background-color: #ff9a4d;
+      }
+    }
   }
 }
 </style>
