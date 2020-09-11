@@ -15,10 +15,15 @@
         </div>
         <button class="btn-audio" :class="{search:keyword}" @click="getList">查询</button>
       </div>
+      <el-button class="addbtn" type="primary" @click="addnew">新增</el-button>
       <el-table :data="tableData" style="width: 100%" @row-click="openInfo" height="100%">
         <el-table-column width="120">
           <template slot-scope="scope">
-            <img :src="scope.row.img|imgUrl" alt style="width:100px;height:75px" />
+            <img
+              :src="scope.row.img?scope.row.img:'/upload/shop/moren.jpg'|imgUrl"
+              alt
+              style="width:100px;height:75px"
+            />
           </template>
         </el-table-column>
         <el-table-column prop="account" label="卡号" width="180"></el-table-column>
@@ -74,7 +79,7 @@
       </span>
 
       <el-dialog
-        width="500px"
+        width="550px"
         title="请选择支付方式"
         :visible.sync="innerVisible"
         append-to-body
@@ -86,7 +91,7 @@
           <el-radio label="wx">微信</el-radio>
           <el-radio label="cash">现金</el-radio>
           <el-radio label="other">其他</el-radio>
-          <el-radio label="card" style="margin-top:30px" v-show="shoptype==5">会员卡余额</el-radio>
+          <el-radio label="card" style="margin-top:30px">会员卡余额</el-radio>
         </el-radio-group>
         <span slot="footer" class="dialog-footer">
           <el-button type="primary" @click="setCard" style="background-color:#dc670b;">支付</el-button>
@@ -142,7 +147,7 @@
       </span>
 
       <el-dialog
-        width="500px"
+        width="550px"
         title="请选择支付方式"
         :visible.sync="innerVisible"
         append-to-body
@@ -154,18 +159,52 @@
           <el-radio label="wx">微信</el-radio>
           <el-radio label="cash">现金</el-radio>
           <el-radio label="other">其他</el-radio>
-          <el-radio label="card" v-show="shoptype==5" style="margin-top:30px">会员卡余额</el-radio>
+          <el-radio label="card" style="margin-top:30px">会员卡余额</el-radio>
         </el-radio-group>
         <span slot="footer" class="dialog-footer">
           <el-button type="primary" @click="setCard">支付</el-button>
         </span>
       </el-dialog>
     </el-dialog>
+
+    <el-dialog
+      title="添加会员"
+      :visible.sync="addmember"
+      width="350px"
+      custom-class="formDialog"
+      :modal-append-to-body="false"
+    >
+      <div class="contant">
+        <el-form label-position="right" label-width="80px" :rules="rules" ref="form">
+          <el-form-item label="姓名" prop="name">
+            <el-input v-model="name"></el-input>
+          </el-form-item>
+          <el-form-item label="生日" prop="birthday">
+            <el-date-picker v-model="birthday" type="date" placeholder="选择日期"></el-date-picker>
+          </el-form-item>
+          <el-form-item label="手机" prop="mobile">
+            <el-input v-model="mobile"></el-input>
+          </el-form-item>
+          <el-form-item label="性别" prop="sex">
+            <el-radio v-model="sex" label="1">男</el-radio>
+            <el-radio v-model="sex" label="2">女</el-radio>
+          </el-form-item>
+          <el-form-item label="身份证号">
+            <el-input v-model="IDcard"></el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addmember = false">取 消</el-button>
+        <el-button type="primary" @click="submit">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import memInfo from './memberinfo'
+import moment from 'moment'
 export default {
   components: { memInfo },
   props: {},
@@ -187,7 +226,27 @@ export default {
       paytype: 'zfb',
       check: 0,
       checkData: '',
-      storeid: sessionStorage.getItem('storeid')
+      addmember: false,
+      name: "",
+      mobile: '',
+      birthday: '',
+      IDcard: '',
+      sex: '2',
+      storeid: sessionStorage.getItem('storeid'),
+      rules: {
+        name: [
+          { required: true, message: '请输入姓名', trigger: 'focus' }
+        ],
+        mobile: [
+          { required: true, message: '请输入手机', trigger: 'focus' }
+        ],
+        birthday: [
+          { required: true, message: '请选择生日', trigger: 'focus' }
+        ],
+        sex: [
+          { required: true, message: '请选择性别', trigger: 'focus' }
+        ]
+      }
     }
   },
   watch: {},
@@ -207,6 +266,38 @@ export default {
     }
   },
   methods: {
+    async submit () {
+      if (!this.name || !this.mobile || !this.birthday || !this.sex) return this.$message.error('缺少必填信息')
+      if (!(/^1[3456789]\d{9}$/.test(this.mobile))) return this.$message.error('手机号不正确')
+      // console.log(this.birthday)
+      let birthday = moment(this.birthday).format('YYYY-MM-DD')
+      const res = await this.$axios.get('/api?datatype=insert_member', {
+        params: {
+          storeid: this.storeid,
+          name: this.name,
+          birthday: birthday,
+          mobile: this.mobile,
+          sex: this.sex,
+          ID_card: this.IDcard
+        }
+      })
+      // console.log(res)
+      if (res.data.code == 1) {
+        this.$message.success(res.data.msg)
+        this.addmember = false
+        this.getList()
+      } else {
+        this.$message.error(res.data.msg)
+      }
+    },
+    addnew () {
+      this.name = ""
+      this.mobile = ''
+      this.birthday = ''
+      this.IDcard = ''
+      this.sex = '2'
+      this.addmember = true
+    },
     openInfo (row) {
       this.choosOne = row
       this.info = true
@@ -307,7 +398,7 @@ export default {
           search: this.keyword
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.tableData = res.data.data
       } else {
@@ -317,7 +408,7 @@ export default {
   },
   created () {
     this.getList()
-    console.log(this.$route.query)
+    // console.log(this.$route.query)
   },
   mounted () { }
 }
@@ -404,6 +495,11 @@ export default {
         background: #28282d;
       }
     }
+    .addbtn {
+      position: absolute;
+      right: 20px;
+      top: 35px;
+    }
   }
   /deep/.cardDialog {
     padding: 0 20px;
@@ -431,6 +527,50 @@ export default {
     span {
       flex: 1;
       margin-right: 50px;
+    }
+  }
+  .formDialog {
+    .contant {
+      padding: 20px 30px 20px 20px;
+    }
+    .el-range-separator {
+      padding: 0;
+    }
+    .el-form-item {
+      position: relative;
+      .i {
+        position: absolute;
+        line-height: 70px;
+        right: 10px;
+        top: 0;
+        cursor: pointer;
+        color: #dc670b;
+      }
+    }
+    .el-form .list {
+      height: 80px;
+      padding-top: 5px;
+      overflow-y: auto;
+      padding-right: 45px;
+
+      .item {
+        line-height: 30px;
+        border-bottom: 0.5px dashed #eee;
+        display: flex;
+        // &:last-child {
+        //   border: none;
+        // }
+        span {
+          flex: 1;
+        }
+        .el-input {
+          width: 70px;
+          margin-right: 10px;
+          .el-input__inner {
+            padding-right: 0;
+          }
+        }
+      }
     }
   }
 }

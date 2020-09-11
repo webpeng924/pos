@@ -44,7 +44,7 @@ export default {
   methods: {
     back () {
       window.history.go(0)
-      var a = 'FLAG_1'
+      var a = sessionStorage.getItem('FLAG')
       javascript: jsSzb.smClientScreen(a)
       return false;
     },
@@ -58,14 +58,14 @@ export default {
           type = " "
         }
         arr.push({ "name": v.itemname + type + v.workername })
-        let discount = v.discount == 1 ? '原价' : v.discount + '折'
-        let discount_price = v.discount == 1 ? '-' : "v.discount_price"
+        let discount = v.discount == 1 ? '原价' : v.discount + '折扣'
+        let discount_price = v.discount == 1 ? '-' : v.discount_price
         arr.push({ name: v.price, value: v.num + "#A#" + discount + "#A# " + discount_price })
       })
       let remark = this.info.remark == null ? '' : this.info.remark
       arr.push({ "name": "---" }, { "name": "支付方式", "value": "合计" }, { name: this.$options.filters['type'](this.info.pay_type), value: this.info.dis_total }, { "name": "---" }, { "name": "备注: " + remark }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" })
       var a = JSON.stringify(arr);
-      console.log(a)
+      // console.log(a)
       javascript: jsSzb.smPrint(a);
       return false;
     }

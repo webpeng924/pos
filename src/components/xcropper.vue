@@ -146,10 +146,10 @@ export default {
       this.$refs.cropper.getCropBlob((data) => {
         if (data.size < 1024 * 1024 * 2) {
           this.updata(data);
-          console.log(data, data.size)
+          // console.log(data, data.size)
         } else {
           this.cutImg(data)
-          console.log(data.size)
+          // console.log(data.size)
         }
       })
     },
@@ -197,8 +197,8 @@ export default {
           method: 'post',
           data: params
         }).then(res => {
-          console.log(res)
-            ;
+          // console.log(res)
+          ;
           if (res.data && res.data.data) {
             that.callback(res.data.data);
             // localStorage.setItem('img', JSON.stringify(res.data.data))

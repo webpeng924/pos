@@ -612,7 +612,7 @@ export default {
         msg: '建议图片大小：2M'
       };
       this.$refs.cropper.open(option, (data) => {
-        console.log(data)
+        // console.log(data)
         this.showDesc = true
         this.img = data
       })
@@ -707,7 +707,7 @@ export default {
     // 获取项目分类
     async getXMcate () {
       const res = await this.$axios.get('/api?datatype=get_itemcate&storeid=' + this.storeid)
-      console.log(res)
+      // console.log(res)
       this.catelist = res.data.data
       this.nowcate = res.data.data[0]
     },

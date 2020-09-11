@@ -26,7 +26,7 @@
         @click="chooseItem=v;drawer=true"
       >
         <div class="imgView">
-          <img :src="v.img?v.img:'/upload/shop/moren.jpg'|imgUrl" />
+          <img :src="v.pic?v.pic:'/upload/shop/moren.jpg'|imgUrl" />
         </div>
         <div class="textView">
           <div class="nameView overflowText">{{v.name}}</div>
@@ -150,7 +150,7 @@ export default {
   },
   methods: {
     back () {
-      console.log(this.carlist)
+      // console.log(this.carlist)
       this.$emit('close', this.carlist)
     },
     additem () {
@@ -229,7 +229,7 @@ export default {
     // 获取项目分类
     async getXMcate () {
       const res = await this.$axios.get('/api?datatype=get_itemcate&storeid=' + this.storeid)
-      console.log(res)
+      // console.log(res)
       this.catelist = res.data.data
       this.active = res.data.data[0].id
       this.getXMlist()
@@ -243,8 +243,13 @@ export default {
           cate: this.active
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.data) {
+        res.data.data.forEach(item => {
+          if (!item.pic) {
+            item['pic'] = item.img
+          }
+        })
         this.XMlist = res.data.data
       } else {
         this.XMlist = []
@@ -253,7 +258,7 @@ export default {
     // 获取产品分类
     async getCPcate () {
       const res = await this.$axios.get('/api?datatype=get_goodscate&storeid=' + this.storeid)
-      console.log(res)
+      // console.log(res)
       this.catelist = res.data.data
       this.active = res.data.data[0].id
       this.getCPlist()
@@ -266,7 +271,7 @@ export default {
           storeid: this.storeid
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1 && res.data.data) {
         this.XMlist = res.data.data
       } else {

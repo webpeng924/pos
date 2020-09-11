@@ -296,7 +296,7 @@ import moment from 'moment'
 import { format } from 'url';
 export default {
   components: {},
-  props: {},
+  props: ['choose'],
   data () {
     return {
       type: '号码',
@@ -344,7 +344,7 @@ export default {
         this.chosdate()
       } else {
         this.$message.error('请先选择预约员工')
-        this.getworkerlist()
+        // this.getworkerlist()
         this.workerDialog = true
       }
     },
@@ -356,7 +356,7 @@ export default {
           is_wei: 1
         }
       })
-      if (res.data.code == 1) {
+      if (res.data.code == 1 && res.data.data) {
         res.data.data.forEach(item => {
           if (!item.avatar) {
             item.avatar = '/upload/shop/moren.jpg'
@@ -366,10 +366,14 @@ export default {
           }
         })
         this.workerlist = res.data.data
+        if (this.choose) {
+          this.chosworker = this.workerlist.find(v => v.id == this.choose.workerid)
+          this.worker = this.chosworker.name
+        }
       }
     },
     toaddworker () {
-      this.getworkerlist()
+      // this.getworkerlist()
       this.workerDialog = true
     },
     handleCurrentChange (val) {
@@ -406,7 +410,7 @@ export default {
       //   inputValidator: (val) => { return Number(val) <= Number(data.rest_count) },
       //   inputErrorMessage: '次数错误或超出'
       // }).then(({ value }) => {
-      //   console.log(value, data)
+      //   // console.log(value, data)
       this.chosItem = {
         name: data.itemname,
         id: data.itemid,
@@ -435,7 +439,7 @@ export default {
           cate: this.active
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.data) {
         this.XMlist = res.data.data
       } else {
@@ -448,7 +452,7 @@ export default {
     },
     async getXMcate () {
       const res = await this.$axios.get('/api?datatype=get_itemcate&storeid=' + this.storeid)
-      console.log(res)
+      // console.log(res)
       this.catelist = res.data.data
       this.active = res.data.data[0].id
       this.getXMlist()
@@ -460,7 +464,7 @@ export default {
           search: this.keyword
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.tableData = res.data.data
       }
@@ -480,7 +484,7 @@ export default {
           time: moment(this.yudate).format('YYYY-MM-DD')
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1 && res.data.data) {
         if (this.timelist.length > 0) {
           let arr = []
@@ -488,12 +492,12 @@ export default {
             let aa = item.yytime.split(' ')[1]
             arr.push(aa)
           })
-          console.log(arr)
+          // console.log(arr)
           for (let i = 0; i < this.timelist.length; i++) {
             let bb = this.timelist[i].shi + ':' + this.timelist[i].fen + ':00'
-            console.log(bb)
+            // console.log(bb)
             if (arr.includes(bb)) {
-              console.log(this.timelist[i])
+              // console.log(this.timelist[i])
               this.timelist[i]['isyy'] = true
               this.timelist[i + 1]['isyy'] = true
             }
@@ -531,14 +535,14 @@ export default {
           let nowshi = moment(now).format('HH')
           let nowfen = moment(now).format('m')
           this.timelist = this.timelist.filter(item => {
-            console.log(nowshi, item.shi, item.fen, nowfen)
+            // console.log(nowshi, item.shi, item.fen, nowfen)
             return item.shi > nowshi || item.shi == nowshi && nowfen < 30
           })
         }
       } else {
         this.timelist = []
       }
-      console.log(this.timelist)
+      // console.log(this.timelist)
       this.checkyy()
     },
     tochosMember () {
@@ -561,7 +565,7 @@ export default {
       }
     },
     chooseCard (row) {
-      // console.log(row)
+      // // console.log(row)
       this.ismember = row
       this.cusMobile = row.mobile
       this.cusName = row.name
@@ -605,7 +609,7 @@ export default {
       const res = await this.$axios.get('/api?datatype=insert_yy', {
         params
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success('预约成功')
         this.$emit('close')
@@ -628,8 +632,15 @@ export default {
       }
     }
   },
-  created () { this.getXMcate() },
-  mounted () { }
+  created () {
+    this.getXMcate()
+    this.getworkerlist()
+  },
+  mounted () {
+    if (this.choose) {
+      this.staTime = this.choose.time
+    }
+  }
 }
 </script>
 

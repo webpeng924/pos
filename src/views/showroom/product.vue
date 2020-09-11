@@ -42,7 +42,7 @@ export default {
     // 获取产品分类
     async getCPcate () {
       const res = await this.$axios.get('/api?datatype=get_goodscate&storeid=' + this.storeid)
-      console.log(res)
+      // console.log(res)
       this.catelist = res.data.data
       this.active = res.data.data[0].id
       this.getCPlist()
@@ -54,7 +54,7 @@ export default {
           storeid: this.storeid
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1 && res.data.data) {
         this.tableData = res.data.data
       } else {

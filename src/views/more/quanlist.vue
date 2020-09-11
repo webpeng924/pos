@@ -161,7 +161,7 @@ export default {
           status: this.checked ? 1 : null
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.tableData = res.data.data
       } else {
@@ -185,7 +185,7 @@ export default {
         if (type == 1) {
           this.getList()
         }
-        console.log(res)
+        // console.log(res)
       })
     },
     async getState () {
@@ -195,7 +195,7 @@ export default {
           menu_name: 'quan_state'
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         if (res.data.data != null) {
           if (res.data.data.value == 'true') {

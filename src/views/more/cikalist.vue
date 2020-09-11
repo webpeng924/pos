@@ -3,8 +3,13 @@
     <div class="topView">
       <button class="btn-close btn-audio" @click="back"></button>
       <div class="tView">次卡列表</div>
-      <button class="btn-audio btn-filter" @click="drawer=true" v-show="!from"></button>
-      <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="add=true">新增</button>
+      <button class="btn-audio btn-filter" @click="drawer=true"></button>
+      <button
+        class="btn-audio"
+        style="font-size:18px;color:#dc670b"
+        @click="add=true"
+        v-show="!from"
+      >新增</button>
     </div>
     <el-drawer
       :visible.sync="drawer"
@@ -129,7 +134,7 @@ export default {
 
         }
       })
-      console.log(res)
+      // console.log(res)
       this.tableData = res.data.data
     },
     updateStatus (type) {
@@ -149,7 +154,7 @@ export default {
         if (type == 1) {
           this.getList()
         }
-        console.log(res)
+        // console.log(res)
       })
     },
     async getState () {
@@ -159,7 +164,7 @@ export default {
           menu_name: 'cika_state'
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         if (res.data.data != null) {
           if (res.data.data.value == 'true') {
@@ -176,12 +181,13 @@ export default {
     },
     handleCommand (command) {
       this.cate = command
-      // if (command == 'null') {
-      //   this.catetitle = '全部'
-      // } else {
-      //   let a = this.cateList.find(item => item.id == command)
-      //   this.catetitle = a.title
-      // }
+      if (command == 'null') {
+        this.cate = null
+        //   this.catetitle = '全部'
+        // } else {
+        //   let a = this.cateList.find(item => item.id == command)
+        //   this.catetitle = a.title
+      }
     },
     handleClose (done) {
       this.getList()

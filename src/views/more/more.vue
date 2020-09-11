@@ -188,6 +188,26 @@
             </el-dialog>
           </div>
         </div>
+        <div class="groupView">
+          <div class="titleView">设置</div>
+          <div class="listView">
+            <div class="listItem btn-audio" @click="kexian=true">
+              <img src="../../assets/images/pc.png" />
+              <div>客显屏轮播设置</div>
+            </div>
+            <el-dialog title="客显屏轮播设置" :visible.sync="kexian" width="30%" center>
+              <div style="text-align: center;padding: 20px;">
+                <div style="padding-bottom: 20px;">
+                  <el-button type="primary" @click="changeFLAG(1)">轮播图片</el-button>
+                  <el-button type="primary" @click="changeFLAG(3)">轮播视频</el-button>
+                </div>
+                <div style="padding-bottom: 10px;">
+                  <el-button type="primary" @click="changeFLAG(2)">重新获取数据</el-button>
+                </div>
+              </div>
+            </el-dialog>
+          </div>
+        </div>
         <div class="set_page_right" :class="{activePage:shopinfo}">
           <shopInfo @close="shopinfo=false" v-if="shopinfo"></shopInfo>
         </div>
@@ -334,6 +354,7 @@ export default {
       cikalist: false,
       quanlist: false,
       showTable: false,
+      kexian: false,
       tableName: '',
       userInfo: JSON.parse(sessionStorage.getItem('userInfo')),
       role: JSON.parse(sessionStorage.getItem('userInfo')).role,
@@ -375,6 +396,20 @@ export default {
         }
       )
     },
+    changeFLAG (type) {
+      if (type == 1) {
+        sessionStorage.setItem('FLAG', 'FLAG_1')
+      } else if (type == 3) {
+        sessionStorage.setItem('FLAG', 'FLAG_3')
+      } else {
+        var a = JSON.stringify({ id: this.storeid });
+        javascript: jsSzb.smInit(a);
+      }
+      this.kexian = false
+      var a = sessionStorage.getItem('FLAG')
+      javascript: jsSzb.smClientScreen(a)
+      return false;
+    },
     formatDate (date) {
       var y = date.getFullYear()
       var m = date.getMonth() + 1
@@ -405,19 +440,19 @@ export default {
           // 点击上个月
           let prevBtn1 = document.querySelector('.el-calendar__button-group .el-button-group>button:nth-child(1)');
           prevBtn1.addEventListener('click', () => {
-            console.log('上个月');
+            // console.log('上个月');
             this.month = moment(new Date(this.month)).subtract(1, "months").format('YYYY-MM')
           })
           // 点击今天
           let prevBtn2 = document.querySelector('.el-calendar__button-group .el-button-group>button:nth-child(2)');
           prevBtn2.addEventListener('click', () => {
-            console.log('今天');
+            // console.log('今天');
             this.month = moment(now).format('YYYY-MM')
           })
           // 点击下个月
           let prevBtn3 = document.querySelector('.el-calendar__button-group .el-button-group>button:nth-child(3)');
           prevBtn3.addEventListener('click', () => {
-            console.log('下个月');
+            // console.log('下个月');
             this.month = moment(new Date(this.month)).add(1, 'months').format('YYYY-MM')
           })
         })
@@ -456,7 +491,7 @@ export default {
     },
     async getInfo () {
       const res = await this.$axios.get('/api?datatype=more&storeid=' + this.storeid)
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.shopInfo = res.data.data
         let data = JSON.stringify(res.data.data)

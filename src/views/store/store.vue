@@ -119,7 +119,7 @@ export default {
   },
   watch: {
     value (data) {
-      console.log(data)
+      // console.log(data)
       if (data == '库存-入库单') {
         this.sign = 1
       } else {
@@ -141,7 +141,7 @@ export default {
           search: this.searchtxt ? this.searchtxt : null
         }
       })
-      console.log(res)
+      // console.log(res)
       this.tableData = []
       if (res.data.code == 1 && res.data.data) {
         res.data.data.forEach(item => {
@@ -157,7 +157,7 @@ export default {
       }
     },
     setInfo (data) {
-      console.log(data)
+      // console.log(data)
       if (data == 1) {
         this.getDate()
       }

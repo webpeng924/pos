@@ -263,18 +263,21 @@ export default {
     openXM () {
       this.fromtype = true
       this.projectList = true
+      this.add = false
     },
     openCP () {
       this.fromtype = true
       this.product = true
+      this.add = false
     },
     setdata (data) {
       this.projectList = false
-      console.log(data)
+      this.add = true
+      // console.log(data)
       if (data) {
         if (this.itemsInfo.length) {
           this.itemsInfo.forEach(item => {
-            console.log(item.id, data.id)
+            // console.log(item.id, data.id)
             if (item.id != data.id) {
               this.itemsInfo.push(data)
             } else {
@@ -302,7 +305,7 @@ export default {
     },
     async delitem (id) {
       const res = await this.$axios.get('/api?datatype=del_package&id=' + id)
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success('已删除')
         this.getList()
@@ -332,19 +335,20 @@ export default {
         fact_money: row.fact_money
       }
       this.date = [starttime, endtime]
-      this.goodsInfo = row.goodsinfo
-      this.itemsInfo = row.itemsinfo
+      this.goodsInfo = row.goodsinfo ? row.goodsinfo : []
+      this.itemsInfo = row.itemsinfo ? row.itemsinfo : []
       this.id = row.id
       this.type = 2
       this.add = true
     },
     setdata1 (data) {
       this.product = false
-      console.log(data)
+      this.add = true
+      // console.log(data)
       if (data) {
         if (this.goodsInfo.length) {
           this.goodsInfo.forEach(item => {
-            console.log(item.id, data.id)
+            // console.log(item.id, data.id)
             if (item.id != data.id) {
               this.$set(data, 'count', 1)
               this.goodsInfo.push(data)
@@ -352,6 +356,7 @@ export default {
           })
         } else {
           this.$set(data, 'count', 1)
+          data.content = ''
           this.goodsInfo.push(data)
         }
       }
@@ -373,7 +378,7 @@ export default {
         if (type == 1) {
           this.getList()
         }
-        console.log(res)
+        // console.log(res)
       })
     },
     rowClick (row, index, e) {
@@ -386,7 +391,7 @@ export default {
           menu_name: 'tc_state'
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         if (res.data.data != null) {
           if (res.data.data.value == 'true') {
@@ -409,11 +414,12 @@ export default {
           status: this.checked ? 1 : null
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1 && res.data.data) {
         this.tableData = res.data.data
         this.tableData.forEach(item => {
           if (item.goodsinfo) {
+            // console.log(item.goodsinfo)
             item.goodsinfo = JSON.parse(item.goodsinfo)
           }
           if (item.itemsinfo) {
@@ -447,7 +453,7 @@ export default {
         goodsinfo: this.goodsInfo
       })
       const res = await this.$axios.post('/api?datatype=insert_package', data)
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)
         this.getList()
@@ -540,6 +546,9 @@ export default {
   overflow: hidden;
   .el-dialog__header {
     display: none;
+  }
+  .el-dialog__body {
+    height: 100%;
   }
 }
 </style>

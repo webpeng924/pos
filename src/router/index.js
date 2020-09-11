@@ -11,6 +11,16 @@ const routes = [
     component: () => import('@/views/login.vue')
   },
   {
+    path: '/signPage',
+    name: 'signPage',
+    component: () => import('@/components/signAgreement.vue')
+  },
+  {
+    path: '/sign',
+    name: 'sign',
+    component: () => import('@/components/signPage.vue')
+  },
+  {
     path: '/home',
     name: 'Home',
     component: Home
@@ -63,7 +73,8 @@ const router = new VueRouter({
 
 router.beforeEach((to, from, next) => {
   let user = sessionStorage.getItem('userInfo')
-  if (user || to.path == '/login') {
+  let shop = sessionStorage.getItem('shopInfo')
+  if ((user && shop) || to.path == '/login' || to.path == '/signPage' || to.path == '/sign') {
     next()
   } else {
     next({

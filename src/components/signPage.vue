@@ -1,19 +1,22 @@
 <template>
-  <div class="page sign-page">
-    <div class="content">
-      <div>请用正楷在下框写入您的真实姓名：</div>
-      <div class="sign-wrap" id="signWrap">
-        <canvas id="myCanvas" width="200" height="300"></canvas>
+  <div class="signPage">
+    <div class="sign-page">
+      <div class="content">
+        <div>请用正楷在下框写入您的真实姓名：</div>
+        <div class="sign-wrap" id="signWrap">
+          <canvas id="myCanvas" width="200" height="300"></canvas>
+        </div>
       </div>
-    </div>
-    <div class="fix-btn">
-      <el-button
-        size="large"
-        type="hollow"
-        class="hollow-primary-btn"
-        @click.native="clearArea()"
-      >清除</el-button>
-      <el-button size="large" type="primary" @click.native="saveSign()">提交</el-button>
+      <div class="fix-btn">
+        <el-button
+          size="large"
+          type="hollow"
+          class="hollow-primary-btn"
+          @click.native="clearArea()"
+        >清除</el-button>
+        <el-button size="large" type="primary" @click.native="saveSign()">提交</el-button>
+        <el-button @click="$router.go(-1)">返回</el-button>
+      </div>
     </div>
   </div>
 </template>
@@ -32,7 +35,7 @@ export default {
     };
   },
   mounted () {
-    console.log("mounted");
+    // console.log("mounted");
     this.image = "";
     this.mousePressed = false;
     var lastX, lastY;
@@ -48,7 +51,7 @@ export default {
   methods: {
     saveImageInfo () {
       var image = this.c.toDataURL("image/png"); //得到生成后的签名base64位  url 地址
-      console.log(image);
+      // console.log(image);
       let params = {
         contract_number: this.$route.query.contract_number,
         img_base64: image //图片base6码
@@ -140,7 +143,7 @@ export default {
       if (isDown) {
         this.ctx.beginPath();
         this.ctx.strokeStyle = "#000"; //颜色
-        this.ctx.lineWidth = 3; //线宽
+        this.ctx.lineWidth = 10; //线宽
         this.ctx.lineJoin = "round";
         this.ctx.lineMax = 10; //设置画笔最大线宽
         this.ctx.lineMin = 3; //设置画笔最小线宽
@@ -155,7 +158,7 @@ export default {
       this.lastY = y;
     },
     clearArea () {
-      console.log("清空画板");
+      // console.log("清空画板");
       // Use the identity matrix while clearing the canvas
       this.ctx.setTransform(1, 0, 0, 1, 0, 0);
       this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
@@ -167,17 +170,37 @@ export default {
     checkEmpty () {
       var c = document.getElementById("myCanvas"); // 获取html的canvas对象，我这个id="myCanvas"
       if (this.isCanvasBlank(c)) {
-        this.$dialog.toast({
-          mes: "请签名",
-          timeout: 1500,
-          icon: "error",
-          callback: () => { }
-        });
+        this.$message.error('请签名')
         return;
       } else {
-        console.log("提交签名");
+        // console.log("提交签名");
         var image = this.c.toDataURL("image/png"); //得到生成后的签名base64位  url 地址
-        console.log(image);//保存为图片base64 url
+        // console.log(image);//保存为图片base64 url
+        var params = new URLSearchParams()
+        params.append('img', image)
+        this.$axios({
+          url: '/api?datatype=upload_img',
+          method: 'post',
+          data: params
+        }).then(res => {
+          // console.log(res)
+          if (res.data && res.data.data) {
+            this.uploadImg(res.data.data)
+          }
+        })
+      }
+    },
+    async uploadImg (img) {
+      const res = await this.$axios.get('/api?datatype=insert_sign_photo', {
+        params: {
+          storeid: sessionStorage.getItem('storeid'),
+          sign_photo: img
+        }
+      })
+      if (res.data.code == 1) {
+        this.$message.success('签署成功')
+        sessionStorage.setItem('signPhoto', img)
+        this.$router.go(-1)
       }
     },
     //验证canvas画布是否为空函数
@@ -191,11 +214,18 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
-.page {
+.signPage {
+  padding: 50px;
   height: 100%;
+  z-index: 999;
+  overflow-y: auto;
+  background-color: #fff;
+  position: fixed;
+  width: 100%;
+  font-size: 14px;
 }
-
 .sign-page .content {
+  width: 100%;
   padding: 0.3rem;
   font-size: 14px;
   height: 100%;
@@ -217,5 +247,9 @@ export default {
   // margin: 10px 5% 5px 5%;
   color: #ff6000;
   background-color: #ffffff;
+}
+.fix-btn {
+  display: flex;
+  justify-content: space-around;
 }
 </style>

@@ -80,7 +80,7 @@ export default {
           storeid: sessionStorage.getItem('storeid')
         }
       });
-      console.log("上传", res);
+      // console.log("上传", res);
     }
   },
   components: {

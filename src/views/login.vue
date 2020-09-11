@@ -3,9 +3,9 @@
     <div>
       <div class="login_box">
         <div class="top">
-          <img src="../assets/images/logo.jpg" alt />
+          <img src alt />
         </div>
-        <div class="bom" @keyup.enter="login">
+        <div class="bom">
           <el-input v-model="name" @change="success=false" placeholder="请输入账号" clearable>
             <i slot="prefix" class="iconfont icon-yonghuming1"></i>
           </el-input>
@@ -21,17 +21,15 @@
         <div class="btn" @click="login">登陆</div>
       </div>
     </div>
-    <div class="set_page" :class="{activePage:signPage}">
-      <xiaohao @close="signPage=false" v-if="signPage"></xiaohao>
-    </div>
+    <signAgreement @close="signPage=false" v-if="signPage"></signAgreement>
   </div>
 </template>
 
 <script>
-import signPage from '@/components/signPage'
+import signAgreement from '@/components/signAgreement'
 import qs from 'qs'
 export default {
-  components: {},
+  components: { signAgreement },
   props: {},
   data () {
     return {
@@ -50,48 +48,55 @@ export default {
         username: this.name,
         password: this.password
       })
-      console.log('成功')
       try {
         const res = await this.$axios.post('/api?datatype=login', data)
-        console.log(res)
+        // console.log(res)
         if (res.data.code == 1) {
-          this.getInfo(res.data.data.storeid)
+          sessionStorage.setItem('FLAG', 'FLAG_1')
           this.$message.success(res.data.msg)
           sessionStorage.setItem('storeid', res.data.data.storeid)
           this.$store.commit('setJson', res.data.data);
           localStorage.setItem('userId', res.data.data.id)
           sessionStorage.setItem('userInfo', JSON.stringify(res.data.data));
+          this.getInfo(res.data)
+          var a = JSON.stringify({ id: res.data.data.storeid });
+          // console.log(a)
+          javascript: jsSzb.smInit(a);
+          // return false;
         } else {
           this.$message.error(res.data.msg)
         }
       }
       catch (err) {
-        alert('登录出错')
+        // console.log(err)
       }
     },
-    async getInfo (id) {
-      const res = await this.$axios.get('/api?datatype=more&storeid=' + id)
-      console.log(res)
-      if (res.data.code == 1) {
-        let data = res.data.data
-        sessionStorage.setItem('shopInfo', JSON.stringify(data))
-        sessionStorage.setItem('shoptype', data.type_id)
-        this.$router.push({ name: 'Home' })
+    async getInfo (info) {
+      if (info.sign_photo != null) {
+        const res = await this.$axios.get('/api?datatype=more&storeid=' + info.data.storeid)
+        if (res.data.code == 1) {
+          let data = res.data.data
+          sessionStorage.setItem('shopInfo', JSON.stringify(data))
+          sessionStorage.setItem('shoptype', data.type_id)
+          this.$router.push({ name: 'Home' })
+        }
+      } else {
+        this.$router.push({ name: 'signPage' })
       }
     }
   },
   created () { },
   mounted () {
-    if ((/Android/gi).test(navigator.userAgent)) {
-      window.addEventListener('resize', function () {
-        if (document.activeElement.tagName == 'INPUT' ||
-          document.activeElement.tagName == 'TEXTAREA') {
-          window.setTimeout(function () {
-            document.activeElement.scrollIntoViewIfNeeded();
-          }, 0);
-        }
-      });
-    }
+    // if ((/Android/gi).test(navigator.userAgent)) {
+    //   window.addEventListener('resize', function () {
+    //     if (document.activeElement.tagName == 'INPUT' ||
+    //       document.activeElement.tagName == 'TEXTAREA') {
+    //       window.setTimeout(function () {
+    //         document.activeElement.scrollIntoViewIfNeeded();
+    //       }, 0);
+    //     }
+    //   });
+    // }
   }
 }
 </script>

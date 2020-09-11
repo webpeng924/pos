@@ -53,7 +53,7 @@
       </div>
     </div>
     <div class="set_page" :class="{activePage:addyuyue}">
-      <addyuyue @close="addyuyue=false;checkyy()" :choose="choosOne" v-if="addyuyue"></addyuyue>
+      <addyuyue @close="addyuyue=false;checkyy()" :choose="info" v-if="addyuyue"></addyuyue>
     </div>
     <div class="statusView">
       <div class="flagView">
@@ -87,7 +87,7 @@
       width="600px"
     >
       <div class="dialogMain">
-        <div class="dialogItem" @click="addyuyue=true;typeDialog=false">美容预约</div>
+        <div class="dialogItem" @click="toadd">美容预约</div>
         <div class="dialogItem" @click="submit">设置占用</div>
       </div>
     </el-dialog>
@@ -202,7 +202,6 @@ export default {
       date: '',
       storeid: sessionStorage.getItem('storeid'),
       addyuyue: false,
-      choosOne: '',
       searchlist: [],
       typeDialog: false,
       yylist: [],
@@ -211,7 +210,8 @@ export default {
       worker: '',
       workerid: '',
       keyword: '',
-      staTime: ''
+      staTime: '',
+      info: ''
     }
   },
   watch: {
@@ -222,6 +222,14 @@ export default {
   },
   computed: {},
   methods: {
+    toadd () {
+      this.info = {
+        workerid: this.workerid,
+        time: this.staTime
+      }
+      this.addyuyue = true
+      this.typeDialog = false
+    },
     color (val) {
       switch (val) {
         case '0':
@@ -253,7 +261,7 @@ export default {
       }
     },
     async toSearch () {
-      console.log(this.keyword)
+      // console.log(this.keyword)
       if (!this.keyword) return this.$message.errer('请输入查询手机号')
       const res = await this.$axios.get('/api?datatype=get_yylist', {
         params: {
@@ -274,17 +282,17 @@ export default {
       this.handleClose()
     },
     checktime (v, val) {
-      console.log(val, v)
+      // console.log(val, v)
       this.worker = val.name
       this.workerid = val.id
       this.staTime = moment(this.date).format('YYYY-MM-DD') + ' ' + v.shi + ':' + v.fen + ':00'
-      console.log(this.staTime)
+      // console.log(this.staTime)
       if (val.shilist.length) {
         let a = v.shi + ':' + v.fen
         let flag = val.shilist.some(item => a == item)
         if (flag) {
           let data = val[v.shi + ':' + v.fen].split(',')[0]
-          console.log(data)
+          // console.log(data)
           this.showcurrent = this.yylist.find(k => k.id == data)
           this.yuyueDialog = true
         } else {
@@ -326,7 +334,7 @@ export default {
           time: moment(this.date).format('YYYY-MM-DD')
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1 && res.data.data) {
         this.yylist = res.data.data
         this.workerlist.forEach(v => {
@@ -393,7 +401,7 @@ export default {
       const res = await this.$axios.get('/api?datatype=insert_yy', {
         params
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success('占用成功')
         this.typeDialog = false

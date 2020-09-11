@@ -44,7 +44,7 @@
             </el-dialog>
             <div class="subItem">
               <label>仓库名称</label>
-              <div>总仓库</div>
+              <div>门店仓库</div>
             </div>
           </div>
         </div>
@@ -255,7 +255,7 @@ export default {
           type: 1
         }
       })
-      console.log(res)
+      // console.log(res)
       this.tableData = res.data.data
     },
     chosCp (v) {
@@ -273,12 +273,12 @@ export default {
         stock_no: this.stock_no,
         pan_date: this.formatDate(this.date),
         // checkman: JSON.parse(sessionStorage.getItem('userInfo')).username,
-        warehouse: '总仓库',
+        warehouse: '门店仓库',
         pan_userid: this.buyid,
         goodsinfo: this.chooselist
       })
       const res = await this.$axios.post('/api?datatype=insert_pan_stock', data)
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success('盘点成功')
         this.$emit('close', 1)
@@ -297,7 +297,7 @@ export default {
         this.$set(a, 'new_num', 0)
         this.$set(a, 'cha', 0)
         Object.assign(a, b)
-        console.log(a, b)
+        // console.log(a, b)
         arr.push(a)
       })
       this.chooselist = arr
@@ -537,7 +537,7 @@ export default {
       overflow-x: hidden;
       overflow-y: auto;
       color: #28282d;
-      padding-bottom: 25px;
+      height: calc(100% - 100px);
       .listItem {
         position: relative;
         display: flex;
@@ -573,6 +573,12 @@ export default {
       .listItem:nth-child(odd) {
         background: #f8f8f8;
       }
+    }
+  }
+  /deep/.el-dialog {
+    height: 600px;
+    .el-dialog__body {
+      height: calc(100% - 124px) !important;
     }
   }
 }

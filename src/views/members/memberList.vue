@@ -74,7 +74,7 @@ export default {
           is_wei: 0
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1 && res.data.data) {
         res.data.data.forEach(item => {
           if (!item.avatar) {

@@ -94,7 +94,7 @@ export default {
       this.$emit('close')
     },
     async getList () {
-      console.log(this.formatDate(new Date(this.date[0])))
+      // console.log(this.formatDate(new Date(this.date[0])))
       const res = await this.$axios.get('/api?datatype=get_stock_list', {
         params: {
           storeid: this.storeid,
@@ -104,7 +104,7 @@ export default {
           search: this.searchtxt
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1 && res.data.data) {
         this.tableData = res.data.data
       } else {
@@ -115,7 +115,7 @@ export default {
       this.$refs.refTable.toggleRowExpansion(row)
     },
     toEdit (row) {
-      console.log(row)
+      // console.log(row)
       this.choose = row.id
       this.add = true
     },

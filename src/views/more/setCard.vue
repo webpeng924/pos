@@ -179,7 +179,7 @@ export default {
         fixedNumber: [3, 2]
       };
       this.$refs.cropper.open(option, (data) => {
-        console.log(data)
+        // console.log(data)
         this.add = true
         this.form.img = data
       })
@@ -191,7 +191,7 @@ export default {
           search: this.searchtxt ? this.searchtxt : null
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.tableData = res.data.data
       }
@@ -238,7 +238,7 @@ export default {
     },
     async delitem (id) {
       const res = await this.$axios.get('/api?datatype=del_card&id=' + id)
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success('已删除')
         this.getList()
@@ -261,7 +261,7 @@ export default {
         goods_discount: this.form.goods_discount
       })
       const res = await this.$axios.post('/api?datatype=insert_card', data)
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)
         this.add = false

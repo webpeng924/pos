@@ -4,7 +4,12 @@
       <button class="btn-close btn-audio" @click="back"></button>
       <div class="tView">产品资料</div>
       <button class="btn-audio btn-filter" @click="drawer=true"></button>
-      <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="addNew">新增</button>
+      <button
+        class="btn-audio"
+        style="font-size:18px;color:#dc670b"
+        @click="addNew"
+        v-show="!from"
+      >新增</button>
     </div>
     <el-drawer
       :visible.sync="drawer"
@@ -96,17 +101,16 @@ export default {
           search: this.searchtxt
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1 && res.data.data != null) {
         this.tableData = res.data.data
         this.cateList = []
         res.data.data.forEach(item => {
           if (this.cateList.length != 0) {
-            this.cateList.every(v => {
-              if (v.id != item.category_id) {
-                this.cateList.push({ 'id': item.category_id, 'title': item.title })
-              }
-            })
+            let flag = this.cateList.every(v => v.id != item.category_id)
+            if (flag) {
+              this.cateList.push({ 'id': item.category_id, 'title': item.title })
+            }
           } else {
             this.cateList.push({ 'id': item.category_id, 'title': item.title })
           }
@@ -144,7 +148,7 @@ export default {
         if (type == 1) {
           this.getList()
         }
-        console.log(res)
+        // console.log(res)
       })
     },
     handleCommand (command) {
@@ -160,7 +164,7 @@ export default {
       if (this.from) {
         this.$emit('close', row)
       } else {
-        console.log(row)
+        // console.log(row)
         this.choose = row
         this.add = true
       }
@@ -172,7 +176,7 @@ export default {
           menu_name: 'goods_state'
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         if (res.data.data != null) {
           if (res.data.data.value == 'true') {

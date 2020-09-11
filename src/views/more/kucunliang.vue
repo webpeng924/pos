@@ -58,7 +58,7 @@ export default {
           type: 1
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1 && res.data.data) {
         this.tableData = res.data.data
       } else {

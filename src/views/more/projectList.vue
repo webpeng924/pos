@@ -102,7 +102,7 @@ export default {
         if (type == 1) {
           this.getList()
         }
-        console.log(res)
+        // console.log(res)
       })
     },
     async getList () {
@@ -114,7 +114,7 @@ export default {
           search: this.searchtxt
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1 && res.data.data != null) {
         this.tableData = res.data.data
         this.cateList = []
@@ -137,7 +137,7 @@ export default {
       if (this.from) {
         this.$emit('close', row)
       } else {
-        console.log(row)
+        // console.log(row)
         this.choose = row
         this.add = true
       }
@@ -149,7 +149,7 @@ export default {
           menu_name: 'item_state'
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         if (res.data.data != null) {
           if (res.data.data.value == 'true') {

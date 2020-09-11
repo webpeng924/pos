@@ -194,7 +194,7 @@ export default {
           storeid: this.storeid,
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.catelist = res.data.data
       }
@@ -209,7 +209,7 @@ export default {
         msg: '建议图片大小：2M'
       };
       this.$refs.cropper.open(option, (data) => {
-        console.log(data)
+        // console.log(data)
         this.img = data
       })
     },
@@ -238,7 +238,7 @@ export default {
       const res = await this.$axios.get('/api?datatype=insert_item', {
         params
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)
         this.back()
@@ -253,7 +253,7 @@ export default {
   },
   created () {
     this.getCate()
-    console.log(this.choose)
+    // console.log(this.choose)
     if (this.choose) {
       this.categoryName = this.choose.title
       this.type = 2
@@ -357,6 +357,7 @@ export default {
             background-size: 100% 100%;
             img {
               width: 100%;
+              height: 100%;
             }
             span {
               position: absolute;

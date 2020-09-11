@@ -9,7 +9,7 @@
         <span>收银台</span>
       </div>
     </router-link>
-    <router-link :to="{name:'card'}">
+    <router-link :to="{name:'card'}" v-show="type!=1">
       <div class="nav_item">
         <i class="iconfont icon-huiyuanvipqia01"></i>
         <span>开通会员</span>
@@ -66,6 +66,7 @@ export default {
   props: {},
   data () {
     return {
+      type: sessionStorage.getItem('shoptype')
     }
   },
   watch: {},

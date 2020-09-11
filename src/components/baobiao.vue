@@ -159,7 +159,7 @@ export default {
             }
           }
         }
-        console.log(this.salelist)
+        // console.log(this.salelist)
         this.draw(text)
       } else {
         this.tableData = []

@@ -14,7 +14,7 @@
                 <div class="listItem" v-for="(v,k) in itemlist" :key="k">
                   <div class="masterView">
                     <div class="nameView">
-                      <span class="span-name">{{v.itemname}}</span>
+                      <span class="span-name one-txt-cut">{{v.itemname}}</span>
                       <span class="span-quantity">x{{v.num}}</span>
                     </div>
                     <!-- <div class="btnView">
@@ -304,7 +304,7 @@ export default {
         this.$set(k, 'workerNo', '')
         if (k.staff1 && k.staff1 != 0) {
           let workername = workerlist.find(w => w.id == k.staff1)
-          console.log(workerlist, k.staff1, workername)
+          // console.log(workerlist, k.staff1, workername)
           k.workername = workername.name
           k.workerNo = workername.job_no
         }
@@ -342,7 +342,7 @@ export default {
     chooseQuan (v) {
       if (this.paytype == '会员卡') {
         let flag = moment.unix(v.v_starttime).format('YYYY-MM-DD') <= moment(new Date()).format('YYYY-MM-DD')
-        console.log(flag)
+        // console.log(flag)
         if (flag) {
           this.choosquan = v
           this.quanDialog = false
@@ -415,7 +415,7 @@ export default {
     }
   },
   mounted () {
-    console.log('创建')
+    // console.log('创建')
     var a = 'FLAG_0'
     javascript: jsSzb.smClientScreen(a)
     return false;
@@ -526,6 +526,10 @@ export default {
                 padding: 20px 20px 20px 60px;
                 line-height: 28px;
                 justify-content: space-between;
+                .span-name {
+                  width: 300px;
+                  display: inline-block;
+                }
               }
             }
           }

@@ -145,7 +145,7 @@ export default {
   mounted () {
     this.$dragging.$on('dragged', ({ value }) => {
       //因为我这在排序的时候不需要做处理，所以空着就行
-      console.log(value.list)
+      // console.log(value.list)
     })
   }
 }

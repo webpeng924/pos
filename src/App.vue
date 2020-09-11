@@ -25,7 +25,7 @@ export default {
   },
   methods: {
     browerStatus (e) {
-      console.log(e)
+      // console.log(e)
       var that = this;
       var n = window.event.screenX - window.screenLeft;
       var b = n > document.documentElement.scrollWidth - 20;
@@ -33,7 +33,7 @@ export default {
         that.$axios.get('/api?datatype=logout&id=' + that.id)
         return false
       } else {
-        console.log('刷新')
+        // console.log('刷新')
       }
     },
     beforeunloadHandler () {
@@ -54,6 +54,14 @@ export default {
   mounted () {
     window.addEventListener('beforeunload', e => this.beforeunloadHandler(e))
     window.addEventListener('unload', e => this.unloadHandler(e))
+    window.addEventListener('resize', function () {
+      if (document.activeElement.tagName == 'INPUT' ||
+        document.activeElement.tagName == 'TEXTAREA') {
+        window.setTimeout(function () {
+          document.activeElement.scrollIntoViewIfNeeded();
+        }, 0);
+      }
+    })
   }
 }
 </script>

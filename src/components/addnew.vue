@@ -16,7 +16,7 @@
             <!-- <i class="el-icon-search" @click="showSearch = !showSearch;getXMlist()"></i> -->
             <div class="keywordView">
               <div class="inputView">
-                <input placeholder="请输入编号或者名称查询" v-model="keyword" />
+                <input placeholder="请输入编号或者名称查询" v-model="searchtxt" />
                 <button class="btn-audio btn-search" @click="getXMlist">搜索</button>
               </div>
             </div>
@@ -168,7 +168,7 @@
               <div class="priceView">￥&nbsp;{{(Number(v.price)*v.num*v.discount).toFixed(2)}}</div>
             </div>
             <div class="empView">
-              <div class="empItem" v-show="!v.worker&&v.typeid!=2">
+              <div class="empItem" v-show="!v.worker">
                 <label
                   class="label-name"
                   style="color: rgb(255, 94, 86);"
@@ -181,7 +181,8 @@
                   class="label-name overflowText"
                   @click="openworker(v,k,2)"
                 >{{v.worker.name}}（No：{{v.worker.job_no}}）</label>
-                <label class="label-job overflowText">服务人员</label>
+                <label class="label-job overflowText" v-show="v.typeid==2">销售人员</label>
+                <label class="label-job overflowText" v-show="v.typeid!=2">服务人员</label>
               </div>
             </div>
             <button class="btn-del" @click="delchooselist(v,k)"></button>
@@ -225,7 +226,7 @@
               <el-option label="号码" value="号码"></el-option>
               <el-option label="姓名" value="姓名"></el-option>
             </el-select>
-            <input placeholder="请输入手机号或会员卡号" v-model="keyword" />
+            <input placeholder="请输入手机号或会员卡号" v-model="keyword" @keyup.enter="getList" />
             <button class="btn-close btn-audio" @click="keyword=''"></button>
           </div>
           <button class="btn-audio" :class="{search:keyword}" @click="getList">查询</button>
@@ -350,6 +351,7 @@ export default {
       laiyuan: '',
       radio: '1',
       keyword: '',
+      searchtxt: '',
       setnum: false,
       CPnum: '1',
       memo: '',
@@ -396,7 +398,7 @@ export default {
       }
     },
     member (val, oldValue) {
-      console.log(val, oldValue)
+      // console.log(val, oldValue)
       if (val) {
         this.getInfo(val.member_id)
         this.getcicardInfo()
@@ -516,7 +518,7 @@ export default {
         dis_total: this.newprice ? this.newprice : this.sumprice
       }
       let data = qs.stringify(obj)
-      console.log(obj)
+      // console.log(obj)
       const res = await this.$axios.post('/api?datatype=insert_order', data)
       if (res.data.code == 1) {
         if (status == 1) {
@@ -551,14 +553,16 @@ export default {
           member_id: this.member.member_id
         }
       })
-      if (res.data.code == 1) {
+      if (res.data.code == 1 && res.data.data) {
         this.member = Object.assign(this.member, res.data.data)
-        if (this.yyitem) {
+        if (this.yyitem && this.member.item_discount) {
           this.yyitem.discount = Number(this.member.item_discount) / 10
+        } else {
+          this.yyitem.discount = 1
         }
         if (this.chooslist.length) {
           this.chooslist.forEach(item => {
-            if (item.discount == 1) {
+            if (item.discount == 1 && this.member.goods_discount) {
               if (item.typeid == 2) {
                 item.discount = Number(this.member.goods_discount) / 10
               } else {
@@ -616,6 +620,7 @@ export default {
       });
     },
     setcika (value, v) {
+      let discount = this.member.item_discount ? this.member.item_discount / 10 : 1
       let obj = {
         worker: '',
         is_usecard: 1,
@@ -625,12 +630,14 @@ export default {
         itemname: v.itemname,
         price: 0,
         cikaid: v.id,
+        staff1: 0,
         subtotal: 0,
-        discount: Number(this.member.item_discount) / 10,
+        discount: discount,
         maxNum: v.typeid == 1 ? v.rest_count : ''
       }
       this.chooslist = this.chooslist.filter(item => !item.cikaid || item.cikaid != v.id)
       this.chooslist.push(obj)
+      this.openworker(obj, this.chooslist.length - 1, 2)
     },
     async checkyuyue () {
       const res = await this.$axios.get('/api?datatype=get_yylist', {
@@ -639,7 +646,7 @@ export default {
           time: moment(new Date).format('YYYY-MM-DD')
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1 && res.data.data) {
         this.yuyuelist = res.data.data
       } else {
@@ -729,7 +736,7 @@ export default {
     },
     // 打开
     openworker (v, k, sign) {
-      console.log(v)
+      // console.log(v)
       if (sign == 2) {
         this.ModifyW = k
         let worker = ''
@@ -747,7 +754,7 @@ export default {
         this.additem = v
         this.ModifyW = null
         if (this.id == 1) {
-          console.log(v)
+          // console.log(v)
           let option = {
             title: v.name,
             serverfor: this.member ? this.member.name : '客B',
@@ -812,10 +819,10 @@ export default {
           status: 1,
           type: this.id == 2 ? 1 : null,
           cate: this.active,
-          search: this.keyword
+          search: this.searchtxt
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.data) {
         this.XMlist = res.data.data
         this.XMlist.forEach(item => {
@@ -826,7 +833,7 @@ export default {
       } else {
         if (this.showSearch) {
           this.$message.error('未搜索到该分类下项目或产品')
-          this.keyword = ''
+          this.searchtxt = ''
         }
         this.XMlist = []
       }
@@ -834,7 +841,7 @@ export default {
     // 获取项目分类
     async getXMcate () {
       const res = await this.$axios.get('/api?datatype=get_itemcate&storeid=' + this.storeid)
-      console.log(res)
+      // console.log(res)
       this.catelist = res.data.data
       this.active = res.data.data[0].id
       this.getXMlist()
@@ -842,7 +849,7 @@ export default {
     // 获取产品分类
     async getCPcate () {
       const res = await this.$axios.get('/api?datatype=get_goodscate&storeid=' + this.storeid)
-      console.log(res)
+      // console.log(res)
       this.catelist = res.data.data
       this.active = res.data.data[0].id
       this.getXMlist()
@@ -879,7 +886,7 @@ export default {
         }
       })
 
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)
         this.addcate = false
@@ -904,7 +911,7 @@ export default {
         }
       })
 
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)
         if (this.id == 1) {
@@ -922,10 +929,10 @@ export default {
       console.log(v, data)
       if (data) {
         if (data.gong) {
-          this.$set(v, 'staff1', data.id)
+          this.$set(v, 'staff1', data.gong.id)
         }
         this.$set(v, 'typeid', 1)
-        if (this.member) {
+        if (this.member && this.member.item_discount) {
           this.$set(v, 'discount', Number(this.member.item_discount) / 10)
         } else {
           this.$set(v, 'discount', 1)
@@ -933,13 +940,13 @@ export default {
         this.$set(v, 'goods_id', v.id)
       } else {
         this.$set(v, 'typeid', 2)
-        if (this.member) {
+        if (this.member && this.member.goods_discount) {
           this.$set(v, 'discount', Number(this.member.goods_discount) / 10)
         } else {
           this.$set(v, 'discount', 1)
         }
       }
-      console.log(v)
+      // console.log(v)
       let obj = {
         worker: data ? data.gong : '',
         typeid: v.typeid,
@@ -956,6 +963,9 @@ export default {
         this.chooslist = this.chooslist.filter(k => k.typeid != 2 || (k.typeid == 2 && k.itemid != obj.itemid))
       }
       this.chooslist.push(obj)
+      if (obj.typeid == 2) {
+        this.openworker(obj, this.chooslist.length - 1, 2)
+      }
     },
     delchooselist (v, k) {
       this.chooslist.splice(k, 1)
@@ -970,7 +980,7 @@ export default {
           search: this.keyword
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.tableData = res.data.data
         if (this.info && sign == 1) {
@@ -991,7 +1001,7 @@ export default {
             this.chooslist = this.info.orderinfo
             this.chooslist.forEach(item => {
               if (!item.discount) {
-                if (this.member) {
+                if (this.member && this.member.goods_discount) {
                   if (item.typeid == 2) {
                     this.$set(item, 'discount', Number(this.member.goods_discount) / 10)
                   } else {
@@ -1022,8 +1032,8 @@ export default {
     }
   },
   beforeDestroy () {
-    console.log('消毁')
-    var a = 'FLAG_1'
+    // console.log('消毁')
+    var a = sessionStorage.getItem('FLAG')
     javascript: jsSzb.smClientScreen(a)
     return false;
   },
@@ -1032,12 +1042,12 @@ export default {
       let arr = JSON.parse(sessionStorage.getItem('carlist'))
       this.chooslist = arr
     }
-    console.log(this.info)
+    // console.log(this.info)
     this.getXMcate()
     this.getList(1)
   },
   mounted () {
-    console.log('创建')
+    // console.log('创建')
     var a = 'FLAG_0'
     javascript: jsSzb.smClientScreen(a)
     return false;

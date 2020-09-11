@@ -3,7 +3,7 @@
     <div class="topView">
       <button class="btn-close btn-audio" @click="$emit('close')"></button>
       <div class="tView">
-        <p>会员卡销售统计表</p>
+        <p>员工业绩排行</p>
         <div class="dateView">
           <el-date-picker
             v-model="date"

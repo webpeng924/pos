@@ -68,7 +68,7 @@
             </el-dialog>
             <div class="subItem">
               <label>归属仓库</label>
-              <div>总仓库</div>
+              <div>门店仓库</div>
             </div>
           </div>
           <div class="groupView">
@@ -359,7 +359,7 @@ export default {
           type: 1
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1 && res.data.data) {
         this.tableData = res.data.data
         this.tableData.forEach(item => {
@@ -395,7 +395,7 @@ export default {
         out_date: this.formatDate(this.date),
         out_type: this.way,
         checkman: JSON.parse(sessionStorage.getItem('userInfo')).username,
-        warehouse: '总仓库',
+        warehouse: '门店仓库',
         number: this.chooselist.length,
         amount: this.totalPrice,
         get_usertype: '员工',
@@ -405,7 +405,7 @@ export default {
         goodsinfo: this.chooselist
       })
       const res = await this.$axios.post('/api?datatype=insert_out_stock', data)
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success('出库成功')
         this.$emit('close', 1)
@@ -426,7 +426,7 @@ export default {
         this.$set(a, 'supplier_id', '供应商A')
         this.$set(a, 'makedate', this.formatDate(new Date()))
         Object.assign(a, b)
-        console.log(a, b)
+        // console.log(a, b)
         arr.push(a)
       })
       this.chooselist = arr
@@ -753,7 +753,7 @@ export default {
       overflow-x: hidden;
       overflow-y: auto;
       color: #28282d;
-      padding-bottom: 25px;
+      height: calc(100% - 100px);
       .listItem {
         position: relative;
         display: flex;
@@ -789,6 +789,12 @@ export default {
       .listItem:nth-child(odd) {
         background: #f8f8f8;
       }
+    }
+  }
+  /deep/.el-dialog {
+    height: 600px;
+    .el-dialog__body {
+      height: calc(100% - 124px) !important;
     }
   }
 }

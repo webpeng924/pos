@@ -29,7 +29,9 @@ axios.interceptors.request.use(config => {
   loading = Loading.service({ lock: true, text: '数据加载中...', spinner: 'el-icon-loading', background: 'rgba(0, 0, 0, 0.7)' })
   if (config.url.substr(0, 4) === '/api') {
     config.url = 'https://hb.rgoo.com/api/api.php' + config.url.substr(4)
-    // config.url = 'http://192.168.0.110:8066' + config.url.substr(4)
+  }
+  if (config.url.substr(0, 4) === '/apt') {
+    config.url = 'http://hb.rgoo.com/api/api_table.php' + config.url.substr(4)
   }
   return config
 })

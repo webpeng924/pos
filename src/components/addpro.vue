@@ -195,7 +195,7 @@ export default {
         price: '',
         in_cost: '',
         category_id: '',
-        warehouse: '总仓库',
+        warehouse: '门店仓库',
         goods_unit: '',
         supplier_id: '',
         state: false,
@@ -220,7 +220,7 @@ export default {
         }
       })
 
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.catelist = res.data.data
       }
@@ -233,7 +233,7 @@ export default {
         fixedNumber: [3, 2]
       };
       this.$refs.cropper.open(option, (data) => {
-        console.log(data)
+        // console.log(data)
         this.img = data
       })
     },
@@ -260,7 +260,7 @@ export default {
       }
 
       const res = await this.$axios.get('/api?datatype=insert_goods', { params })
-      console.log(res)
+      // console.log(res)
 
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)
@@ -397,6 +397,7 @@ export default {
             background-size: 100% 100%;
             img {
               width: 100%;
+              height: 100%;
             }
             span {
               position: absolute;

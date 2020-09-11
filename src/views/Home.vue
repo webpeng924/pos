@@ -4,9 +4,9 @@
       <div class="right">
         <div class="btn" @click="page=true">收银</div>
         <span class="i" @click="quickmoney=true">快速收银</span>
-        <el-input placeholder="手牌号或员工信息查询" v-model="likeName" style="width:240px;border:#dc670b">
+        <!-- <el-input placeholder="员工信息查询" v-model="likeName" style="width:240px;border:#dc670b">
           <i slot="prefix" class="el-input__icon el-icon-search"></i>
-        </el-input>
+        </el-input>-->
       </div>
       <div class="left">
         <div class="one">
@@ -108,10 +108,10 @@
           <div class="cView" style="margin-top:15px;">
             <div class="subItem" v-for="(val,idx) in v.orderinfo" :key="idx" v-show="idx<3">
               <div class="nameView overflowText">{{val.itemname}}</div>
+              <!-- v-show="val.typeid==1" -->
               <div
                 class="empView overflowText edit"
                 @click.stop="openworker(v,val)"
-                v-show="val.typeid==1"
               >{{val.workername}}</div>
               <div class="priceView one-txt-cut">
                 <span>￥&nbsp;</span>
@@ -210,7 +210,7 @@
           :class="{select:chosIpu==1}"
           v-model="Quickprice"
           type="number"
-          min="0"
+          :min="0"
           @focus="chosIput(1)"
         ></el-input>
         <i>￥</i>
@@ -395,15 +395,15 @@ export default {
         let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
         if (res.data.data) {
           res.data.data.forEach(item => {
-            console.log(1, item.orderinfo)
+            // console.log(1, item.orderinfo)
             if (item.orderinfo != null) {
-              console.log(2)
+              // console.log(2)
               item.orderinfo.forEach(k => {
                 this.$set(k, 'workername', '')
                 this.$set(k, 'workerNo', '')
                 if (k.staff1 && k.staff1 != 0) {
                   let workername = workerlist.find(w => w.id == k.staff1)
-                  console.log(workerlist, k.staff1, workername)
+                  // console.log(workerlist, k.staff1, workername)
                   k.workername = workername.name
                   k.workerNo = workername.job_no
                 }
@@ -446,8 +446,8 @@ export default {
       })
     },
     toSubmit () {
-      if (!this.Quickprice || this.Quickprice == 0) {
-        this.$message.error('请输入价格')
+      if (!this.Quickprice || this.Quickprice <= 0) {
+        this.$message.error('请输入正确价格')
       } else {
         this.innerVisible = true
       }
@@ -516,7 +516,7 @@ export default {
       }
     },
     openworker (v, val) {
-      console.log(val)
+      // console.log(val)
       if (Number(v.status) < 3) {
         let option = {
           title: val.itemname,
@@ -551,7 +551,7 @@ export default {
           this.modifyitem(data)
         }
       })
-      console.log(data)
+      // console.log(data)
     },
     //修改项目信息
     async modifyitem (data) {
@@ -645,7 +645,11 @@ export default {
     this.getworkerlist()
     this.getorderlist(1)
   },
-  mounted () { }
+  mounted () {
+    var a = sessionStorage.getItem('FLAG')
+    javascript: jsSzb.smClientScreen(a)
+    return false;
+  }
 }
 </script>
 

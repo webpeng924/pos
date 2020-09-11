@@ -349,7 +349,7 @@ export default {
         msg: '建议图片大小：2M'
       };
       this.$refs.cropper.open(option, (data) => {
-        console.log(data)
+        // console.log(data)
         this.avatar = data
       })
     },
@@ -392,7 +392,7 @@ export default {
         params
       })
 
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)
         this.back()
@@ -402,7 +402,7 @@ export default {
     }
   },
   created () {
-    console.log(this.choose)
+    // console.log(this.choose)
     if (this.choose) {
       this.id = this.choose.id
       this.avatar = this.choose.avatar

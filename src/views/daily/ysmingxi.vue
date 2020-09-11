@@ -347,7 +347,7 @@ export default {
       this.title = command;
     },
     filterType (val) {
-      console.log(val);
+      // console.log(val);
     },
     async getNewNo () {
       const res = await this.$axios.get('/api?datatype=get_stock_no', {
@@ -395,7 +395,7 @@ export default {
             v['cikaid'] = v.card_memberitem_id
           })
           this.chosOrder['info'] = arr
-          console.log(this.chosOrder)
+          // console.log(this.chosOrder)
         } else {
           let arr = this.chosOrder.info
           arr.forEach(v => {
@@ -410,7 +410,7 @@ export default {
       this.getNewNo()
     },
     handleSelectionChange (val) {
-      console.log(val)
+      // console.log(val)
       this.needchangelist = val
     },
     // 修改order订单
@@ -428,7 +428,7 @@ export default {
         dis_total: this.chosOrder.dis_total
       }
       let data = qs.stringify(obj)
-      console.log(obj)
+      // console.log(obj)
       const res = await this.$axios.post('/api?datatype=insert_order', data)
       if (res.data.code == 1) {
         this.$message.success('退货成功')
@@ -457,7 +457,7 @@ export default {
         stock_no: this.stock_no,
         into_date: this.formatDate(new Date()),
         into_type: '客户退货',
-        warehouse: '总仓库',
+        warehouse: '门店仓库',
         number: this.needchangelist.length,
         amount: totalPrice,
         into_userid: JSON.parse(sessionStorage.getItem('userInfo')).id,
@@ -466,7 +466,7 @@ export default {
         goodsinfo: arr
       })
       const res = await this.$axios.post('/api?datatype=insert_into_stock', data)
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success('成功')
         this.submit()

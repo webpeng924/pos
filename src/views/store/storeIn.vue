@@ -57,7 +57,7 @@
             </el-dialog>
             <div class="subItem">
               <label>归属仓库</label>
-              <div>总仓库</div>
+              <div>门店仓库</div>
             </div>
           </div>
           <div class="groupView">
@@ -161,6 +161,7 @@
       :modal-append-to-body="false"
       center
       width="700px"
+      style="height:100%"
     >
       <div class="searchView">
         <!-- <el-input placeholder="请输入产品编号或名称" v-model="searchtxt" @blur="changecate"  prefix-icon="el-icon-search">
@@ -304,7 +305,7 @@ export default {
           status: 1
         }
       })
-      console.log(res)
+      // console.log(res)
       this.tableData = res.data.data
       this.tableData.forEach(item => {
         this.cateList = []
@@ -336,7 +337,7 @@ export default {
         stock_no: this.stock_no,
         into_date: this.formatDate(this.date),
         into_type: this.way,
-        warehouse: '总仓库',
+        warehouse: '门店仓库',
         number: this.chooselist.length,
         amount: this.totalPrice,
         into_userid: this.buyid,
@@ -345,7 +346,7 @@ export default {
         goodsinfo: this.chooselist
       })
       const res = await this.$axios.post('/api?datatype=insert_into_stock', data)
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success('入库成功')
         this.$emit('close', 1)
@@ -365,7 +366,7 @@ export default {
         // this.$set(a, 'supplier_id', '供应商A')
         this.$set(a, 'makedate', this.formatDate(new Date()))
         Object.assign(a, b)
-        console.log(a, b)
+        // console.log(a, b)
         arr.push(a)
       })
       this.chooselist = arr
@@ -537,8 +538,7 @@ export default {
       min-width: 300px;
       border-right: 0.5px solid rgba(220, 220, 220, 0.7);
       .listView {
-        overflow-x: hidden;
-        overflow-y: auto;
+        overflow: auto;
         padding: 10px 0;
         height: calc(100% - 60px);
         .groupView {
@@ -734,10 +734,9 @@ export default {
       }
     }
     .listView {
-      overflow-x: hidden;
-      overflow-y: auto;
+      overflow: auto;
+      height: calc(100% - 100px);
       color: #28282d;
-      padding-bottom: 25px;
       .listItem {
         position: relative;
         display: flex;
@@ -773,6 +772,12 @@ export default {
       .listItem:nth-child(odd) {
         background: #f8f8f8;
       }
+    }
+  }
+  /deep/.el-dialog {
+    height: 600px;
+    .el-dialog__body {
+      height: calc(100% - 124px) !important;
     }
   }
 }

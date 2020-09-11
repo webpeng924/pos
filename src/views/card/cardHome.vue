@@ -3,7 +3,7 @@
     <div class="tView">注册会员</div>
     <div class="cView">
       <p>请扫描下方二维码，进入会员专用小程序注册会员</p>
-      <img src="../../assets/images/zhuceewm.jpg" alt />
+      <img :src="pic" alt />
     </div>
   </div>
 </template>
@@ -14,15 +14,36 @@ export default {
   props: {},
   data () {
     return {
+      pic: ''
     }
   },
   watch: {},
   computed: {},
-  methods: {},
-  created () { },
+  methods: {
+    getPic () {
+      this.$axios.get('/api?datatype=get_qrcode', {
+        params: {
+          storeid: sessionStorage.getItem('storeid')
+        }
+      }).then(res => {
+        if (res.data.code == 1) {
+          this.pic = res.data.data
+        }
+      })
+    }
+  },
+  created () {
+    this.getPic()
+  },
+  beforeDestroy () {
+    // console.log('消毁')
+    var a = sessionStorage.getItem('FLAG')
+    javascript: jsSzb.smClientScreen(a)
+    return false;
+  },
   mounted () {
-    console.log('创建')
-    var a = 'FLAG_2'
+    // console.log('创建')
+    var a = 'FLAG_0'
     javascript: jsSzb.smClientScreen(a)
     return false;
   }

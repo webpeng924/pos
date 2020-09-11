@@ -150,7 +150,7 @@ export default {
   },
   methods: {
     modifyCar (data) {
-      console.log(data)
+      // console.log(data)
       let arr = JSON.parse(sessionStorage.getItem('carlist'))
       if (arr) {
         this.carlist = arr
@@ -178,7 +178,7 @@ export default {
     this.modifyCar()
   },
   mounted () {
-    console.log('Current Swiper instance object', this.swiper)
+    // console.log('Current Swiper instance object', this.swiper)
   }
 }
 </script>

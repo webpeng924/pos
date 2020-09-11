@@ -1,9 +1,13 @@
 <template>
   <div id="daily">
     <div class="topView">
-      <div class="tView">日结</div>
+      <div class="tView">
+        <span :class="{active:type==1}" @click="type=1">日结</span> /
+        <span :class="{active:type==2}" @click="type=2">本月概览</span>
+      </div>
       <div class="dateView">
         <el-date-picker
+          v-show="type==1"
           v-model="date"
           type="daterange"
           prefix-icon="a"
@@ -14,7 +18,7 @@
         ></el-date-picker>
       </div>
     </div>
-    <div class="contentView">
+    <div class="contentView" v-show="type==1">
       <div class="left">
         <div class="headerView">
           <div class="tView">实际营业款</div>
@@ -92,16 +96,6 @@
                 <div>会员</div>
               </div>
             </div>
-            <!-- <div>
-              <div class="cntItem">
-                <div>1</div>
-                <div>男</div>
-              </div>
-              <div class="cntItem">
-                <div>33</div>
-                <div>女</div>
-              </div>
-            </div>-->
           </div>
         </div>
         <div class="cardSaleView">
@@ -154,7 +148,7 @@
                 <div class="itemView" v-for="(v,k) in infolist.item" :key="k">
                   <label>{{k+1}}</label>
                   <label class="overflowText">{{v.itemname}}</label>
-                  <label>￥&nbsp;{{v.price}}</label>
+                  <label>{{v.price}}</label>
                   <label>{{v.ccount}}</label>
                   <!-- <img
                     src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Sort_1.png"
@@ -175,7 +169,179 @@
                 <div class="itemView" v-for="(v,k) in infolist.goods" :key="k">
                   <label>{{k+1}}</label>
                   <label class="overflowText">{{v.itemname}}</label>
-                  <label>￥&nbsp;{{v.price}}</label>
+                  <label>{{v.price}}</label>
+                  <label>{{v.ccount}}</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="contentView" v-show="type==2">
+      <div class="left">
+        <div class="headerView">
+          <div class="tView">
+            营业收入
+            <span>{{month}}</span>
+          </div>
+          <div class="amtView">
+            ￥&nbsp;
+            <span>{{total}}</span>
+          </div>
+        </div>
+        <div class="listView">
+          <div class="one">
+            <div class="item">
+              <span>本月营收目标：</span>
+              <span>{{target.toFixed(2)}} 元</span>
+              <span @click="modifyTarget">修改</span>
+            </div>
+            <div class="item">
+              <span>目标差额：</span>
+              <span>{{target>total?(target-total).toFixed(2):(total-target).toFixed(2)}} 元</span>
+              <span v-if="target<total" style="color:red">超出</span>
+              <span v-if="target>total" style="color:#ccc">未达标</span>
+            </div>
+          </div>
+          <div class="two">
+            <el-progress type="circle" :percentage="percentage" :stroke-width="20" :width="150"></el-progress>
+            <p>业绩完成度</p>
+          </div>
+        </div>
+      </div>
+      <div class="right">
+        <div class="cusView">
+          <div class="item">
+            <div class="tView">到店顾客数</div>
+            <div class="cView">{{infolist.zong}}人</div>
+          </div>
+          <div class="item">
+            <div class="tView" style="padding-left:0">人数与销售额对比</div>
+            <div class="pView">
+              <span>会员</span>
+              <div>
+                <div class="indiv">
+                  <el-progress
+                    :text-inside="true"
+                    :stroke-width="15"
+                    v-if="!isNaN(card/infolist.zong*100)"
+                    :percentage="card/infolist.zong*100"
+                    status="warning"
+                  ></el-progress>
+                  <span>{{card}} 人</span>
+                </div>
+                <div class="indiv">
+                  <el-progress
+                    :text-inside="true"
+                    :stroke-width="15"
+                    v-if="!isNaN((cardsum/total*100).toFixed(2))"
+                    :percentage="(cardsum/total*100).toFixed(2)"
+                    status="success"
+                  ></el-progress>
+                  <span>{{cardsum}} 元</span>
+                </div>
+              </div>
+            </div>
+            <div class="pView">
+              <span>散客</span>
+              <div>
+                <div class="indiv">
+                  <el-progress
+                    :text-inside="true"
+                    :stroke-width="15"
+                    v-if="!isNaN(nocard/infolist.zong*100)"
+                    :percentage="nocard/infolist.zong*100"
+                    status="warning"
+                  ></el-progress>
+                  <span>{{nocard}} 人</span>
+                </div>
+                <div class="indiv">
+                  <el-progress
+                    :text-inside="true"
+                    :stroke-width="15"
+                    v-if="!isNaN((nocardsum/total*100).toFixed(2))"
+                    :percentage="(nocardsum/total*100).toFixed(2)"
+                    status="success"
+                  ></el-progress>
+                  <span>{{nocardsum}} 元</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cardSaleView">
+          <div class="tView">会员</div>
+          <div class="cView">
+            <div class="cardSaleView" style="display:block">
+              <div class="textView">
+                <label class="label-name">
+                  开卡
+                  <span>{{kaika.ccount}}</span>
+                </label>
+                <label class="label-amt">￥&nbsp;{{kaika.total}}</label>
+              </div>
+              <el-progress
+                :text-inside="true"
+                :stroke-width="15"
+                :percentage="kaika.point"
+                status="warning"
+              ></el-progress>
+            </div>
+            <div class="cardTopupView" style="display:block">
+              <div class="textView">
+                <label class="label-name">
+                  充值
+                  <span>{{chong.ccount}}</span>
+                </label>
+                <label class="label-amt">￥&nbsp;{{chong.total}}</label>
+              </div>
+              <el-progress
+                :text-inside="true"
+                :stroke-width="15"
+                :percentage="chong.point"
+                status="exception"
+              ></el-progress>
+            </div>
+          </div>
+        </div>
+        <div class="saleInfoView">
+          <div class="tView">服务排行</div>
+          <div class="cView">
+            <div class="serviceTopView" style="display:block">
+              <div class="tView">项目Top&nbsp;5</div>
+              <div class="bcView">
+                <div class="headerView">
+                  <label>序号</label>
+                  <label>项目名称</label>
+                  <label>单价</label>
+                  <label>次数</label>
+                </div>
+                <div class="itemView" v-for="(v,k) in infolist.item" :key="k">
+                  <label>{{k+1}}</label>
+                  <label class="overflowText">{{v.itemname}}</label>
+                  <label>{{v.price}}</label>
+                  <label>{{v.ccount}}</label>
+                  <!-- <img
+                    src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Sort_1.png"
+                    class="img-index"
+                  />-->
+                </div>
+              </div>
+            </div>
+            <div class="productTopView" style="display:block">
+              <div class="tView">产品Top&nbsp;5</div>
+              <div class="bcView">
+                <div class="headerView">
+                  <label>序号</label>
+                  <label>产品名称</label>
+                  <label>单价</label>
+                  <label>次数</label>
+                </div>
+                <div class="itemView" v-for="(v,k) in infolist.goods" :key="k">
+                  <label>{{k+1}}</label>
+                  <label class="overflowText">{{v.itemname}}</label>
+                  <label class="overflowText">{{v.price}}</label>
                   <label>{{v.ccount}}</label>
                 </div>
               </div>
@@ -259,6 +425,7 @@ export default {
     return {
       date: '',
       now: '',
+      type: 1,
       list: [],
       dialogVisible: false,
       ysmingxi: false,
@@ -271,6 +438,8 @@ export default {
       newcus: 0,
       oldcus: 0,
       nocard: 0,
+      nocardsum: 0,
+      cardsum: 0,
       card: 0,
       chong: {
         ccount: 0,
@@ -281,15 +450,39 @@ export default {
         ccount: 0,
         point: 0,
         total: 0
-      }
+      },
+      // percentage: 0,
+      target: 0,
     }
   },
   watch: {
     date () {
       this.getData()
+      this.getTarget()
+    },
+    type (val) {
+      if (val == 1) {
+        const a = this.formatDate(new Date())
+        this.date = [a, a]
+      } else {
+        let a = moment(new Date).endOf('month').format("YYYY-MM-DD")
+        let b = moment(new Date).endOf('month').format("YYYY-MM") + '-01'
+        this.date = [b, a]
+      }
     }
   },
   computed: {
+    month () {
+      return moment(new Date()).format('YYYY-MM')
+    },
+    percentage () {
+      let percentage = 0
+      if (this.target != 0) {
+        percentage = (this.total / this.target * 100).toFixed(2)
+        // console.log(percentage)
+      }
+      return Number(percentage)
+    }
   },
   filters: {
     paytype (val) {
@@ -306,6 +499,29 @@ export default {
     }
   },
   methods: {
+    modifyTarget () {
+      this.$prompt('', '修改本月营收目标', {
+        distinguishCancelAndClose: true,
+        confirmButtonText: '确定修改',
+        cancelButtonText: '取消',
+        inputValue: this.target,
+        inputPattern: /^[0-9]\d*(.\d{1,2})?$/,
+        // inputValidator: (val) => { return Number(val) <= Number(data.rest_count) },
+        inputErrorMessage: '价格为整数或最多保留2位小数'
+      }).then(({ value }) => {
+        this.$axios.get('/api?datatype=insert_store_target', {
+          params: {
+            storeid: this.storeid,
+            month: this.month,
+            value: value
+          }
+        }).then(res => {
+          if (res.data.code == 1) {
+            this.getTarget()
+          }
+        })
+      })
+    },
     formatDate (date) {
       var y = date.getFullYear()
       var m = date.getMonth() + 1
@@ -314,13 +530,17 @@ export default {
       d = d < 10 ? '0' + d : d
       return y + '-' + m + '-' + d
     },
-    // print () {
-    //   let news = document.querySelector('#print').innerHTML
-    //   document.body.innerHTML = news
-    //   window.print()
-    //   this.dialogVisible = false
-    //   window.location.reload()
-    // },
+    async getTarget () {
+      const res = await this.$axios.get('/api?datatype=get_store_target', {
+        params: {
+          storeid: this.storeid,
+          month: this.month
+        }
+      })
+      if (res.data.code == 1) {
+        this.target = Number(res.data.data)
+      }
+    },
     print () {
       let arr = [{ "name": JSON.parse(sessionStorage.getItem('shopInfo')).shop_name, "style": "1" }]
       let time = ''
@@ -363,7 +583,7 @@ export default {
       let printTime = '打印时间：' + moment().format('YYYY-MM-DD HH:mm')
       let checkmen = '操作员：' + JSON.parse(sessionStorage.getItem('userInfo')).username
       arr.push({ "name": "---" }, { "name": printTime }, { "name": checkmen }, { "name": "签名：" })
-      console.log(JSON.stringify(arr))
+      // console.log(JSON.stringify(arr))
       var a = JSON.stringify(arr);
       javascript: jsSzb.smPrint(a);
       return false;
@@ -384,6 +604,8 @@ export default {
         this.newcus = 0
         this.oldcus = 0
         this.nocard = 0
+        this.nocardsum = 0
+        this.cardsum = 0
         this.card = 0
         this.chong = {
           ccount: 0,
@@ -413,8 +635,10 @@ export default {
           res.data.data.customer1.forEach(item => {
             if (item.customer_type == 1) {
               this.nocard = item.ccount
+              this.nocardsum = Number(item.sum_total)
             } else {
               this.card = item.ccount
+              this.cardsum = Number(item.sum_total)
             }
           })
           res.data.data.customer1.forEach(item => {
@@ -440,8 +664,9 @@ export default {
     }
   },
   created () {
-    const a = this.formatDate(new Date())
-    this.date = [a, a]
+    // const a = this.formatDate(new Date())
+    // this.date = [a, a]
+    this.type = 2
   },
   mounted () {
     window.callJsFunction = this.callJsFunction
@@ -473,7 +698,13 @@ export default {
     70px top / 300px 242px no-repeat;
   background-size: 33% 242px;
   .tView {
-    color: #fff;
+    color: #999;
+    font-size: 22px;
+    span.active {
+      font-size: 26px;
+      color: #fff;
+      text-decoration: underline;
+    }
   }
   .dateView {
     position: absolute;
@@ -505,8 +736,12 @@ export default {
         .tView {
           line-height: 22px;
           margin-bottom: 10px;
-          font-size: 16px;
-          color: rgba(255, 255, 255, 0.7);
+          font-size: 20px;
+          color: #f1f1f1;
+          span {
+            font-size: 14px;
+            margin-left: 10px;
+          }
         }
         .amtView {
           line-height: 42px;
@@ -573,6 +808,13 @@ export default {
             }
           }
         }
+        .two {
+          text-align: center;
+          padding: 20px 0;
+          p {
+            margin-top: 10px;
+          }
+        }
       }
     }
     .right {
@@ -582,13 +824,52 @@ export default {
       overflow-y: auto;
       > div {
         margin-top: 35px;
+        &:first-child {
+          margin-top: 0;
+        }
+      }
+      .cusView {
+        display: flex;
+        .cView {
+          padding-left: 30px;
+          font-size: 16px;
+          color: #47bf7c;
+          font-weight: 700;
+        }
+        .item {
+          flex: 2;
+          &:first-child {
+            flex: 1;
+          }
+          .pView {
+            width: 100%;
+            display: flex;
+            margin-bottom: 6px;
+            span {
+              width: 30px;
+            }
+            > div {
+              flex: 1;
+            }
+            .indiv {
+              display: flex;
+              .el-progress {
+                flex: 1;
+              }
+              span {
+                width: 100px;
+                padding-left: 10px;
+              }
+            }
+          }
+        }
       }
       .tView {
         line-height: 22px;
         font-size: 16px;
         font-family: PingFangSC-Semibold;
         color: #28282d;
-        padding: 15px 0 15px 30px;
+        padding: 15px 0 15px 10px;
       }
       .customerView > .cView > div {
         border-right: 0.5px solid rgba(220, 220, 220, 0.7);
@@ -668,10 +949,14 @@ export default {
           line-height: 20px;
         }
         label {
-          flex: 1;
+          flex: 2;
           text-align: center;
           font-size: 14px;
           color: #28282d;
+          &:first-child,
+          &:last-child {
+            flex: 1;
+          }
         }
         .itemView {
           position: relative;
@@ -680,8 +965,12 @@ export default {
           // padding-left: 15px;
           line-height: 24px;
           label {
-            flex: 1;
+            flex: 2;
             // text-align: left;
+            &:first-child,
+            &:last-child {
+              flex: 1;
+            }
           }
           .img-index {
             position: absolute;

@@ -139,7 +139,7 @@ export default {
           status: 1
         }
       })
-      console.log(res)
+      // console.log(res)
       if (res.data.data) {
         this.XMlist = res.data.data
       } else {
@@ -157,7 +157,7 @@ export default {
         price: this.price
       }
       const res = await this.$axios.get('/api?datatype=insert_cicard', { params })
-      console.log(res)
+      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)
         this.back()

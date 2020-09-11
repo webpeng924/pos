@@ -144,7 +144,7 @@ export default {
         msg: '建议图片大小：2M'
       };
       this.$refs.cropper.open(option, (data) => {
-        console.log(data)
+        // console.log(data)
         this.src = 'https://hb.rgoo.com' + data
         this.shopInfo.avatar = data
         this.changeLogo(data)
