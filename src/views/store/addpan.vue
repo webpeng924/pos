@@ -575,11 +575,5 @@ export default {
       }
     }
   }
-  /deep/.el-dialog {
-    height: 600px;
-    .el-dialog__body {
-      height: calc(100% - 124px) !important;
-    }
-  }
 }
 </style>

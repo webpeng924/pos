@@ -12,7 +12,7 @@
 #print-bcView {
   box-sizing: border-box;
   text-align: center;
-  min-width: 160px;
+  min-width: 200px;
   padding: 5px 0;
   width: 100%;
   left: 0;
@@ -46,6 +46,7 @@
   height: auto;
   line-height: 15px;
   margin-bottom: 5px;
+  display: flex;
 }
 #printContent table tr td {
   display: block;
@@ -53,11 +54,12 @@
 }
 #printContent .listView table tr td:nth-child(1) {
   width: 58%;
+  flex: 1;
   text-align: left;
   padding: 3px 0;
 }
 .print-58 {
-  width: 180px !important;
+  width: 220px !important;
 }
 .print-58 table {
   width: 220px !important;

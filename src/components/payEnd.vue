@@ -55,7 +55,7 @@ export default {
       this.orderInfo.forEach(v => {
         let type = " 服务: "
         if (v.typeid == 2) {
-          type = " "
+          type = "销售："
         }
         arr.push({ "name": v.itemname + type + v.workername })
         let discount = v.discount == 1 ? '原价' : v.discount + '折扣'

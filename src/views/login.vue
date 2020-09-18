@@ -3,7 +3,8 @@
     <div>
       <div class="login_box">
         <div class="top">
-          <img src alt />
+          <img src="../assets/images/shiboleier.png" alt v-show="!isApp" />
+          <img src="../assets/images/logo.png" alt v-show="isApp" />
         </div>
         <div class="bom">
           <el-input v-model="name" @change="success=false" placeholder="请输入账号" clearable>
@@ -35,6 +36,7 @@ export default {
     return {
       password: '',
       name: '',
+      isApp: false,
       signPage: false
     }
   },
@@ -83,9 +85,26 @@ export default {
       } else {
         this.$router.push({ name: 'signPage' })
       }
+    },
+    urlParse (queryStr) {
+      let arr = queryStr.slice(1).split('&');
+      let map = {};
+      arr.forEach(item => {
+        let param = item.split('=');
+        map[param[0]] = param[1];
+      });
+      return map;
     }
   },
-  created () { },
+  created () {
+    // 判断环境
+    // this.userAgent = window.navigator.userAgent;
+    if ((window.navigator.userAgent).indexOf('wv') == -1) {
+      this.isApp = false
+    } else {
+      this.isApp = true
+    }
+  },
   mounted () {
     // if ((/Android/gi).test(navigator.userAgent)) {
     //   window.addEventListener('resize', function () {
@@ -112,7 +131,7 @@ export default {
   width: 100%;
   > div {
     height: 100%;
-    min-height: 700px;
+    min-height: 500px;
     // min-width: 1200px;
     position: relative;
     justify-content: center; /*子元素水平居中*/
@@ -121,6 +140,7 @@ export default {
     .login_box {
       width: 40%;
       height: 60%;
+      min-height: 400px;
       background: rgba(255, 255, 255, 1);
       box-shadow: 0px 16px 60px 0px rgba(0, 0, 0, 0.5);
       border-radius: 16px;

@@ -283,7 +283,7 @@ export default {
   overflow-y: auto;
   .listItem {
     font-size: 15px;
-    font-family: PingFangSC-Medium;
+
     color: #28282d;
     padding: 15px 0;
     line-height: 20px;

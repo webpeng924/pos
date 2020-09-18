@@ -225,7 +225,7 @@ export default {
       width: 58px;
       height: 40px;
       font-size: 16px;
-      font-family: PingFangSC-Medium;
+
       color: #47bf7c;
       text-align: right;
     }

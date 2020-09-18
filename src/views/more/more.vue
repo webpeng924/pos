@@ -95,6 +95,10 @@
               <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Report_JCTJ.png" />
               <div>会员卡销售统计</div>
             </div>
+            <div class="listItem btn-audio" @click="openTable('staffRank')">
+              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Report_JCTJ.png" />
+              <div>员工销售排行</div>
+            </div>
           </div>
         </div>
         <div class="groupView">
@@ -303,6 +307,7 @@
     <div class="set_page" :class="{activePage:showTable}">
       <churutongji @close="showTable=false;tableName=''" v-if="tableName=='churutongji'"></churutongji>
       <cardSale @close="showTable=false;tableName=''" v-if="tableName=='cardSale'"></cardSale>
+      <staffRank @close="showTable=false;tableName=''" v-if="tableName=='staffRank'"></staffRank>
     </div>
   </div>
 </template>
@@ -327,8 +332,9 @@ import quanlist from './quanlist'
 import orderlist from '../order/orderlist'
 import churutongji from './churutongji'
 import cardSale from '../table/cardSale'
+import staffRank from '../table/staffSale'
 export default {
-  components: { product, memberlist, projectlist, shopInfo, zhekou, xiaohao, baobiao, kucun, setCard, msg, erweima, memberView, panku, cikalist, quanlist, orderlist, churutongji, cardSale },
+  components: { product, memberlist, projectlist, shopInfo, zhekou, xiaohao, baobiao, kucun, setCard, msg, erweima, memberView, panku, cikalist, quanlist, orderlist, churutongji, cardSale, staffRank },
   props: {},
   data () {
     return {
@@ -629,7 +635,7 @@ export default {
             width: 160px;
             text-align: center;
             font-size: 14px;
-            font-family: PingFangSC-Medium;
+
             color: #28282d;
             margin-bottom: 30px;
             div {

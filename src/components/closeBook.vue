@@ -478,8 +478,9 @@ export default {
   .contentView {
     display: flex;
     position: relative;
-    height: calc(100% - 85px);
-    // overflow: auto;
+    height: calc(100% - 100px);
+    // min-height: 450px;
+    overflow: auto;
     .orderView {
       flex: 1;
       position: relative;
@@ -488,7 +489,7 @@ export default {
       background: #f4f4f4;
       overflow: hidden;
       padding-bottom: 60px;
-      .contentView {
+      > .listView {
         // overflow-x: hidden;
         // overflow-y: auto;
         height: 100%;
@@ -498,9 +499,8 @@ export default {
         }
         .itemsView {
           height: calc(100% - 90px);
-          overflow: auto;
           padding: 0 15px 25px 15px;
-          min-height: 100px;
+          min-height: 160px;
           background: #fff;
           .tView {
             line-height: 40px;
@@ -511,6 +511,7 @@ export default {
           .toPayView {
             height: calc(100% - 40px);
             overflow: auto;
+            min-height: 100px;
             & > .listItem {
               background: #f4f4f4;
               margin-bottom: 10px;
@@ -526,6 +527,9 @@ export default {
                 padding: 20px 20px 20px 60px;
                 line-height: 28px;
                 justify-content: space-between;
+                .nameView {
+                  line-height: 20px;
+                }
                 .span-name {
                   width: 300px;
                   display: inline-block;
@@ -649,7 +653,7 @@ export default {
           height: 48px;
           line-height: 48px;
           font-size: 16px;
-          font-family: PingFangSC-Medium;
+
           color: #fff;
           background: #dc670b;
           border-radius: 0;

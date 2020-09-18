@@ -26,19 +26,22 @@
             />
           </template>
         </el-table-column>
-        <el-table-column prop="account" label="卡号" width="180"></el-table-column>
+        <el-table-column prop="card_num" label="卡号" width="180"></el-table-column>
         <el-table-column prop="name" label="姓名"></el-table-column>
         <el-table-column prop="mobile" label="手机号"></el-table-column>
-        <el-table-column prop="cardtype" label="卡类型"></el-table-column>
+        <!-- <el-table-column prop="cardtype" label="会员卡类型"></el-table-column> -->
         <el-table-column prop="balance" label="储值余额"></el-table-column>
-        <el-table-column prop="card_addtime" label="开卡日期"></el-table-column>
+        <el-table-column prop="card_addtime" label="开卡日期" width="110"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             <div>
-              <el-button type="success" size="mini" @click.stop="getCard(scope.row,1)">购买次卡</el-button>
+              <el-button type="success" size="mini" plain @click.stop="getCard(scope.row,1)">购买次卡</el-button>
             </div>
             <div style="margin-top:10px">
-              <el-button type="warning" size="mini" @click.stop="getCard(scope.row,2)">购买套餐</el-button>
+              <el-button type="warning" size="mini" plain @click.stop="getCard(scope.row,2)">购买套餐</el-button>
+            </div>
+            <div style="margin-top:10px">
+              <el-button type="danger" size="mini" plain @click.stop="getCard(scope.row,3)">购买会员卡</el-button>
             </div>
           </template>
         </el-table-column>
@@ -57,18 +60,18 @@
       :modal-append-to-body="false"
       custom-class="cardDialog quickmoney"
     >
-      <el-table ref="cardTable" :data="cardList" style="width: 100%" @row-click="choosed">
+      <el-table ref="cardTable" :data="menuList" style="width: 100%" @row-click="choosed">
         <el-table-column width="55">
           <template slot-scope="{row}">
             <div class="seleted" :class="{active:check==row.id}"></div>
           </template>
         </el-table-column>
-        <el-table-column prop="id" label="次卡编号"></el-table-column>
-        <el-table-column prop="itemname" label="项目名称"></el-table-column>
-        <el-table-column label="次数 / 时长">
+        <el-table-column prop="id" label="次卡编号" width="100"></el-table-column>
+        <el-table-column prop="itemname" label="项目名称" show-overflow-tooltip></el-table-column>
+        <el-table-column label="次数 / 时长" width="100">
           <template slot-scope="{row}">{{row.typeid==1?row.count:row.num}}</template>
         </el-table-column>
-        <el-table-column label="次卡类型">
+        <el-table-column label="次卡类型" width="100">
           <template slot-scope="scope">{{scope.row.typeid|Type}}</template>
         </el-table-column>
         <el-table-column prop="price" label="次卡售价"></el-table-column>
@@ -78,7 +81,7 @@
         <el-button type="primary" @click="choosePay" style="background-color:#dc670b;">确 定</el-button>
       </span>
 
-      <el-dialog
+      <!-- <el-dialog
         width="550px"
         title="请选择支付方式"
         :visible.sync="innerVisible"
@@ -96,7 +99,7 @@
         <span slot="footer" class="dialog-footer">
           <el-button type="primary" @click="setCard" style="background-color:#dc670b;">支付</el-button>
         </span>
-      </el-dialog>
+      </el-dialog>-->
     </el-dialog>
 
     <!-- 套餐弹窗 -->
@@ -145,26 +148,33 @@
         <el-button @click="TCDialog = false">取 消</el-button>
         <el-button type="primary" @click="choosePay">确 定</el-button>
       </span>
+    </el-dialog>
 
-      <el-dialog
-        width="550px"
-        title="请选择支付方式"
-        :visible.sync="innerVisible"
-        append-to-body
-        center
-        custom-class="quickmoney"
-      >
-        <el-radio-group v-model="paytype" style="padding:50px">
-          <el-radio label="zfb">支付宝</el-radio>
-          <el-radio label="wx">微信</el-radio>
-          <el-radio label="cash">现金</el-radio>
-          <el-radio label="other">其他</el-radio>
-          <el-radio label="card" style="margin-top:30px">会员卡余额</el-radio>
-        </el-radio-group>
-        <span slot="footer" class="dialog-footer">
-          <el-button type="primary" @click="setCard">支付</el-button>
-        </span>
-      </el-dialog>
+    <!-- 会员卡弹窗 -->
+    <el-dialog
+      title="会员卡列表"
+      :visible.sync="cardDialog"
+      width="70%"
+      center
+      :modal-append-to-body="false"
+      custom-class="cardDialog quickmoney"
+    >
+      <el-table ref="cardTable" :data="cardList" style="width: 100%" @row-click="choosed">
+        <el-table-column width="55">
+          <template slot-scope="{row}">
+            <div class="seleted" :class="{active:check==row.id}"></div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="card_no" label="会员卡编号" width="100"></el-table-column>
+        <el-table-column prop="name" label="会员卡名称" show-overflow-tooltip width="200"></el-table-column>
+        <el-table-column prop="recharge_money" label="销售价"></el-table-column>
+        <el-table-column prop="deposit_amount" label="会员到账"></el-table-column>
+        <el-table-column prop="usetime" label="会员卡有效期限"></el-table-column>
+      </el-table>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="cardDialog = false">取 消</el-button>
+        <el-button type="primary" @click="choosePay">确 定</el-button>
+      </span>
     </el-dialog>
 
     <el-dialog
@@ -199,14 +209,23 @@
         <el-button type="primary" @click="submit">确 定</el-button>
       </div>
     </el-dialog>
+
+    <div class="set_page" :class="{activePage:innerVisible}">
+      <closepage
+        @close="innerVisible=false;checkData='';check=0"
+        v-if="innerVisible"
+        :choose="checkData"
+      ></closepage>
+    </div>
   </div>
 </template>
 
 <script>
 import memInfo from './memberinfo'
 import moment from 'moment'
+import closepage from '@/components/closeOther'
 export default {
-  components: { memInfo },
+  components: { memInfo, closepage },
   props: {},
   data () {
     return {
@@ -215,11 +234,13 @@ export default {
       tableData: [],
       info: false,
       choosOne: '',
-      cardList: [],
       buytype: 1,
+      menuList: [],
       TCList: [],
+      cardList: [],
       menuDialog: false,
       TCDialog: false,
+      cardDialog: false,
       innerVisible: false,
       shoptype: sessionStorage.getItem('shoptype'),
       choose: '',
@@ -313,12 +334,13 @@ export default {
           }
         })
         if (res.data.code == 1 && res.data.data) {
-          this.cardList = res.data.data
+          this.menuList = res.data.data
           this.menuDialog = true
         } else {
-          this.cardList = []
+          this.$message.error('无可购买次卡')
+          this.menuList = []
         }
-      } else {
+      } else if (type == 2) {
         const res = await this.$axios.get("/api?datatype=get_package_list", {
           params: {
             storeid: this.storeid,
@@ -337,12 +359,40 @@ export default {
           })
           this.TCDialog = true
         } else {
+          this.$message.error('无可购买套餐')
           this.TCList = []
         }
+      } else {
+        const res = await this.$axios.get('/api?datatype=check_member_cardinfo', {
+          params: {
+            storeid: this.storeid,
+            member_id: member.member_id
+          }
+        })
+        if (res.data.code == 1) {
+          this.getcardlist()
+        } else {
+          this.$message.error(res.data.msg)
+        }
+      }
+    },
+    async getcardlist () {
+      const res = await this.$axios.get('/api?datatype=get_card_list', {
+        params: {
+          storeid: this.storeid
+        }
+      })
+      if (res.data.code == 1 && res.data.data) {
+        this.cardList = res.data.data
+        this.cardDialog = true
+      } else {
+        this.$message.error('无可选会员卡')
+        this.cardList = []
       }
     },
     choosed (row) {
       this.checkData = row
+      this.$set(this.checkData, 'member_id', this.choose.member_id)
       this.check = row.id
     },
     async setCard () {
@@ -384,12 +434,15 @@ export default {
       }
     },
     choosePay () {
-      if (this.check) {
-        this.innerVisible = true
+      if (!this.check) return this.$message.error('请选择')
+      if (this.menuDialog) {
+        this.menuDialog = false
+      } else if (this.TCDialog) {
+        this.TCDialog = false
       } else {
-        this.$message.error('请选择')
+        this.cardDialog = false
       }
-
+      this.innerVisible = true
     },
     async getList () {
       const res = await this.$axios.get('/api?datatype=get_memberlist', {

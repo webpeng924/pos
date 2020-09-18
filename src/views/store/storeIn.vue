@@ -103,7 +103,7 @@
       <div class="incomeGoodsView">
         <div class="tView">
           入库信息
-          <button class="btn-add btn-audio">扫码</button>
+          <button class="btn-add btn-audio" @click="opencode">扫码</button>
           <button class="btn-add btn-audio" @click="openadd">选择产品</button>
           <button style="color:red" v-show="setid" @click="delInstore">删除</button>
         </div>
@@ -166,7 +166,7 @@
       <div class="searchView">
         <!-- <el-input placeholder="请输入产品编号或名称" v-model="searchtxt" @blur="changecate"  prefix-icon="el-icon-search">
         </el-input>-->
-        <input placeholder="请输入产品编号或名称" v-model="searchtxt" @blur="changecate" />
+        <input placeholder="请输入产品编号或名称" v-model="searchtxt" @input="changecate" />
       </div>
       <div class="headerView">
         <label class="label-code">编号</label>
@@ -174,12 +174,12 @@
         <label>
           <el-dropdown trigger="click" @command="changecate">
             <span class="el-dropdown-link">
-              产品分类
+              {{cate.title}}
               <i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item :command="null">全部</el-dropdown-item>
-              <el-dropdown-item v-for="(v,k) in cateList" :key="k" :command="v.id">{{v.title}}</el-dropdown-item>
+              <el-dropdown-item command="null">全部</el-dropdown-item>
+              <el-dropdown-item v-for="(v,k) in cateList" :key="k" :command="v">{{v.title}}</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </label>
@@ -228,6 +228,25 @@
         <el-calendar v-model="prodate"></el-calendar>
       </div>
     </el-dialog>
+
+    <!-- 选择入库产品 -->
+    <el-dialog
+      title="输入条码"
+      :visible.sync="codeDialog"
+      :modal-append-to-body="false"
+      center
+      width="700px"
+      custom-class="codeDialog"
+      style="height:320px"
+    >
+      <div class="searchView" style="padding:20px">
+        <input placeholder="请输入产品条形码" v-model="codebar" ref="input" @keyup.enter="getitem" />
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="codeDialog = false">取 消</el-button>
+        <el-button type="success" @click="getitem">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -242,12 +261,14 @@ export default {
       addpro: false,
       choosepro: false,
       tableData: [],
+      codebar: '',
       searchtxt: '',
       list: [],
       storeid: sessionStorage.getItem('storeid'),
       stock_no: '',
       way: '正常入库',
       wayDialog: false,
+      codeDialog: false,
       dateDialog: false,
       workerDialog: false,
       makeDay: false,
@@ -259,6 +280,7 @@ export default {
       searchtxt: null,
       cateList: [],
       chooselist: [],
+      cate: { id: null, title: '全部' },
       prodate: '',
       chosOne: ''
     }
@@ -274,6 +296,38 @@ export default {
     }
   },
   methods: {
+    opencode () {
+      this.codebar = ''
+      this.codeDialog = true
+      this.getCPlist()
+      this.$nextTick(() => { this.$refs['input'].focus() })
+    },
+    getitem () {
+      if (!this.codebar) return this.$message.error('请输入条码')
+      this.$axios.get('/api?datatype=get_goods_list', {
+        params: {
+          storeid: this.storeid,
+          status: 1,
+          search: this.codebar
+        }
+      }).then(res => {
+        console.log(res)
+        if (res.data.code == 1 && res.data.data) {
+          let data = res.data.data[0]
+          if (this.list.includes(data.id)) {
+            this.$message.error('此产品已添加，请直接修改数量')
+          } else {
+            this.list.push(data.id)
+            this.submitGoods()
+            this.$message.success('添加成功')
+          }
+        } else {
+          this.$message.error('未查询到此条码')
+        }
+      })
+      this.codebar = ''
+      this.$nextTick(() => { this.$refs['input'].focus() })
+    },
     formatDate (date) {
       var y = date.getFullYear()
       var m = date.getMonth() + 1
@@ -373,10 +427,15 @@ export default {
       this.choosepro = false
     },
     async changecate (command) {
+      if (command == 'null') {
+        this.cate = { id: null, title: '全部' }
+      } else {
+        this.cate = command
+      }
       const res = await this.$axios.get('/api?datatype=get_goods_list', {
         params: {
           storeid: this.storeid,
-          cate: command,
+          cate: this.cate.id,
           status: 1,
           search: this.searchtxt
         }
@@ -485,7 +544,14 @@ export default {
   mounted () { }
 }
 </script>
-
+<style lang="scss">
+.chooseDialog.el-dialog {
+  height: 80%;
+  .el-dialog__body {
+    height: calc(100% - 124px) !important;
+  }
+}
+</style>
 <style lang="scss" scoped>
 #storeIn {
   height: 100%;
@@ -701,7 +767,8 @@ export default {
       }
     }
   }
-  .chooseDialog {
+  .chooseDialog,
+  .codeDialog {
     .searchView {
       padding: 10px 12px;
       background: #f4f4f4;
@@ -772,12 +839,6 @@ export default {
       .listItem:nth-child(odd) {
         background: #f8f8f8;
       }
-    }
-  }
-  /deep/.el-dialog {
-    height: 600px;
-    .el-dialog__body {
-      height: calc(100% - 124px) !important;
     }
   }
 }

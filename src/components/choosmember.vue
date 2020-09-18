@@ -115,7 +115,7 @@ export default {
           is_wei: 1
         }
       })
-      if (res.data.code == 1) {
+      if (res.data.code == 1 && res.data.data) {
         res.data.data.forEach(item => {
           if (!item.avatar) {
             item.avatar = '/upload/shop/moren.jpg'
@@ -128,6 +128,9 @@ export default {
         if (this.setinfo.worker && this.setinfo.worker.staff1 != 0) {
           this.choosegong = this.workerlist.find(item => item.id == this.setinfo.worker.staff1)
         }
+      } else {
+        this.workerlist = []
+        this.$message.error('暂无员工')
       }
     },
     async getitem () {
@@ -173,7 +176,7 @@ export default {
 <style lang="scss" scoped>
 .popView-contentView {
   width: 1024px;
-  height: 80vh;
+  height: 75vh;
   border-radius: 6px;
   background: rgb(255, 255, 255);
   overflow: auto;
@@ -240,7 +243,7 @@ export default {
   }
   .bcView {
     position: relative;
-    height: calc(80vh - 150px);
+    height: calc(75vh - 150px);
     .contentView {
       position: relative;
       height: 100%;

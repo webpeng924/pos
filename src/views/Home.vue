@@ -4,20 +4,21 @@
       <div class="right">
         <div class="btn" @click="page=true">收银</div>
         <span class="i" @click="quickmoney=true">快速收银</span>
+        <p>系统到期时间：{{endtime}}</p>
         <!-- <el-input placeholder="员工信息查询" v-model="likeName" style="width:240px;border:#dc670b">
           <i slot="prefix" class="el-input__icon el-icon-search"></i>
         </el-input>-->
       </div>
       <div class="left">
         <div class="one">
-          <el-select v-model="value">
+          <el-select v-model="value" @focus="rotate=true">
             <el-option value="今日收银">今日收银</el-option>
             <el-option value="昨日收银">昨日收银</el-option>
             <el-option value="前日收银">前日收银</el-option>
           </el-select>
         </div>
         <div class="two">
-          <el-select v-model="server">
+          <el-select v-model="server" @focus="rotate=true">
             <el-option value="全部">全部</el-option>
             <el-option value="服务中">服务中</el-option>
             <el-option value="待结账">待结账</el-option>
@@ -166,20 +167,11 @@
     </div>
 
     <div class="set_page" :class="{activePage:page}">
-      <opennew
-        @close="page=false;getorderlist(1);server='服务中';info=''"
-        :info="info"
-        v-if="page"
-        :from="from"
-      ></opennew>
+      <opennew @close="page=false;server='服务中';info=''" :info="info" v-if="page" :from="from"></opennew>
     </div>
 
     <div class="set_page" :class="{activePage:printpage}">
-      <printpage
-        @close="printpage=false;getorderlist(3);server='已结账';info=''"
-        :info="info"
-        v-if="printpage"
-      ></printpage>
+      <printpage @close="printpage=false;server='已结账';info=''" :info="info" v-if="printpage"></printpage>
     </div>
 
     <div class="statusView">
@@ -224,7 +216,7 @@
           @focus="chosIput(2)"
         ></el-input>-->
       </div>
-      <el-dialog
+      <!-- <el-dialog
         width="50%"
         title="请选择支付方式"
         :visible.sync="innerVisible"
@@ -241,7 +233,7 @@
         <span slot="footer" class="dialog-footer">
           <el-button type="primary" @click="setCard">支付</el-button>
         </span>
-      </el-dialog>
+      </el-dialog>-->
     </el-dialog>
 
     <el-dialog title="备注" :visible.sync="showMemo" width="430px" center custom-class="quickmoney">
@@ -275,17 +267,22 @@
         <el-button type="primary" @click="toSign" style="width:80%">点击签到</el-button>
       </div>
     </el-dialog>
+
+    <div class="set_page" :class="{activePage:innerVisible}">
+      <closepage @close="innerVisible=false" v-if="innerVisible" :money="Quickprice"></closepage>
+    </div>
   </div>
 </template>
 
 <script>
 import opennew from '@/components/addnew.vue'
 import printpage from '@/components/printpage.vue'
+import closepage from '@/components/closeOther'
 import chooseworker from '@/components/choosmember.vue'
 import qs from 'qs'
 import moment from 'moment'
 export default {
-  components: { chooseworker, opennew, printpage },
+  components: { chooseworker, opennew, printpage, closepage },
   props: {},
   data () {
     return {
@@ -330,32 +327,10 @@ export default {
   },
   watch: {
     value (val) {
-      switch (this.server) {
-        case '全部':
-          return this.getorderlist(0);
-        case '服务中':
-          return this.getorderlist(1);
-        case '待结账':
-          return this.getorderlist(2);
-        case '已结账':
-          return this.getorderlist(3);
-        case '已作废':
-          return this.getorderlist(4);
-      }
+      this.getorderlist()
     },
     server (val) {
-      switch (val) {
-        case '全部':
-          return this.getorderlist(0);
-        case '服务中':
-          return this.getorderlist(1);
-        case '待结账':
-          return this.getorderlist(2);
-        case '已结账':
-          return this.getorderlist(3);
-        case '已作废':
-          return this.getorderlist(4);
-      }
+      this.getorderlist()
     }
   },
   filters: {
@@ -364,9 +339,28 @@ export default {
     },
     moment1 (val) {
       return moment(val).format('YYYY年MM月DD日')
+    },
+    server (val) {
+      switch (val) {
+        case '全部':
+          return 0;
+        case '服务中':
+          return 1;
+        case '待结账':
+          return 2;
+        case '已结账':
+          return 3;
+        case '已作废':
+          return 4
+      }
     }
   },
-  computed: {},
+  computed: {
+    endtime () {
+      let time = moment(this.shopInfo.adt).add('1', 'years').format('YYYY-MM-DD')
+      return time
+    }
+  },
   methods: {
     color (val) {
       switch (val) {
@@ -380,7 +374,9 @@ export default {
           return 'rgb(221, 221, 221)';
       }
     },
-    async getorderlist (status) {
+    async getorderlist () {
+      this.orderlist = []
+      let status = this.$options.filters['server'](this.server)
       const loading = this.$loading({ lock: true, text: '数据加载中...', spinner: 'el-icon-loading', background: 'rgba(0, 0, 0, 0.7)' });
       const res = await this.$axios.get('/api?datatype=get_orderlist', {
         params: {
@@ -441,7 +437,7 @@ export default {
         })
         if (res.data.code == 1) {
           this.$message.success('已取消')
-          this.getorderlist(1)
+          this.getorderlist()
         }
       })
     },
@@ -449,6 +445,7 @@ export default {
       if (!this.Quickprice || this.Quickprice <= 0) {
         this.$message.error('请输入正确价格')
       } else {
+        this.quickmoney = false
         this.innerVisible = true
       }
     },
@@ -533,10 +530,10 @@ export default {
     },
     // 接受返回
     setdata (data) {
-      this.$prompt('', '请输入优惠总价', {
+      this.$prompt('', '请输入优惠后价格', {
         confirmButtonText: '确定',
         inputValue: this.nowModifyOrder.dis_total,
-        inputPattern: /^[1-9]\d*(.\d{1,2})?$/,
+        inputPattern: /^[0-9]\d*(.\d{1,2})?$/,
         // inputValidator: (val) => { return Number(val) <= Number(data.rest_count) },
         inputErrorMessage: '价格为整数或最多保留2位小数'
       }).then(async ({ value }) => {
@@ -565,7 +562,7 @@ export default {
       const res = await this.$axios.post('/api?datatype=update_orderitem_detail', obj)
       if (res.data.code == 1) {
         this.$message.success('更新成功')
-        this.getorderlist(1)
+        this.getorderlist()
         this.showworker = false
       }
     },
@@ -579,7 +576,12 @@ export default {
           clearInterval(timer)
         }
       }, 3);
-      this.getorderlist()
+      if (this.server == '服务中') {
+        this.getorderlist()
+      } else {
+        this.server = '服务中'
+      }
+      // 
     },
     stop (e) {
       e.stopPropagation()
@@ -628,7 +630,7 @@ export default {
       })
       if (res.data.code == 1) {
         this.showMemo = false
-        this.getorderlist(1)
+        this.getorderlist()
       }
     }
   },
@@ -643,12 +645,12 @@ export default {
       this.showSign = true
     }
     this.getworkerlist()
-    this.getorderlist(1)
+    this.getorderlist()
   },
   mounted () {
-    var a = sessionStorage.getItem('FLAG')
-    javascript: jsSzb.smClientScreen(a)
-    return false;
+    // var a = sessionStorage.getItem('FLAG')
+    // javascript: jsSzb.smClientScreen(a)
+    // return false;
   }
 }
 </script>
@@ -698,7 +700,8 @@ export default {
 
 .el-dialog.popView-contentView {
   width: 1024px;
-  height: 80vh;
+  height: 75vh;
+  margin-top: 10vh !important;
   border-radius: 6px;
   background: rgb(255, 255, 255);
   overflow: auto;
@@ -769,6 +772,13 @@ export default {
     }
     .right {
       flex: 1;
+      p {
+        float: right;
+        line-height: 40px;
+        font-size: 15px;
+        margin-right: 30px;
+        color: #999;
+      }
     }
     .left {
       display: flex;
@@ -1002,7 +1012,7 @@ export default {
           }
           .tagView {
             flex: 1;
-            font-family: PingFangSC-Medium;
+
             font-size: 20px;
             color: #28282d;
           }
@@ -1131,7 +1141,7 @@ export default {
               border: 0.5px solid #ddd;
               font-size: 12px;
               color: #28282d;
-              font-family: PingFangSC-Medium;
+
               border-radius: 3px;
             }
             .timeView {
@@ -1366,7 +1376,7 @@ export default {
     }
     .bcView {
       position: relative;
-      height: calc(80vh - 150px);
+      height: calc(75vh - 150px);
       .contentView {
         position: relative;
         height: 100%;

@@ -226,7 +226,7 @@
                     :text-inside="true"
                     :stroke-width="15"
                     v-if="!isNaN(card/infolist.zong*100)"
-                    :percentage="card/infolist.zong*100"
+                    :percentage="Number((card/infolist.zong*100).toFixed(0))"
                     status="warning"
                   ></el-progress>
                   <span>{{card}} 人</span>
@@ -235,8 +235,8 @@
                   <el-progress
                     :text-inside="true"
                     :stroke-width="15"
-                    v-if="!isNaN((cardsum/total*100).toFixed(2))"
-                    :percentage="(cardsum/total*100).toFixed(2)"
+                    v-if="!isNaN(cardsum/total*100)"
+                    :percentage="Number((cardsum/total*100).toFixed(0))"
                     status="success"
                   ></el-progress>
                   <span>{{cardsum}} 元</span>
@@ -251,7 +251,7 @@
                     :text-inside="true"
                     :stroke-width="15"
                     v-if="!isNaN(nocard/infolist.zong*100)"
-                    :percentage="nocard/infolist.zong*100"
+                    :percentage="Number((nocard/infolist.zong*100).toFixed(0))"
                     status="warning"
                   ></el-progress>
                   <span>{{nocard}} 人</span>
@@ -260,8 +260,8 @@
                   <el-progress
                     :text-inside="true"
                     :stroke-width="15"
-                    v-if="!isNaN((nocardsum/total*100).toFixed(2))"
-                    :percentage="(nocardsum/total*100).toFixed(2)"
+                    v-if="!isNaN(nocardsum/total*100)"
+                    :percentage="Number((nocardsum/total*100).toFixed(0))"
                     status="success"
                   ></el-progress>
                   <span>{{nocardsum}} 元</span>
@@ -358,16 +358,19 @@
           <div id="printContent" class="print-58">
             <div id="print-bcView">
               <div class="header">
-                <h4>上海善真化妆品有限公司</h4>
-                <h4>日结汇总</h4>
-                <h4>记账日期：{{date[1]}}</h4>
+                <h4>{{shopInfo.shop_name}}</h4>
+                <h4>{{date[0] == date[1]?'日结汇总':'营收汇总'}}</h4>
+                <hr />
+                <p
+                  style="text-align:left;line-height:24px"
+                >记账日期：{{date[0] == date[1]?date[1]:date[0] +' 至 '+ date[1]}}</p>
               </div>
               <div class="listView">
                 <table align="left" class="textScale">
                   <tbody>
                     <tr v-show="list1.length">
                       <td>现金类:</td>
-                      <td></td>
+                      <!-- <td></td> -->
                     </tr>
                     <tr v-for="(v,k) in list1" :key="k+'a'">
                       <td>{{v.pay_type|paytype}}</td>
@@ -375,7 +378,7 @@
                     </tr>
                     <tr v-show="list2.length">
                       <td>卡付类:</td>
-                      <td></td>
+                      <!-- <td></td> -->
                     </tr>
                     <tr v-for="(v,k) in list2" :key="k+'a'">
                       <td>储值账户</td>
@@ -383,7 +386,7 @@
                     </tr>
                     <tr v-show="list3.length">
                       <td>欠款类:</td>
-                      <td></td>
+                      <!-- <td></td> -->
                     </tr>
                     <tr v-for="(v,k) in list3" :key="k+'a'">
                       <td>会员签账</td>
@@ -430,6 +433,7 @@ export default {
       dialogVisible: false,
       ysmingxi: false,
       storeid: sessionStorage.getItem('storeid'),
+      shopInfo: JSON.parse(sessionStorage.getItem('shopInfo')),
       infolist: [],
       total: 0,
       list1: [],
@@ -746,7 +750,7 @@ export default {
         .amtView {
           line-height: 42px;
           font-size: 20px;
-          font-family: PingFangSC-Medium;
+
           color: #fff;
           span {
             font-size: 36px;
@@ -1008,10 +1012,9 @@ export default {
   .dialog {
     .news {
       width: 100%;
-
       /deep/ .el-dialog {
         width: 20% !important;
-        min-width: 260px;
+        min-width: 300px;
       }
     }
     p {

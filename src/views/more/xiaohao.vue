@@ -120,7 +120,7 @@ export default {
     width: 100%;
     height: 54px;
     font-size: 15px;
-    font-family: PingFangSC-Medium;
+
     color: #47bf7c;
     box-shadow: 0 0 2px 0 rgba(220, 220, 220, 0.4);
   }

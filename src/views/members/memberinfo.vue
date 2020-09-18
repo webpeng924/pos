@@ -476,6 +476,10 @@
         <el-button @click="setDesc" style="background-color:#dc670b;color:#fff">保 存</el-button>
       </span>
     </el-dialog>
+
+    <div class="set_page" :class="{activePage:innerVisible}">
+      <closepage @close="innerVisible=false;" v-if="innerVisible" :closeinfo="closeinfo"></closepage>
+    </div>
   </div>
 </template>
 
@@ -483,8 +487,9 @@
 import moment from 'moment'
 import huankuan from '@/components/huankuan.vue'
 import xcropper from '@/components/xcropper.vue'
+import closepage from '@/components/closeOther'
 export default {
-  components: { huankuan, xcropper },
+  components: { huankuan, xcropper, closepage },
   props: ['choose'],
   data () {
     return {
@@ -494,6 +499,7 @@ export default {
       showMemo: false,
       showDesc: false,
       img: '',
+      innerVisible: false,
       desc: '',
       huankuan: false,
       remark: '',
@@ -506,6 +512,7 @@ export default {
       catelist: [],
       money: '',
       gift_money: '',
+      closeinfo: '',
       nowcate: '',
       showaddMoney: false
     };
@@ -670,21 +677,28 @@ export default {
     async addmoney () {
       if (this.money == '') return this.$message.error('请输入充值金额')
       if (Number(this.money) <= 0) return this.$message.error('请输入正确充值金额')
-      const res = await this.$axios.get('/api?datatype=recharge', {
-        params: {
-          storeid: this.storeid,
-          member_id: this.member_id,
-          money: Number(this.money),
-          gift_money: Number(this.gift_money)
-        }
-      })
-      if (res.data.code == 1) {
-        this.$message.success('充值成功')
-        this.showaddMoney = false
-        this.getInfo(this.member_id)
-      } else {
-        this.$message.error('充值失败')
+      this.closeinfo = {
+        money: this.money,
+        member_id: this.member_id,
+        gift_money: this.gift_money
       }
+      this.innerVisible = true
+      this.showaddMoney = false
+      // const res = await this.$axios.get('/api?datatype=recharge', {
+      //   params: {
+      //     storeid: this.storeid,
+      //     member_id: this.member_id,
+      //     money: Number(this.money),
+      //     gift_money: Number(this.gift_money)
+      //   }
+      // })
+      // if (res.data.code == 1) {
+      //   this.$message.success('充值成功')
+      //   this.showaddMoney = false
+      //   this.getInfo(this.member_id)
+      // } else {
+      //   this.$message.error('充值失败')
+      // }
     },
     returnCard () {
       this.$confirm('确认将此会员卡退款并注销吗?', '提示', {
@@ -950,7 +964,7 @@ export default {
                 .label-name {
                   margin-right: 12px;
                   font-size: 20px;
-                  font-family: PingFangSC-Medium;
+
                   color: #28282d;
                 }
                 .label-mobile {
@@ -1078,7 +1092,7 @@ export default {
       line-height: 40px;
       height: 85px;
       font-size: 20px;
-      font-family: PingFangSC-Medium;
+
       color: #28282d;
       text-align: center;
       border-bottom: 0.5px solid rgba(220, 220, 220, 0.3);

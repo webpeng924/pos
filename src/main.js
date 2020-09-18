@@ -16,6 +16,7 @@ import animated from 'animate.css'
 // import 'amfe-flexible'
 //全局过滤器
 import './assets/js/filter.js'
+import './assets/js/directive'
 Vue.use(ElementUI)
 Vue.use(animated)
 

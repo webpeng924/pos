@@ -114,7 +114,7 @@
         </div>
         <div class="textView">
           <label class="label-name">{{ismember.name}}</label>
-          <label class="label-cardNo">{{ismember.account}}</label>
+          <label class="label-cardNo">{{ismember.card_num}}</label>
         </div>
         <button class="btn-reset btn-audio" @click="memberView=true"></button>
       </div>
@@ -211,10 +211,10 @@
               />
             </template>
           </el-table-column>
-          <el-table-column prop="account" label="卡号" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="card_num" label="卡号" show-overflow-tooltip></el-table-column>
           <el-table-column prop="name" label="姓名" show-overflow-tooltip></el-table-column>
           <el-table-column prop="mobile" label="手机号"></el-table-column>
-          <el-table-column prop="cardtype" label="卡类型"></el-table-column>
+          <!-- <el-table-column prop="cardtype" label="卡类型"></el-table-column> -->
           <el-table-column prop="balance" label="储值余额"></el-table-column>
           <!-- <el-table-column prop="expiry_date" label="有效期"></el-table-column> -->
         </el-table>

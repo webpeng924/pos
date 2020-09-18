@@ -12,7 +12,7 @@
         <el-table-column label="性别" min-width="100">
           <template #default="{row}">{{ row.sex == 1 ? "男" : "女" }}</template>
         </el-table-column>
-        <el-table-column prop="account" label="会员卡号" min-width="180"></el-table-column>
+        <el-table-column prop="card_num" label="会员卡号" min-width="180"></el-table-column>
         <el-table-column label="归属门店" min-width="120">{{shopName}}</el-table-column>
         <el-table-column prop="mobile" label="手机号码" min-width="150"></el-table-column>
         <el-table-column label="累计卡销售" min-width="100">0</el-table-column>

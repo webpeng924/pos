@@ -16,7 +16,7 @@
             <!-- <i class="el-icon-search" @click="showSearch = !showSearch;getXMlist()"></i> -->
             <div class="keywordView">
               <div class="inputView">
-                <input placeholder="请输入编号或者名称查询" v-model="searchtxt" />
+                <input placeholder="请输入编号或者名称查询" v-model="searchtxt" ref="input" />
                 <button class="btn-audio btn-search" @click="getXMlist">搜索</button>
               </div>
             </div>
@@ -237,10 +237,10 @@
               <img :src="scope.row.img|imgUrl" alt style="width:80px" />
             </template>
           </el-table-column>
-          <el-table-column prop="account" label="卡号" width="180" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="card_num" label="卡号" width="180" show-overflow-tooltip></el-table-column>
           <el-table-column prop="name" label="姓名"></el-table-column>
           <el-table-column prop="mobile" label="手机号"></el-table-column>
-          <el-table-column prop="cardtype" label="卡类型"></el-table-column>
+          <!-- <el-table-column prop="cardtype" label="卡类型"></el-table-column> -->
           <el-table-column prop="balance" label="储值余额"></el-table-column>
           <!-- <el-table-column prop="expiry_date" label="有效期"></el-table-column> -->
         </el-table>
@@ -860,10 +860,10 @@ export default {
     },
     //总优惠价
     modifytotalPrice () {
-      this.$prompt('', '请输入优惠总价', {
+      this.$prompt('', '请输入优惠后价格', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputPattern: /^[1-9]\d*(.\d{1,2})?$/,
+        inputPattern: /^[0-9]\d*(.\d{1,2})?$/,
         // inputValidator: (val) => { return Number(val) <= Number(data.rest_count) },
         inputErrorMessage: '价格为整数或最多保留2位小数'
       }).then(({ value }) => {
@@ -1048,6 +1048,7 @@ export default {
   },
   mounted () {
     // console.log('创建')
+    // this.$refs['input'].focus()
     var a = 'FLAG_0'
     javascript: jsSzb.smClientScreen(a)
     return false;
@@ -1394,7 +1395,6 @@ export default {
             color: #604e2a;
             font-size: 14px;
             line-height: 20px;
-            font-family: PingFangSC-Medium;
           }
           .btn-del {
             min-width: 36px;
@@ -1606,7 +1606,7 @@ export default {
           padding: 0 15px;
           background: #f4f4f4;
           line-height: 40px;
-          font-family: PingFangSC-Medium;
+
           font-size: 14px;
           color: #28282d;
         }

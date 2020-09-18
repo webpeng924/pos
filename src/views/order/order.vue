@@ -252,12 +252,14 @@ export default {
           is_wei: 1
         }
       })
-      if (res.data.code == 1) {
+      if (res.data.code == 1 && res.data.data) {
         res.data.data.forEach(v => {
           this.$set(v, 'shilist', [])
         })
         this.workerlist = res.data.data
         this.checkyy()
+      } else {
+        this.$message.error('无员工资料')
       }
     },
     async toSearch () {

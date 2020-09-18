@@ -20,7 +20,7 @@
         </div>
         <div class="item">
           <div class="left">会员卡号：</div>
-          <div class="right">{{info.account}}</div>
+          <div class="right">{{info.card_num}}</div>
         </div>
         <div class="item">
           <div class="left">手机号码：</div>

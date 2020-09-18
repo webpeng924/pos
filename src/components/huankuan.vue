@@ -58,18 +58,23 @@
         <el-button type="warning" style="width:200px" @click="submit">还款</el-button>
       </div>
     </div>
+    <div class="set_page" :class="{activePage:closepage}">
+      <closepage @close="closepage=false" v-if="closepage" :orderlist="orderlist"></closepage>
+    </div>
   </div>
 </template>
 
 <script>
+import closepage from './closeOther.vue'
 export default {
-  components: {},
+  components: { closepage },
   props: ['member'],
   data () {
     return {
       storeid: sessionStorage.getItem('storeid'),
       signbillList: [],
-      choolist: []
+      choolist: [],
+      closepage: false
     }
   },
   methods: {
@@ -102,19 +107,20 @@ export default {
     async submit () {
       if (!this.signbillList.length) return
       if (!this.choolist.length) return this.$message.error('请选择还款单')
-      const res = await this.$axios.get('/api?datatype=repayment', {
-        params: {
-          storeid: this.storeid,
-          member_id: this.member.member_id,
-          id: this.choolist
-        }
-      })
-      if (res.data.code == 1) {
-        this.$message.success('还款成功')
-        this.$emit('close')
-      } else {
-        this.$message.error(res.data.msg)
-      }
+      this.closepage = true
+      // const res = await this.$axios.get('/api?datatype=repayment', {
+      //   params: {
+      //     storeid: this.storeid,
+      //     member_id: this.member.member_id,
+      //     id: this.choolist
+      //   }
+      // })
+      // if (res.data.code == 1) {
+      //   this.$message.success('还款成功')
+      //   this.$emit('close')
+      // } else {
+      //   this.$message.error(res.data.msg)
+      // }
     }
   },
   created () {
@@ -129,6 +135,14 @@ export default {
         sum += Number(item.money)
       })
       return sum
+    },
+    orderlist () {
+      let arr = []
+      this.choolist.forEach(item => {
+        let a = this.signbillList.find(v => v.id == item)
+        arr.push({ order_no: a.order_no, id: item })
+      })
+      return JSON.stringify(arr)
     },
     payPrice () {
       let sum = 0

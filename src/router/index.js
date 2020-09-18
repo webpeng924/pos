@@ -74,7 +74,18 @@ const router = new VueRouter({
 router.beforeEach((to, from, next) => {
   let user = sessionStorage.getItem('userInfo')
   let shop = sessionStorage.getItem('shopInfo')
+  if (to.path == '/login') {
+    document.title = '登录'
+  }
   if ((user && shop) || to.path == '/login' || to.path == '/signPage' || to.path == '/sign') {
+    if (shop) {
+      let shoptype = JSON.parse(shop).type_id
+      if (shoptype == 1) {
+        document.title = '诗泊蕾尔管理系统'
+      } else {
+        document.title = '诗臻泊管理系统'
+      }
+    }
     next()
   } else {
     next({
