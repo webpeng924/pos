@@ -80,6 +80,7 @@ export default {
           let data = res.data.data
           sessionStorage.setItem('shopInfo', JSON.stringify(data))
           sessionStorage.setItem('shoptype', data.type_id)
+          localStorage.setItem('logName', this.name)
           this.$router.push({ name: 'Home' })
         }
       } else {
@@ -106,16 +107,10 @@ export default {
     }
   },
   mounted () {
-    // if ((/Android/gi).test(navigator.userAgent)) {
-    //   window.addEventListener('resize', function () {
-    //     if (document.activeElement.tagName == 'INPUT' ||
-    //       document.activeElement.tagName == 'TEXTAREA') {
-    //       window.setTimeout(function () {
-    //         document.activeElement.scrollIntoViewIfNeeded();
-    //       }, 0);
-    //     }
-    //   });
-    // }
+    let hasname = localStorage.getItem('logName')
+    if (hasname) {
+      this.name = hasname
+    }
   }
 }
 </script>

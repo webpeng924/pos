@@ -482,10 +482,9 @@ export default {
     percentage () {
       let percentage = 0
       if (this.target != 0) {
-        percentage = (this.total / this.target * 100).toFixed(2)
-        // console.log(percentage)
+        percentage = Number((this.total / this.target * 100).toFixed(2))
       }
-      return Number(percentage)
+      return percentage
     }
   },
   filters: {

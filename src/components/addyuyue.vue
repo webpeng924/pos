@@ -196,7 +196,7 @@
               <el-option label="号码" value="号码"></el-option>
               <el-option label="姓名" value="姓名"></el-option>
             </el-select>
-            <input placeholder="请输入手机号或会员卡号" v-model="keyword" />
+            <input placeholder="请输入会员名或手机号" v-model="keyword" />
             <button class="btn-close btn-audio" @click="keyword=''"></button>
           </div>
           <button class="btn-audio" :class="{search:keyword}" @click="getList">查询</button>
@@ -461,6 +461,7 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_memberlist', {
         params: {
           storeid: this.storeid,
+          sign: 2,
           search: this.keyword
         }
       })

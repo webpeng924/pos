@@ -226,7 +226,7 @@
               <el-option label="号码" value="号码"></el-option>
               <el-option label="姓名" value="姓名"></el-option>
             </el-select>
-            <input placeholder="请输入手机号或会员卡号" v-model="keyword" @keyup.enter="getList" />
+            <input placeholder="请输入会员名或手机号" v-model="keyword" @keyup.enter="getList" />
             <button class="btn-close btn-audio" @click="keyword=''"></button>
           </div>
           <button class="btn-audio" :class="{search:keyword}" @click="getList">查询</button>
@@ -271,7 +271,7 @@
         </div>
         <div style="display:flex;margin-bottom:20px">
           <span style="width:80px">折扣：</span>
-          <el-input v-model="editdiscount" placeholder="0~1"></el-input>
+          <el-input v-model="editdiscount" placeholder="0~1" @input="changeDiscount"></el-input>
         </div>
         <div style="display:flex">
           <span style="width:80px">折后价：</span>
@@ -329,7 +329,7 @@
     </el-dialog>
 
     <div class="set_page" :class="{activePage:page}">
-      <closeBook @close="page=false;" :bookinfo="bookinfo" v-if="page"></closeBook>
+      <closeBook @close="page=false;opencode()" :bookinfo="bookinfo" v-if="page"></closeBook>
     </div>
   </div>
 </template>
@@ -359,6 +359,7 @@ export default {
       memberView: false,
       id: 1,
       storeid: sessionStorage.getItem('storeid'),
+      is_doublescreen: JSON.parse(sessionStorage.getItem('shopInfo')).is_doublescreen,
       showMemo: false,
       showworker: false,
       addcate: false,
@@ -415,9 +416,9 @@ export default {
         this.chooslist = []
       }
     },
-    editdiscount (val) {
-      this.editdisprice = Number(this.editprice * val).toFixed(2)
-    },
+    // editdiscount (val) {
+    //   this.editdisprice = Number(this.editprice * val).toFixed(2)
+    // },
     // editdisprice (val) {
     //   this.editdiscount = this.editprice / val
     // },
@@ -450,6 +451,64 @@ export default {
     }
   },
   methods: {
+    scanCode () {
+      let code = ''
+      let lastTime, nextTime
+      let lastCode, nextCode
+      let that = this
+      window.document.onkeypress = function (e) {
+        if (window.event) { // IE
+          nextCode = e.keyCode
+        } else if (e.which) { // Netscape/Firefox/Opera
+          nextCode = e.which
+        }
+        if (e.which === 13) {
+          if (code.length < 3) return // 手动输入的时间不会让code的长度大于2，所以这里只会对扫码枪有
+          // console.log(code)
+          // console.log('扫码结束')
+          that.getgoods(code) // 获取到扫码枪输入的内容，做别的操作
+          code = ''
+          lastCode = ''
+          lastTime = ''
+          return
+        }
+        nextTime = new Date().getTime()
+        if (!lastTime && !lastCode) {
+          // console.log('扫码开始。。。')
+          code += e.key
+        }
+
+        if (lastCode && lastTime && nextTime - lastTime > 500) { // 当扫码前有keypress事件时,防止首字缺失
+          // console.log('防止首字缺失。。。')
+          code = e.key
+        } else if (lastCode && lastTime) {
+          // console.log('扫码中。。。')
+          code += e.key
+        }
+        lastCode = nextCode
+        lastTime = nextTime
+      }
+    },
+    getgoods (codebar) {
+      if (!codebar || this.page) return
+      this.$axios.get('/api?datatype=get_skulist', {
+        params: {
+          storeid: this.storeid,
+          type: 1,
+          bar_code: codebar
+        }
+      }).then(res => {
+        // console.log(res)
+        if (res.data.code == 1 && res.data.data && res.data.data.length) {
+          let obj = res.data.data[0]
+          obj['name'] = obj.goods_name
+          this.additem = obj
+          this.addchooselist(obj, '', 1)
+        } else {
+          this.$message.error('未查询到商品')
+        }
+      })
+    },
     //挂单
     confirmDiscount (status) {
       if (!this.chooslist.length) return this.$message.error('请至少选择一个项目或产品')
@@ -475,10 +534,13 @@ export default {
       this.editIndex = k
       this.editprice = v.price
       this.editdiscount = v.discount
-      // this.editdisprice = v.price * v.discount
+      this.editdisprice = v.price * v.discount
     },
     changeDisprice () {
       this.editdiscount = this.editdisprice / this.editprice
+    },
+    changeDiscount () {
+      this.editdisprice = Number(this.editprice * this.editdiscount).toFixed(2)
     },
     modifyPrice () {
       this.chooslist.forEach((item, idx) => {
@@ -527,6 +589,8 @@ export default {
           this.$set(res.data.data, 'orderinfo', this.chooslist)
           this.bookinfo = res.data.data
           // this.info = res.data.data
+          document.onkeydown = null
+          window.onkeydown = null
           this.page = true
         }
       }
@@ -736,7 +800,7 @@ export default {
     },
     // 打开
     openworker (v, k, sign) {
-      // console.log(v)
+      // console.log(v, k, sign)
       if (sign == 2) {
         this.ModifyW = k
         let worker = ''
@@ -926,7 +990,7 @@ export default {
     },
     // 添加到右侧
     addchooselist (v, data, num) {
-      console.log(v, data)
+      // console.log(v, data)
       if (data) {
         if (data.gong) {
           this.$set(v, 'staff1', data.gong.id)
@@ -959,11 +1023,21 @@ export default {
         is_usecard: 0,
         discount: v.discount
       }
+      let goods = ''
       if (obj.typeid == 2) {
+        goods = this.chooslist.find(item => (item.typeid == 2 && item.itemid == obj.itemid))
+        // console.log(goods)
+        if (goods) {
+          // let oldnum=goods.num
+          obj['num'] = Number(goods.num) + Number(obj.num)
+          obj['staff1'] = goods.staff1
+          obj['worker'] = goods.worker
+        }
+        // console.log(obj)
         this.chooslist = this.chooslist.filter(k => k.typeid != 2 || (k.typeid == 2 && k.itemid != obj.itemid))
       }
       this.chooslist.push(obj)
-      if (obj.typeid == 2) {
+      if (!goods && obj.typeid == 2) {
         this.openworker(obj, this.chooslist.length - 1, 2)
       }
     },
@@ -973,17 +1047,18 @@ export default {
         this.yyitem = ''
       }
     },
-    async getList (sign) {
+    async getList (type) {
       const res = await this.$axios.get('/api?datatype=get_memberlist', {
         params: {
           storeid: this.storeid,
+          sign: 2,
           search: this.keyword
         }
       })
       // console.log(res)
       if (res.data.code == 1) {
         this.tableData = res.data.data
-        if (this.info && sign == 1) {
+        if (this.info && type == 1) {
           if (this.info.member_id != 0) {
             this.member = this.tableData.find(item => item.member_id == this.info.member_id)
           }
@@ -1015,6 +1090,55 @@ export default {
           }
         }
       }
+    },
+    opencode () {
+      var _this = this
+      var codeString = "";
+      //定时器每隔200ms 清空codeString
+      //扫码枪读取的速度比手动输入的速度要快很多，这也可以作为区分扫码还是手动输入的条件
+      var scanTimeer = setInterval(function () {
+        var now = new Date().getTime();
+        if (now - lastTime > 200) {
+          codeString = "";
+        }
+      }, 200);
+      var lastTime;
+      var caseFormat = false;
+      document.onkeydown = function (e) {
+        var nextTime = new Date().getTime();
+        var code = e.which;
+        //shift键
+        if (code == 16) {
+          caseFormat = true;
+        } else {
+          if (caseFormat) {
+            if (code >= 65 && code <= 90) {
+              //转小写
+              code = code + 32;
+            } else if (code >= 97 && code <= 122) {
+              //转大写
+              code = code - 32;
+            }
+            caseFormat = false;
+          }
+          var char = String.fromCharCode(code);
+          if (codeString == "") {
+            codeString += char;
+          } else if (nextTime - lastTime <= 30) {
+            codeString += char;
+          }
+        }
+        lastTime = nextTime;
+      };
+
+      window.onkeydown = (function (e) {
+        var nextTime1 = new Date().getTime();
+        var lastTime1;
+        if (e.which == 13) {
+          _this.getgoods(codeString.substring(0, codeString.length - 1));
+          codeString = "";
+        }
+      })
     }
   },
   filters: {
@@ -1033,11 +1157,21 @@ export default {
   },
   beforeDestroy () {
     // console.log('消毁')
-    var a = sessionStorage.getItem('FLAG')
-    javascript: jsSzb.smClientScreen(a)
-    return false;
+    document.onkeydown = null
+    window.onkeydown = null
+    if (this.is_doublescreen == 1) {
+      var a = sessionStorage.getItem('FLAG')
+      javascript: jsSzb.smClientScreen(a)
+      return false;
+    }
   },
   created () {
+    this.opencode()
+  },
+  updated () {
+    this.opencode()
+  },
+  mounted () {
     if (this.from == 'car') {
       let arr = JSON.parse(sessionStorage.getItem('carlist'))
       this.chooslist = arr
@@ -1045,13 +1179,13 @@ export default {
     // console.log(this.info)
     this.getXMcate()
     this.getList(1)
-  },
-  mounted () {
     // console.log('创建')
     // this.$refs['input'].focus()
-    var a = 'FLAG_0'
-    javascript: jsSzb.smClientScreen(a)
-    return false;
+    if (this.is_doublescreen == 1) {
+      var a = 'FLAG_0'
+      javascript: jsSzb.smClientScreen(a)
+      return false;
+    }
   }
 }
 </script>

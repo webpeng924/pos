@@ -261,14 +261,11 @@ export default {
 
       const res = await this.$axios.get('/api?datatype=insert_goods', { params })
       // console.log(res)
-
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)
         this.back()
-      } else if (res.data.code == 2) {
-        this.$message.error(res.data.msg)
       } else {
-        this.$message.error('添加失败')
+        this.$message.error(res.data.msg)
       }
     }
   },

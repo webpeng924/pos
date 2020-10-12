@@ -39,7 +39,7 @@
         :data="tableData"
         style="width: 100%"
         height="100%"
-        v-if="value=='库存-入库单'"
+        v-if="sign==1"
         @row-click="toEdit"
       >
         <el-table-column type="expand">
@@ -63,7 +63,13 @@
         </el-table-column>
       </el-table>
       <!-- 出库 -->
-      <el-table :data="tableData" style="width: 100%" height="100%" v-else @row-click="toEdit">
+      <el-table
+        :data="tableData"
+        style="width: 100%"
+        height="100%"
+        v-if="sign==2"
+        @row-click="toEdit"
+      >
         <el-table-column type="expand">
           <template slot-scope="props">
             <div class="props_item" v-for="(v,k) in props.row.goodsinfo" :key="k">
@@ -75,7 +81,15 @@
         </el-table-column>
         <el-table-column prop="stock_no" label="单号"></el-table-column>
         <el-table-column prop="sdate" label="出库日期"></el-table-column>
-        <el-table-column prop="stype" label="类型"></el-table-column>
+        <el-table-column prop="stype" label="类型" width="150">
+          <template slot-scope="scope">
+            {{scope.row.stype}}
+            <span
+              style="color:#dc670b"
+              v-show="scope.row.stype=='调拨出库'"
+            >({{scope.row.db_status|dbtype}})</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="warehouse" label="仓库名称"></el-table-column>
         <el-table-column prop="amount" label="金额合计"></el-table-column>
         <el-table-column prop="allnum" label="数量合计" width="100"></el-table-column>
@@ -89,7 +103,9 @@
     <div class="set_page" :class="{activePage:pageIn}">
       <stroeIn @close="setInfo" v-if="pageIn" :setid="setid"></stroeIn>
     </div>
-
+    <div class="set_page" :class="{activePage:pagedb}">
+      <storeIndb @close="setInfo" v-if="pagedb" :info="dbInfo"></storeIndb>
+    </div>
     <div class="set_page" :class="{activePage:pageOut}">
       <stroeOut @close="setInfo" v-if="pageOut" :setid="setid"></stroeOut>
     </div>
@@ -98,10 +114,12 @@
 
 <script>
 import stroeIn from './storeIn'
+import storeIndb from './storeIndb'
 import stroeOut from './storeOut'
 import moment from 'moment'
+import { deflate } from 'zlib';
 export default {
-  components: { stroeIn, stroeOut },
+  components: { stroeIn, stroeOut, storeIndb },
   props: {},
   data () {
     return {
@@ -111,9 +129,12 @@ export default {
       storeid: sessionStorage.getItem('storeid'),
       tableData: [],
       pageIn: false,
+      pagedb: false,
       pageOut: false,
+      notify: null,
       sign: 1,
       searchtxt: '',
+      dbInfo: '',
       setid: ''
     }
   },
@@ -126,6 +147,20 @@ export default {
         this.sign = 2
       }
       this.getDate()
+    }
+  },
+  filters: {
+    dbtype (val) {
+      switch (val) {
+        case '1':
+          return '未接收';
+        case '2':
+          return '部分接收';
+        case '3':
+          return '全部接收';
+        default:
+          return ''
+      }
     }
   },
   computed: {
@@ -162,8 +197,10 @@ export default {
         this.getDate()
       }
       this.pageIn = false
+      this.pagedb = false
       this.pageOut = false
       this.setid = ''
+      this.getdb()
     },
     Timer (date) {
       let time = Number(date)
@@ -180,25 +217,81 @@ export default {
     turnIn () {
       this.value = '库存-入库单'
       this.pageIn = true
+      if (this.notify) {
+        this.notify.close()
+      }
     },
     turnOut () {
       this.value = '库存-出库单'
       this.pageOut = true
+      if (this.notify) {
+        this.notify.close()
+      }
     },
     // 编辑删除
     toEdit (row) {
       this.setid = row.id
       if (this.sign == 1) {
-        this.pageIn = true
+        if (row.stype == '调拨入库') {
+          return this.$message.error('已接收调拨单不可删除')
+        } else {
+          this.pageIn = true
+        }
       } else {
-        this.pageOut = true
+        if (row.stype == '调拨出库' && row.db_status > 1) {
+          return this.$message.error('已接收调拨单不可删除')
+        } else {
+          this.pageOut = true
+        }
       }
+    },
+    getdb () {
+      this.$axios.get('/api?datatype=get_db_count', {
+        params: {
+          storeid: this.storeid
+        }
+      }).then(res => {
+        let that = this
+        if (res.data.code == 1 && res.data.data) {
+          if (res.data.data > 0) {
+            this.notify = this.$notify({
+              title: '提示',
+              message: '您有' + res.data.data + '条调拨待处理，点此处理',
+              type: 'warning',
+              duration: 0,
+              onClick: that.openIn,
+              position: 'bottom-right'
+            });
+          }
+        }
+      })
+    },
+    openIn () {
+      this.$axios.get('/api?datatype=get_db_onestock', {
+        params: {
+          storeid: this.storeid
+        }
+      }).then(res => {
+        console.log(res)
+        this.dbInfo = res.data.data
+        this.value = '库存-入库单'
+        this.pagedb = true
+        if (this.notify) {
+          this.notify.close()
+        }
+      })
+    }
+  },
+  beforeDestroy () {
+    if (this.notify) {
+      this.notify.close()
     }
   },
   created () {
     const a = new Date() + ''
     this.date = [a, a]
     this.getDate()
+    this.getdb()
   },
   mounted () { }
 }

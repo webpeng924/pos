@@ -123,12 +123,12 @@
             <div class="subView remarkView">
               <div class="leftView">会员备注：</div>
               <div class="valView">
-                {{ remark ? remark : "暂无备注" }}
-                <!-- <img
+                {{ userinfo.remark ? userinfo.remark : "暂无备注" }}
+                <img
                   src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Edit_Green.png"
                   class="img-edit"
                   @click="showMemo = true"
-                />-->
+                />
               </div>
             </div>
           </div>
@@ -136,7 +136,7 @@
         <div class="accInfoView">
           <div class="accItem">
             <div class="valueView balanceView">
-              <label>{{ userinfo.balance-userinfo.gift_money }}</label>
+              <label>{{ userinfo.balance-userinfo.gift_money>0?userinfo.balance-userinfo.gift_money:userinfo.balance }}</label>
             </div>
             <div class="nameView">储值账户</div>
           </div>
@@ -321,6 +321,11 @@
               }}
             </template>
           </el-table-column>
+          <el-table-column label="消费内容">
+            <template slot-scope="scope">
+              <p v-for="(v,k) in scope.row.info" :key="k">{{v.itemname}} X {{v.num}}</p>
+            </template>
+          </el-table-column>
           <el-table-column label="支付方式">
             <template slot-scope="scope">{{scope.row.pay_type |payType}}</template>
           </el-table-column>
@@ -452,10 +457,10 @@
       :modal-append-to-body="false"
     >
       <div class="textView">
-        <textarea placeholder="填写备注" maxlength="500"></textarea>
+        <textarea placeholder="填写备注" maxlength="500" v-model="remark"></textarea>
       </div>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="showMemo = false" style="background-color:#dc670b;color:#fff">保 存</el-button>
+        <el-button @click="updateRemark" style="background-color:#dc670b;color:#fff">保 存</el-button>
       </span>
     </el-dialog>
 
@@ -566,6 +571,20 @@ export default {
   },
   computed: {},
   methods: {
+    //修改会员备注
+    async updateRemark () {
+      const res = await this.$axios.get('/api?datatype=update_member_remark', {
+        params: {
+          storeid: this.storeid,
+          member_id: this.member_id,
+          remark: this.remark
+        }
+      })
+      if (res.data.code == 1) {
+        this.showMemo = false
+        this.getInfo(this.member_id)
+      }
+    },
     handleCommand (command) {
       this.nowcate = command
       this.getmemberPic()
@@ -734,6 +753,7 @@ export default {
       });
       if (res.data.code == 1) {
         this.userinfo = res.data.data;
+        this.remark = res.data.data.remark
         if (this.userinfo.last_time != null) {
           this.userinfo.last_time = moment
             .unix(this.userinfo.last_time)

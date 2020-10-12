@@ -159,7 +159,7 @@ export default {
         choose: { gong: this.choosegong },
         price: this.money * this.num
       }
-      console.log(data)
+      // console.log(data)
       this.$emit('close', data)
     }
   },

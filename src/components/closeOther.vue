@@ -78,7 +78,7 @@
                 </div>
               </div>
             </div>
-            <div class="itemsView" style="padding-top: 15px;" v-if="sign==4">
+            <div class="itemsView" style="padding-top: 15px;" v-if="sign==6">
               <div class="tView">消费明细</div>
               <div class="toPayView">
                 <div class="listItem">
@@ -239,6 +239,7 @@ export default {
       paytype: '',
       itemlist: [],
       storeid: sessionStorage.getItem('storeid'),
+      is_doublescreen: JSON.parse(sessionStorage.getItem('shopInfo')).is_doublescreen,
       wxImg: '',
       zfbImg: '',
       qtImg: '',
@@ -471,7 +472,7 @@ export default {
     if (this.choose) {
       this.itemlist.push(this.choose)
       if (this.choose.card_no) {
-        this.sign = 5
+        this.sign = 6
       } else if (this.choose.typeid) {
         this.sign = 1
       } else {
@@ -487,9 +488,11 @@ export default {
     this.getererima()
   },
   mounted () {
-    var a = 'FLAG_0'
-    javascript: jsSzb.smClientScreen(a)
-    return false;
+    if (this.is_doublescreen == 1) {
+      var a = 'FLAG_0'
+      javascript: jsSzb.smClientScreen(a)
+      return false;
+    }
   },
   watch: {},
   computed: {

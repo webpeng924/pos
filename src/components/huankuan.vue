@@ -4,7 +4,7 @@
       <button class="btn-back btn-audio" @click="$emit('close')"></button>
       <div class="tView">还款</div>
     </div>
-    <div class="contentView" style="width: 680px;">
+    <div class="contentView" style="width: 720px;">
       <div class="headerView">选择还款明细</div>
       <div class="qkAccListView listView">
         <div class="tView" v-show="signbillList.length">
@@ -24,14 +24,18 @@
             @click="addchoose(v)"
           >
             <div class="leftView">
-              <div class="orderIdView">
-                <span>单号：</span>
-                {{v.order_no}}
+              <div class="orderIdView one-txt-cut">
+                <span>单号：{{v.order_no}}</span>
                 <!-- <label>&nbsp;收银</label> -->
               </div>
-              <!-- <div class="nameView">
-                <span>名称：</span>维C亮颜精华粉
-              </div>-->
+              <div class="nameView">
+                <div style="float:left">内容：</div>
+                <div
+                  style="padding-left:50px;color:#999"
+                  v-for="(v,k) in v.info"
+                  :key="k"
+                >{{v.itemname}} X{{v.num}}</div>
+              </div>
             </div>
             <div class="rightView">
               <div>
@@ -218,6 +222,7 @@ export default {
         margin-bottom: 12px;
         .leftView {
           flex: 1;
+          width: 260px;
           border-right: 1px dashed rgba(154, 154, 154, 0.5);
           font-size: 16px;
           display: flex;
@@ -227,7 +232,6 @@ export default {
         .rightView {
           display: flex;
           padding-right: 60px;
-          width: 420px;
           min-width: 420px;
           background: transparent
             url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_N.png)

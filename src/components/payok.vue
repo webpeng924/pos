@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="payEnd" v-show="sign!=3">
+    <div class="payEnd" v-if="sign!=3&&sing!=5">
       <div class="pay-header">
         <div class="middle">支付</div>
       </div>
@@ -15,7 +15,7 @@
         </div>
       </div>
     </div>
-    <div class="cardSuccessView" v-show="sign==3">
+    <div class="cardSuccessView" v-if="sign==3">
       <div class="bcView">
         <div class="tView">
           <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_PaySuccess.png" />
@@ -38,7 +38,7 @@
         <button class="btn-comp btn-audio" @click="back">完成</button>
       </div>
     </div>
-    <div class="cardSuccessView" v-show="sign==5">
+    <div class="cardSuccessView" v-if="sign==5">
       <div class="bcView">
         <div class="tView">
           <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_PaySuccess.png" />
@@ -74,6 +74,7 @@ export default {
     return {
       orderInfo: [],
       storeid: sessionStorage.getItem('storeid'),
+      is_doublescreen: JSON.parse(sessionStorage.getItem('shopInfo')).is_doublescreen,
       now: new Date(),
       memberInfo: ''
     }
@@ -102,9 +103,11 @@ export default {
   methods: {
     back () {
       window.history.go(0)
-      var a = sessionStorage.getItem('FLAG')
-      javascript: jsSzb.smClientScreen(a)
-      return false;
+      if (this.is_doublescreen == 1) {
+        var a = sessionStorage.getItem('FLAG')
+        javascript: jsSzb.smClientScreen(a)
+        return false;
+      }
     },
     async getMember (member) {
       const res = await this.$axios.get("/api?datatype=get_one_member", {
@@ -125,7 +128,7 @@ export default {
         arr.push({ "name": this.info.cardname })
       } else if (this.sign == 2) {
         arr.push({ "name": this.info.name })
-      } else if (this.sign == 5) {
+      } else if (this.sign == 6) {
         arr.push({ "name": this.info.name + '（会员卡）' })
       }
       arr.push({ name: this.info.total, value: 1 + "#A#" + '-' + "#A# " + this.info.dis_total })
@@ -133,7 +136,7 @@ export default {
       let remark = this.info.remark == null ? '' : this.info.remark
       arr.push({ "name": "---" }, { "name": "备注: " + remark }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" })
       var a = JSON.stringify(arr);
-      console.log(a)
+      // console.log(a)
       javascript: jsSzb.smPrint(a);
       return false;
     },
@@ -148,7 +151,7 @@ export default {
       }
       arr.push({ "name": "---" }, { name: '余额', value: this.memberInfo.balance }, { "name": "---" }, { "name": "支付方式", "value": "应收合计" }, { name: this.$options.filters['type'](this.paytype), value: this.info.money }, { "name": "---" }, { "name": "备注: " + '-' }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" })
       var a = JSON.stringify(arr);
-      console.log(a)
+      // console.log(a)
       javascript: jsSzb.smPrint(a);
       return false;
     },
@@ -159,12 +162,13 @@ export default {
       arr.push({ name: '快速收款', value: this.money }, { "name": "---" }, { "name": "支付方式", "value": "合计" }, { name: this.$options.filters['type'](this.paytype), value: this.money })
       arr.push({ "name": "---" }, { "name": "备注: " + '-' }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" })
       var a = JSON.stringify(arr);
-      console.log(a)
+      // console.log(a)
       javascript: jsSzb.smPrint(a);
       return false;
     }
   },
   created () {
+    console.log(this.sign)
     if (this.info && this.info.member_id) {
       this.getMember(this.info.member_id)
     }

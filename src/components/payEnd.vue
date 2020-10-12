@@ -20,7 +20,8 @@ export default {
   props: ['info'],
   data () {
     return {
-      orderInfo: []
+      orderInfo: [],
+      is_doublescreen: JSON.parse(sessionStorage.getItem('shopInfo')).is_doublescreen,
     }
   },
   filters: {
@@ -44,9 +45,11 @@ export default {
   methods: {
     back () {
       window.history.go(0)
-      var a = sessionStorage.getItem('FLAG')
-      javascript: jsSzb.smClientScreen(a)
-      return false;
+      if (this.is_doublescreen == 1) {
+        var a = sessionStorage.getItem('FLAG')
+        javascript: jsSzb.smClientScreen(a)
+        return false;
+      }
     },
     print () {
       let arr = [{ "name": JSON.parse(sessionStorage.getItem('shopInfo')).shop_name, "style": "1" }, { "name": "收银单", "style": "1" }, { "name": "---" }, { "name": "消费单号：" + this.info.order_no }]

@@ -27,12 +27,14 @@
           :row-class-name="tableRowClassName"
           height="100%"
         >
-          <el-table-column label="类型" min-width="100">
+          <el-table-column label="类型" min-width="80">
             <template slot-scope="scope">
               <span>{{scope.row.customer_type==0?'占用':'预约'}}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="yytime" label="时间" show-overflow-tooltip min-width="200"></el-table-column>
+          <el-table-column prop="yytime" label="时间" show-overflow-tooltip min-width="180"></el-table-column>
+          <el-table-column prop="name" label="预约人" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="mobile" label="预约电话" show-overflow-tooltip min-width="120"></el-table-column>
           <el-table-column label="时长" min-width="100">1小时</el-table-column>
           <el-table-column prop="itemname" label="项目名称" min-width="150" show-overflow-tooltip></el-table-column>
           <el-table-column label="状态" min-width="100">

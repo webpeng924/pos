@@ -192,7 +192,7 @@
             </el-dialog>
           </div>
         </div>
-        <div class="groupView">
+        <div class="groupView" v-show="is_doublescreen==1">
           <div class="titleView">设置</div>
           <div class="listView">
             <div class="listItem btn-audio" @click="kexian=true">
@@ -341,6 +341,7 @@ export default {
       show: false,
       active: '',
       storeid: sessionStorage.getItem('storeid'),
+      is_doublescreen: JSON.parse(sessionStorage.getItem('shopInfo')).is_doublescreen,
       product: false,
       memberlist: false,
       projectlist: false,

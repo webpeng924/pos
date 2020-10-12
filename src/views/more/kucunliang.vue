@@ -15,7 +15,15 @@
       </el-dialog>-->
     </div>
     <div class="bomView">
-      <el-table :data="tableData" stripe style="width: 100%" height="100%">
+      <el-table
+        :data="tableData"
+        stripe
+        style="width: 100%"
+        height="100%"
+        show-summary
+        ref="table"
+        :summary-method="getSummaries"
+      >
         <el-table-column prop="goods_no" label="产品编号"></el-table-column>
         <el-table-column prop="goods_name" label="产品名称"></el-table-column>
         <el-table-column prop="title" label="统计类别"></el-table-column>
@@ -50,6 +58,31 @@ export default {
     back () {
       this.$emit('close')
     },
+    getSummaries (param) {
+      const { columns, data } = param;
+      const sums = [];
+      columns.forEach((column, index) => {
+        // console.log(column)
+        if (index === 0) {
+          sums[index] = '合计';
+          return;
+        }
+        const values = data.map(item => Number(item[column.property]));
+        if (!values.every(value => isNaN(value)) && (column['label'] == '数量' || column['label'] == '进货单价' || column['label'] == '成本单价')) {
+          sums[index] = values.reduce((prev, curr) => {
+            const value = Number(curr);
+            if (!isNaN(value)) {
+              return prev + curr;
+            } else {
+              return prev;
+            }
+          }, 0);
+        } else {
+          sums[index] = '-';
+        }
+      });
+      return sums;
+    },
     async getCPlist () {
       const res = await this.$axios.get('/api?datatype=get_skulist', {
         params: {
@@ -79,6 +112,9 @@ export default {
         this.$refs.date.focus()
       })
     }
+  },
+  updated () {
+    this.$refs.table.doLayout();
   },
   created () {
     // let a = this.formatDate(new Date())

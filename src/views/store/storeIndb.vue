@@ -4,7 +4,7 @@
       <button class="btn-back" @click="$emit('close',0)"></button>
       <div class="tView">入库</div>
       <div class="btnView">
-        <button class="btn-audio btn-green" @click="saveAdd" v-show="!setid">保存</button>
+        <button class="btn-audio btn-green" @click="saveAdd">保存</button>
       </div>
     </div>
     <div class="contentView">
@@ -16,45 +16,14 @@
               <label>单号</label>
               <div>{{stock_no}}</div>
             </div>
-            <div class="subItem selectView">
+            <div class="subItem">
               <label>入库日期</label>
-              <div @click="dateDialog=true">{{date|time('y-m-d')}}</div>
+              <div>{{date|time('y-m-d')}}</div>
             </div>
-            <div class="subItem selectView">
+            <div class="subItem">
               <label>入库方式</label>
-              <div @click="wayDialog=true">{{way}}</div>
+              <div>调拨入库</div>
             </div>
-            <el-dialog
-              title="入库方式"
-              :visible.sync="wayDialog"
-              width="30%"
-              center
-              :append-to-body="true"
-              custom-class="dialog"
-            >
-              <div class="contentView" style="max-height: 720px;">
-                <div
-                  class="listItem"
-                  :class="{select:way=='正常入库'}"
-                  @click="way='正常入库';wayDialog=false"
-                >正常入库</div>
-                <!-- <div
-                  class="listItem"
-                  :class="{select:way=='盘盈入库'}"
-                  @click="way='盘盈入库';wayDialog=false"
-                >盘盈入库</div>-->
-                <div
-                  class="listItem"
-                  :class="{select:way=='客户退货'}"
-                  @click="way='客户退货';wayDialog=false"
-                >客户退货</div>
-                <!-- <div
-                  class="listItem"
-                  :class="{select:way=='调拨入库'}"
-                  @click="way='调拨入库';wayDialog=false"
-                >调拨入库</div>-->
-              </div>
-            </el-dialog>
             <div class="subItem">
               <label>归属仓库</label>
               <div>门店仓库</div>
@@ -71,9 +40,9 @@
             </div>
           </div>
           <div class="groupView">
-            <div class="subItem selectView">
-              <label>采购人</label>
-              <div @click="workerDialog=true">{{buyer}}</div>
+            <div class="subItem">
+              <label>来源门店</label>
+              <div>{{buyer}}</div>
             </div>
             <el-dialog
               title="选择采购人"
@@ -101,175 +70,57 @@
         </div>
       </div>
       <div class="incomeGoodsView">
-        <div class="tView">
-          入库信息
-          <!-- <button class="btn-add btn-audio" v-show="!setid" @click="opencode">扫码</button> -->
-          <button class="btn-add btn-audio" v-show="!setid" @click="openadd">选择产品</button>
-          <button style="color:red" v-show="setid" @click="delInstore">删除</button>
-        </div>
+        <div class="tView">入库信息</div>
         <div class="headerView">
           <div class="nameView">产品信息</div>
-          <div class="cntView">数量</div>
+          <div class="cntView">接收数量</div>
           <div class="priceView">采购单价</div>
           <div class="amtView">总金额</div>
           <div class="supplierView">供应商</div>
           <!-- <div class="descView">规格</div> -->
           <div class="dateView">生产日期</div>
         </div>
-        <div class="listView" v-if="!setid">
+        <div class="listView">
           <div class="listItem" v-for="(v,k) in chooselist" :key="k">
-            <button class="btn-del btn-audio" @click="delchoose(v)"></button>
             <div class="nameView overflowText">{{v.name?v.name:v.goods_name}}</div>
             <div class="cntView">
               <input v-model="v.number" @change="changeNum(v,1)" />
             </div>
             <div class="priceView">
-              <input v-model="v.in_cost" @change="changeNum(v,2)" />
+              <div style="text-align:center">{{v.in_cost}}</div>
+              <!-- <input v-model="v.in_cost" @change="changeNum(v,2)" /> -->
             </div>
             <div class="amtView">
-              <input v-model="v.total" @change="changeTotal(v)" />
+              <div style="text-align:center">{{v.total}}</div>
+              <!-- <input v-model="v.total" @change="changeTotal(v)" /> -->
             </div>
             <div class="supplierView">
               <div>{{v.supplier_id}}</div>
             </div>
             <!-- <div class="descView overflowText"></div> -->
-            <div class="dateView selectView" @click="changeDate(v)">{{v.makedate}}</div>
-          </div>
-        </div>
-        <div class="listView" v-show="setid">
-          <div class="listItem" v-for="(v,k) in chooselist" :key="k">
-            <button></button>
-            <div class="nameView overflowText">{{v.name?v.name:v.goods_name}}</div>
-            <div class="cntView">{{v.number}}</div>
-            <div class="priceView">{{v.in_cost}}</div>
-            <div class="amtView">{{v.total}}</div>
-            <div class="supplierView">{{v.supplier_id}}</div>
             <div class="dateView">{{v.makedate}}</div>
           </div>
         </div>
       </div>
     </div>
-    <div class="set_page" :class="{activePage:addpro}">
-      <addPro @close="addpro=false"></addPro>
-    </div>
-
-    <!-- 选择入库产品 -->
-    <el-dialog
-      title="选择产品"
-      :visible.sync="choosepro"
-      custom-class="chooseDialog"
-      :modal-append-to-body="false"
-      center
-      width="700px"
-      style="height:100%"
-    >
-      <div class="searchView">
-        <!-- <el-input placeholder="请输入产品编号或名称" v-model="searchtxt" @blur="changecate"  prefix-icon="el-icon-search">
-        </el-input>-->
-        <input placeholder="请输入产品编号或名称" v-model="searchtxt" @input="changecate" />
-      </div>
-      <div class="headerView">
-        <label class="label-code">编号</label>
-        <label class="label-name">产品名称</label>
-        <label>
-          <el-dropdown trigger="click" @command="changecate">
-            <span class="el-dropdown-link">
-              {{cate.title}}
-              <i class="el-icon-arrow-down el-icon--right"></i>
-            </span>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item command="null">全部</el-dropdown-item>
-              <el-dropdown-item v-for="(v,k) in cateList" :key="k" :command="v">{{v.title}}</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-        </label>
-        <label class="label-source">
-          <el-dropdown trigger="click">
-            <span class="el-dropdown-link">
-              供应商
-              <i class="el-icon-arrow-down el-icon--right"></i>
-            </span>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>黄金糕</el-dropdown-item>
-              <el-dropdown-item>狮子头</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-        </label>
-      </div>
-      <div class="listView">
-        <div class="listItem" v-for="(v,k) in tableData" :key="k" @click="chosCp(v)">
-          <label class="label-icon" :class="{select:list.includes(v.id)}"></label>
-          <label class="label-code">{{v.goods_no}}</label>
-          <label class="label-name">{{v.goods_name}}</label>
-          <label>{{v.title}}</label>
-          <label class="label-source"></label>
-        </div>
-      </div>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="choosepro = false">取 消</el-button>
-        <el-button type="success" @click="submitGoods">确 定</el-button>
-      </span>
-    </el-dialog>
-    <el-dialog
-      title="日期选择"
-      :visible.sync="dateDialog"
-      center
-      :append-to-body="true"
-      custom-class="dialog"
-    >
-      <div @click="dateDialog = false">
-        <el-calendar v-model="date"></el-calendar>
-      </div>
-    </el-dialog>
-
-    <!-- 生产日期 -->
-    <el-dialog :visible.sync="makeDay" center :append-to-body="true" custom-class="dialog">
-      <div @click="chosMakeDay">
-        <el-calendar v-model="prodate"></el-calendar>
-      </div>
-    </el-dialog>
-
-    <!-- 选择入库产品 -->
-    <el-dialog
-      title="输入条码"
-      :visible.sync="codeDialog"
-      :modal-append-to-body="false"
-      center
-      width="700px"
-      custom-class="codeDialog"
-      style="height:320px"
-    >
-      <div class="searchView" style="padding:20px">
-        <input placeholder="请输入产品条形码" v-model="codebar" ref="input" @keyup.enter="getitem" />
-      </div>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="codeDialog = false">取 消</el-button>
-        <el-button type="success" @click="getitem">确 定</el-button>
-      </span>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import addPro from '@/components/addpro.vue'
 import qs from 'qs'
 export default {
-  components: { addPro },
-  props: ['setid'],
+  components: {},
+  props: ['info'],
   data () {
     return {
-      addpro: false,
       choosepro: false,
       tableData: [],
-      codebar: '',
+      oldsum: 0,
       searchtxt: '',
       list: [],
       storeid: sessionStorage.getItem('storeid'),
       stock_no: '',
       way: '正常入库',
-      wayDialog: false,
-      codeDialog: false,
-      dateDialog: false,
       workerDialog: false,
       makeDay: false,
       date: new Date,
@@ -296,38 +147,6 @@ export default {
     }
   },
   methods: {
-    // opencode () {
-    //   this.codebar = ''
-    //   this.codeDialog = true
-    //   this.getCPlist()
-    //   this.$nextTick(() => { this.$refs['input'].focus() })
-    // },
-    getitem (codebar) {
-      if (!codebar) return
-      this.$axios.get('/api?datatype=get_goods_list', {
-        params: {
-          storeid: this.storeid,
-          status: 1,
-          bar_code: codebar
-        }
-      }).then(res => {
-        // console.log(res)
-        if (res.data.code == 1 && res.data.data && res.data.data[0]) {
-          let data = res.data.data[0]
-          if (this.list.includes(data.id)) {
-            this.$message.error('此产品已添加，请直接修改数量')
-          } else {
-            this.list.push(data.id)
-            this.submitGoods()
-            this.$message.success('添加成功')
-          }
-        } else {
-          this.$message.error('未查询到此条码')
-        }
-      })
-      // this.codebar = ''
-      // this.$nextTick(() => { this.$refs['input'].focus() })
-    },
     formatDate (date) {
       var y = date.getFullYear()
       var m = date.getMonth() + 1
@@ -335,18 +154,6 @@ export default {
       var d = date.getDate()
       d = d < 10 ? '0' + d : d
       return y + '-' + m + '-' + d
-    },
-    async getworkerlist () {
-      const res = await this.$axios.get('/api?datatype=get_staff_list', {
-        params: {
-          storeid: this.storeid,
-          is_li: 0,
-          is_wei: 1
-        }
-      })
-      if (res.data.code == 1) {
-        this.workerlist = res.data.data
-      }
     },
     openadd () {
       this.choosepro = true
@@ -376,28 +183,14 @@ export default {
         })
       })
     },
-    chosCp (v) {
-      if (!this.list.includes(v.id)) {
-        this.list.push(v.id)
-      } else {
-        this.list = this.list.filter(value => value != v.id)
-      }
-    },
     async saveAdd () {
-      if (!this.buyid) return this.$message.error('请选择采购人')
-      if (!this.chooselist.length) return this.$message.error('缺少产品信息')
+      // if (!this.buyid) return this.$message.error('请选择采购人')
+      // if (!this.chooselist.length) return this.$message.error('缺少产品信息')
       let arr = []
+      let Newsum = 0
       this.chooselist.forEach(item => {
+        Newsum += Number(item.number)
         // if (item.number == 1)
-        // let obj = {
-        //   id: item.id,
-        //   goods_name: item.goods_name,
-        //   number: item.number,
-        //   in_cost: item.in_cost,
-        //   total: item.total,
-        //   supplier: item.supplier,
-        //   makedate: item.makedate
-        // }
         let obj = {
           id: item.id,
           category_id: item.category_id,
@@ -411,62 +204,94 @@ export default {
         }
         arr.push(obj)
       })
+      if (Newsum < this.oldsum) {
+        this.delOld()
+      } else {
+        this.modifyDB()
+      }
       let data = qs.stringify({
         storeid: this.storeid,
         stock_no: this.stock_no,
         into_date: this.formatDate(this.date),
-        into_type: this.way,
+        into_type: '调拨入库',
         warehouse: '门店仓库',
         number: this.chooselist.length,
         amount: this.totalPrice,
-        into_userid: this.buyid,
+        into_userid: JSON.parse(sessionStorage.getItem('userInfo')).id,
         checkman: JSON.parse(sessionStorage.getItem('userInfo')).username,
         remark: this.remark,
         goodsinfo: arr
       })
       const res = await this.$axios.post('/api?datatype=insert_into_stock', data)
-      // console.log(res)
       if (res.data.code == 1) {
         this.$message.success('入库成功')
-        this.$emit('close', 1)
       }
     },
-    delchoose (v) {
-      this.chooselist = this.chooselist.filter(item => item.id != v.id)
-      this.list = this.list.filter(item => item != v.id)
-    },
-    submitGoods () {
-      let arr = []
-      this.list.forEach(id => {
-        let a = this.tableData.find(item => item.id == id)
-        let b = this.chooselist.find(val => val.id == id)
-        this.$set(a, 'number', 1)
-        this.$set(a, 'total', Number(a.in_cost))
-        // this.$set(a, 'supplier_id', '供应商A')
-        this.$set(a, 'makedate', this.formatDate(new Date()))
-        Object.assign(a, b)
-        // console.log(a, b)
-        arr.push(a)
-      })
-      if (arr.length > 60) return this.$message.error('商品数量不能超过60个，请分批入库！')
-      this.chooselist = arr
-      this.choosepro = false
-    },
-    async changecate (command) {
-      if (command == 'null') {
-        this.cate = { id: null, title: '全部' }
-      } else {
-        this.cate = command
-      }
-      const res = await this.$axios.get('/api?datatype=get_goods_list', {
+    // 全部接收
+    modifyDB () {
+      this.$axios.get('/api?datatype=update_db_status', {
         params: {
-          storeid: this.storeid,
-          cate: this.cate.id,
-          status: 1,
-          search: this.searchtxt
+          out_id: this.info.id
+        }
+      }).then(res => {
+        if (res.data.code == 1) {
+          this.$message.success(res.data.msg)
+          this.$emit('close', 1)
         }
       })
-      this.tableData = res.data.data
+    },
+    // 删除原来的出库单
+    async delOld () {
+      let params = {
+        storeid: this.info.storeid,
+        id: this.info.id,
+        role: 1,
+        checkman: '调拨接收门店:' + JSON.parse(sessionStorage.getItem('shopInfo')).shop_name
+      }
+      const res = await this.$axios.get('/api?datatype=del_stock_out', { params })
+      if (res.data.code == 1) {
+        this.addNew()
+      } else {
+        this.$message.error(res.data.msg)
+      }
+    },
+    async addNew () {
+      let arr = []
+      let sum = 0
+      this.chooselist.forEach(item => {
+        let obj = {
+          goods_id: item.goods_id,
+          goods_name: item.goods_name,
+          number: item.number,
+          in_cost: item.in_cost,
+          total: item.total,
+          supplier: item.supplier,
+          makedate: item.makedate
+        }
+        sum += Number(item.total)
+        arr.push(obj)
+      })
+      let data = qs.stringify({
+        storeid: this.info.storeid,
+        stock_no: this.info.stock_no,
+        out_date: this.info.out_date,
+        out_type: '调拨出库',
+        checkman: this.info.checkman,
+        warehouse: '门店仓库',
+        number: this.chooselist.length,
+        amount: sum,
+        db_status: 2,
+        get_userid: this.storeid,
+        remark: this.info.remark,
+        useinfo: '调拨出库',
+        goodsinfo: arr
+      })
+      const res = await this.$axios.post('/api?datatype=insert_out_stock', data)
+      // console.log(res)
+      if (res.data.code == 1) {
+        this.$message.success('成功')
+        this.$emit('close', 1)
+      }
     },
     async getNewNo () {
       const res = await this.$axios.get('/api?datatype=get_stock_no', {
@@ -481,18 +306,14 @@ export default {
     },
     // 修改数量
     changeNum (v, id) {
-      if (id == 1) {
-        v.number = window.isNaN(Number(v.number)) ? 1 : Number(v.number)
-        if (v.number < 1) {
-          v.number = 1
-          this.$message.error('数量不能少于1件')
-        }
-      } else {
-        v.in_cost = window.isNaN(Number(v.in_cost)) ? 0 : Number(v.in_cost)
-        if (v.in_cost < 0) {
-          v.in_cost = 0
-          this.$message.error('价格输入不正确')
-        }
+      v.number = window.isNaN(Number(v.number)) ? 0 : Number(v.number)
+      if (v.number < 1) {
+        v.number = 1
+        this.$message.error('数量不可少于1件')
+      }
+      if (v.number > v.max) {
+        v.number = v.max
+        this.$message.error('不可超出最大接收数量')
       }
       this.chooselist.forEach(item => {
         if (item.id == v.id) {
@@ -508,128 +329,21 @@ export default {
         }
       })
     },
-    changeDate (v) {
-      this.prodate = v.makedate
-      this.chosOne = v
-      this.makeDay = true
-    },
-    chosMakeDay () {
-      this.chooselist.forEach(item => {
-        if (item.id == this.chosOne.id) {
-          item.makedate = this.formatDate(this.prodate)
-        }
+    setInfo () {
+      this.buyer = this.info.shop_name
+      this.info.goodsinfo.forEach(item => {
+        item['max'] = item.number
+        this.oldsum += Number(item.number)
       })
-      this.makeDay = false
-    },
-    async getinfoByid () {
-      const res = await this.$axios.get('/api?datatype=get_one_stock', {
-        params: {
-          sign: 1,
-          id: this.setid
-        }
-      })
-      if (res.data.code == 1) {
-        let data = res.data.data
-        this.stock_no = data.stock_no
-        this.date = data.into_date
-        this.way = data.into_type
-        this.buyer = data.name
-        this.buyid = data.into_userid
-        this.remark = data.remark
-        this.chooselist = data.goodsinfo
-      }
-    },
-    delInstore () {
-      if (this.way == '盘盈入库') return this.$message.error('盘点相关，无法删除')
-      this.$confirm('确认删除此入库单吗?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(async () => {
-        let params = {
-          storeid: this.storeid,
-          id: this.setid,
-          role: JSON.parse(sessionStorage.getItem('userInfo')).role,
-          checkman: JSON.parse(sessionStorage.getItem('userInfo')).username
-        }
-        const res = await this.$axios.get('/api?datatype=del_stock_into', { params })
-        if (res.data.code == 1) {
-          this.$message.success('操作成功')
-          this.$emit('close', 1)
-        } else {
-          this.$message.error(res.data.msg)
-        }
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '已取消删除'
-        });
-      });
-    },
-    opencode () {
-      var _this = this
-      var codeString = "";
-      //定时器每隔200ms 清空codeString
-      //扫码枪读取的速度比手动输入的速度要快很多，这也可以作为区分扫码还是手动输入的条件
-      var scanTimeer = setInterval(function () {
-        var now = new Date().getTime();
-        if (now - lastTime > 200) {
-          codeString = "";
-        }
-      }, 200);
-      var lastTime;
-      var caseFormat = false;
-      document.onkeydown = function (e) {
-        var nextTime = new Date().getTime();
-        var code = e.which;
-        //shift键
-        if (code == 16) {
-          caseFormat = true;
-        } else {
-          if (caseFormat) {
-            if (code >= 65 && code <= 90) {
-              //转小写
-              code = code + 32;
-            } else if (code >= 97 && code <= 122) {
-              //转大写
-              code = code - 32;
-            }
-            caseFormat = false;
-          }
-          var char = String.fromCharCode(code);
-          if (codeString == "") {
-            codeString += char;
-          } else if (nextTime - lastTime <= 30) {
-            codeString += char;
-          }
-        }
-        lastTime = nextTime;
-      };
-
-      window.onkeydown = (function (e) {
-        var nextTime1 = new Date().getTime();
-        var lastTime1;
-        if (e.which == 13) {
-          _this.getitem(codeString.substring(0, codeString.length - 1));
-          codeString = "";
-        }
-      })
+      this.chooselist = JSON.parse(JSON.stringify(this.info.goodsinfo))
     }
   },
   created () {
-    if (this.setid) {
-      this.getinfoByid()
-    } else {
-      this.getNewNo()
-    }
-    this.getworkerlist()
-    this.getCPlist()
-    this.opencode()
-  },
-  beforeDestroy () {
-    // console.log('消毁')
-    document.onkeydown = null
-    window.onkeydown = null
+    if (!this.info) return this.$emit('close', 0)
+    this.setInfo()
+    this.getNewNo()
+    // this.getworkerlist()
+    // this.getCPlist()
   },
   mounted () { }
 }

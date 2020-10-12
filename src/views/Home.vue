@@ -2,9 +2,9 @@
   <div class="cash">
     <div class="top_select" v-show="!merge">
       <div class="right">
-        <div class="btn" @click="page=true">收银</div>
+        <div class="btn" @click="page=true;server = ''">收银</div>
         <span class="i" @click="quickmoney=true">快速收银</span>
-        <p>系统到期时间：{{endtime}}</p>
+        <p @click="showaddtime=true">系统到期时间：{{shopInfo.pos_period?shopInfo.pos_period:endtime}}</p>
         <!-- <el-input placeholder="员工信息查询" v-model="likeName" style="width:240px;border:#dc670b">
           <i slot="prefix" class="el-input__icon el-icon-search"></i>
         </el-input>-->
@@ -139,7 +139,7 @@
             <div
               class="remarkView overflowText"
               style="color: rgb(187, 187, 187);"
-              @click.stop="()=>{if(v.status<3){showMemo=true;modifyid=v.id}}"
+              @click.stop="()=>{if(v.status<3){remark=v.remark;showMemo=true;modifyid=v.id}}"
             >{{v.remark}}</div>
             <div class="serTimeView">
               <div
@@ -260,11 +260,40 @@
       <chooseworker @close="setdata" :setinfo="setinfo" v-if="showworker"></chooseworker>
     </el-dialog>
 
-    <!-- 签名 -->
+    <!-- 签到 -->
     <el-dialog :visible.sync="showSign" width="30%">
       <div style="text-align: center;padding:20px;font-size:16px">今天是 {{new Date()|moment1}}</div>
       <div style="text-align: center;padding:20px">
         <el-button type="primary" @click="toSign" style="width:80%">点击签到</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 续费 -->
+    <el-dialog :visible.sync="showaddtime" width="600px">
+      <div class="addtime">
+        <p>尊敬的用户，您好：</p>
+        <p style="text-indent: 2em;">您的系统使用期限将在{{endtime}}到期；为确保您的用户体验，避免损失；请及时续费！</p>
+        <div class="item_i">
+          <div class="item_item opc">
+            <span class="tag">续费享优惠</span>
+            <h3>续费VIP</h3>
+            <p class="money">￥800</p>
+            <p class="money1">￥1000</p>
+            <div class="line">免费送积分</div>
+          </div>
+          <div class="item_item bdj">
+            <span class="tag">续费享优惠</span>
+            <h3>续费VIP</h3>
+            <p class="money">￥1400</p>
+            <p class="money1">￥2000</p>
+            <div class="line">免费送积分</div>
+          </div>
+        </div>
+        <div class="paytype">
+          <el-radio v-model="paytype" label="zfb" border>支付宝</el-radio>
+          <el-radio v-model="paytype" label="wx" border>微信</el-radio>
+          <el-radio v-model="paytype" label="other" border>其他</el-radio>
+        </div>
       </div>
     </el-dialog>
 
@@ -292,12 +321,13 @@ export default {
       deg: 0,
       mainPay: false,
       innerVisible: false,
+      showaddtime: false,
       value: '今日收银',
       people: '单据人员',
       server: '服务中',
       rotate: true,
       choose: null,
-      paytype: 'zfb',
+      paytype: '',
       gongzhong: 1,
       storeid: sessionStorage.getItem('storeid'),
       page: false,
@@ -340,7 +370,7 @@ export default {
     moment1 (val) {
       return moment(val).format('YYYY年MM月DD日')
     },
-    server (val) {
+    Server (val) {
       switch (val) {
         case '全部':
           return 0;
@@ -376,7 +406,7 @@ export default {
     },
     async getorderlist () {
       this.orderlist = []
-      let status = this.$options.filters['server'](this.server)
+      let status = this.$options.filters['Server'](this.server)
       const loading = this.$loading({ lock: true, text: '数据加载中...', spinner: 'el-icon-loading', background: 'rgba(0, 0, 0, 0.7)' });
       const res = await this.$axios.get('/api?datatype=get_orderlist', {
         params: {
@@ -450,22 +480,22 @@ export default {
       }
     },
     // 快速收款
-    async setCard () {
-      const res = await this.$axios.get('/api?datatype=quick_pay', {
-        params: {
-          storeid: this.storeid,
-          dis_total: this.Quickprice,
-          pay_type: this.paytype
-        }
-      })
-      if (res.data.code == 1) {
-        this.$message.success('收款成功')
-        this.innerVisible = false
-        this.quickmoney = false
-      } else {
-        this.$message.error('收款失败')
-      }
-    },
+    // async setCard () {
+    //   const res = await this.$axios.get('/api?datatype=quick_pay', {
+    //     params: {
+    //       storeid: this.storeid,
+    //       dis_total: this.Quickprice,
+    //       pay_type: this.paytype
+    //     }
+    //   })
+    //   if (res.data.code == 1) {
+    //     this.$message.success('收款成功')
+    //     this.innerVisible = false
+    //     this.quickmoney = false
+    //   } else {
+    //     this.$message.error('收款失败')
+    //   }
+    // },
     toSign () {
       this.$axios.get('/api?datatype=insert_sign&storeid=' + this.storeid).then(res => {
         if (res.data.code == 1) {
@@ -479,6 +509,7 @@ export default {
     // 打开整单
     modifyorder (v) {
       if (v.status < 3) {
+        this.server = ''
         this.info = v
         this.page = true
       } else if (v.status == 3) {
@@ -647,11 +678,6 @@ export default {
     this.getworkerlist()
     this.getorderlist()
   },
-  mounted () {
-    // var a = sessionStorage.getItem('FLAG')
-    // javascript: jsSzb.smClientScreen(a)
-    // return false;
-  }
 }
 </script>
 
@@ -1549,6 +1575,73 @@ export default {
       z-index: 10;
       background: url(https://static.bokao2o.com/wisdomCashier/images/Icon_X_Gray.png)
         center / 28px 28px no-repeat;
+    }
+  }
+
+  .addtime {
+    padding: 20px;
+    > p {
+      font-weight: 700;
+      padding: 0 25px;
+    }
+    .item_i {
+      display: flex;
+      padding: 60px 20px 0;
+      justify-content: space-around;
+      .item_item {
+        width: 150px;
+        height: 150px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        position: relative;
+        .tag {
+          position: absolute;
+          top: -15px;
+          display: inline-block;
+          padding: 2px 15px;
+          border-radius: 150px 0 150px 0 / 150px 0 150px 0;
+          // height: 30px;
+          background-color: #ff6600;
+          color: #fff;
+        }
+        h3 {
+          font-size: 18px;
+          font-weight: 700;
+          margin-top: 25px;
+          text-align: center;
+        }
+        p {
+          text-align: center;
+          font-size: 12px;
+          &.money {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ff9933;
+          }
+          &.money1 {
+            text-decoration: line-through #ff9933;
+          }
+        }
+        .line {
+          background-color: #ff6600;
+          color: #fff;
+          line-height: 30px;
+          text-align: center;
+          position: absolute;
+          bottom: 0;
+          width: 100%;
+        }
+      }
+      .opc {
+        opacity: 0.5;
+      }
+      .bdj {
+        border: 1px solid #ff6600;
+      }
+    }
+    .paytype {
+      text-align: center;
+      padding-top: 30px;
     }
   }
 }

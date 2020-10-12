@@ -169,12 +169,29 @@
       class="payDialog"
       :show-close="false"
       :modal-append-to-body="false"
-      title="付款码"
+      title="收款"
       center
     >
-      <img :src="showImg|imgUrl" alt class="payEr" />
+      <img
+        :src="showImg|imgUrl"
+        alt
+        class="payEr"
+        v-show="paytype == '其他'||shopinfo.is_payonline != 1"
+      />
+      <input
+        placeholder="请客户扫码或录入付款码后回车"
+        v-model="codebar"
+        ref="input"
+        @keyup.enter="showpay"
+        style="width:80%;margin:0 10%;"
+        v-show="paytype == '支付宝' || paytype == '微信'"
+      />
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="fukuanOK">确认收到款项</el-button>
+        <el-button
+          type="primary"
+          @click="fukuanOK"
+          v-show="paytype == '其他'||shopinfo.is_payonline != 1"
+        >确认收到款项</el-button>
       </span>
     </el-dialog>
 
@@ -222,6 +239,8 @@ export default {
       paytype: '',
       itemlist: [],
       storeid: sessionStorage.getItem('storeid'),
+      shopinfo: JSON.parse(sessionStorage.getItem('shopInfo')),
+      is_doublescreen: JSON.parse(sessionStorage.getItem('shopInfo')).is_doublescreen,
       wxImg: '',
       zfbImg: '',
       qtImg: '',
@@ -235,6 +254,8 @@ export default {
       quanDialog: false,
       choosquan: '',
       quanlist: [],
+      codebar: '',
+      timer: null,
       info: ''
     }
   },
@@ -247,26 +268,81 @@ export default {
     submit () {
       if (!this.paytype) return this.$message.error('请选择支付方式')
       if (this.paytype == '支付宝' || this.paytype == '微信' || this.paytype == '其他') {
-        if (this.paytype == '支付宝') {
-          this.showImg = this.zfbImg
-        } else if (this.paytype == '微信') {
-          this.showImg = this.wxImg
+        if (this.shopinfo.is_payonline == 1 && this.paytype != '其他') {
+          this.showcode()
         } else {
-          this.showImg = this.qtImg
-        }
-        if (this.showImg) {
-          this.dialogVisible = true
-        } else {
-          this.$confirm('缺少该付款二维码', '提示', {
-            confirmButtonText: '去上传',
-            cancelButtonText: '更换付款方式',
-            type: 'warning'
-          }).then(() => {
-            this.erweima = true
-          })
+          if (this.paytype == '支付宝') {
+            this.showImg = this.zfbImg
+          } else if (this.paytype == '微信') {
+            this.showImg = this.wxImg
+          } else {
+            this.showImg = this.qtImg
+          }
+          if (this.showImg) {
+            this.dialogVisible = true
+          } else {
+            this.$confirm('缺少该付款二维码', '提示', {
+              confirmButtonText: '去上传',
+              cancelButtonText: '更换付款方式',
+              type: 'warning'
+            }).then(() => {
+              this.erweima = true
+            })
+          }
         }
       } else {
         this.fukuanOK()
+      }
+    },
+    showcode () {
+      if (this.paytype == '支付宝') {
+        this.showImg = this.zfbImg
+      } else {
+        this.showImg = this.wxImg
+      }
+      this.dialogVisible = true
+      this.codebar = ''
+      this.$nextTick(() => { this.$refs['input'].focus() })
+    },
+    async showpay () {
+      let that = this
+      if (!that.codebar) return
+      const res = await that.$axios.get('http://hb.rgoo.com/api/sft_pay.php', {
+        params: {
+          storeid: this.storeid,
+          order_no: that.bookinfo.order_no,
+          amount: that.bookinfo.dis_total,
+          pay_type: that.paytype == '支付宝' ? 'ZFB01' : 'TX01',
+          authCode: that.codebar
+        }
+      })
+      // console.log(res)
+      if (res.data.code == 1) {
+        that.timer = setInterval(function () {
+          that.checkpay(res.data.order_no, res.data.txnTime, res.data.paytime)
+        }, 2000);
+      }
+    },
+    async checkpay (order_no, time, paytime) {
+      const res = await this.$axios.get('http://hb.rgoo.com/api/sft_return.php', {
+        params: {
+          storeid: this.storeid,
+          order_no: order_no,
+          paytime: paytime,
+          txntime: time
+        }
+      })
+      // console.log(res)
+      if (res.data.errorCode == '00') {
+        clearInterval(this.timer)
+        this.timer = null
+        this.fukuanOK()
+      } else if (res.data.errorCode != 'AW' && res.data.errorCode != 'A7' && res.data.errorCode != '09') {
+        clearInterval(this.timer)
+        this.timer = null
+        this.$message.error('支付失败')
+        this.codebar = ''
+        this.$nextTick(() => { this.$refs['input'].focus() })
       }
     },
     async  fukuanOK () {
@@ -416,9 +492,11 @@ export default {
   },
   mounted () {
     // console.log('创建')
-    var a = 'FLAG_0'
-    javascript: jsSzb.smClientScreen(a)
-    return false;
+    if (this.is_doublescreen == 1) {
+      var a = 'FLAG_0'
+      javascript: jsSzb.smClientScreen(a)
+      return false;
+    }
   },
   watch: {},
   computed: {

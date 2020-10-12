@@ -15,11 +15,11 @@
           <lqyRecharge></lqyRecharge>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="短信设置">
+      <!-- <el-tab-pane label="短信设置">
         <div class="box">
-          <!-- <lqyErWeiMaPay></lqyErWeiMaPay> -->
+          <lqyErWeiMaPay></lqyErWeiMaPay>
         </div>
-      </el-tab-pane>
+      </el-tab-pane>-->
     </el-tabs>
   </div>
 </template>

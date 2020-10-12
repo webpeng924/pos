@@ -14,7 +14,8 @@ export default {
   props: {},
   data () {
     return {
-      pic: ''
+      pic: '',
+      is_doublescreen: JSON.parse(sessionStorage.getItem('shopInfo')).is_doublescreen,
     }
   },
   watch: {},
@@ -37,15 +38,19 @@ export default {
   },
   beforeDestroy () {
     // console.log('消毁')
-    var a = sessionStorage.getItem('FLAG')
-    javascript: jsSzb.smClientScreen(a)
-    return false;
+    if (this.is_doublescreen == 1) {
+      var a = sessionStorage.getItem('FLAG')
+      javascript: jsSzb.smClientScreen(a)
+      return false;
+    }
   },
   mounted () {
     // console.log('创建')
-    var a = 'FLAG_0'
-    javascript: jsSzb.smClientScreen(a)
-    return false;
+    if (this.is_doublescreen == 1) {
+      var a = 'FLAG_0'
+      javascript: jsSzb.smClientScreen(a)
+      return false;
+    }
   }
 }
 </script>

@@ -30,7 +30,12 @@
     <div class="CView">
       <div class="box">
         <div class="left">
-          <div v-for="(v,k) in workerlist" :key="k" class="a_item">
+          <div
+            v-for="(v,k) in workerlist"
+            :key="k"
+            class="a_item"
+            :style="`background:url(${imgurl(v.avatar)});background-size:100% 100%`"
+          >
             <p>{{v.name}}</p>
             <p class="one-txt-cut">{{v.service_job}}({{v.job_no}})</p>
           </div>
@@ -222,6 +227,13 @@ export default {
   },
   computed: {},
   methods: {
+    imgurl (data) {
+      if (data) {
+        return 'https://hb.rgoo.com' + data
+      } else {
+        return 'https://hb.rgoo.com/upload/shop/moren.jpg'
+      }
+    },
     toadd () {
       this.info = {
         workerid: this.workerid,
@@ -615,11 +627,12 @@ export default {
         overflow-y: hidden;
         background: #f4f4f4;
         border-right: 0.5px solid rgba(220, 220, 220, 0.7);
-        padding: 30px 10px 30px 20px;
+        padding: 100px 10px 20px 20px;
         p {
-          font-size: 16px;
-          line-height: 40px;
+          font-size: 14px;
+          line-height: 20px;
           width: 100%;
+          color: #fff;
         }
       }
       .b_item {

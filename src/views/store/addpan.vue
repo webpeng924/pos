@@ -268,6 +268,18 @@ export default {
     async saveAdd () {
       if (!this.buyid) return this.$message.error('请选择盘点员工')
       if (!this.chooselist.length) return this.$message.error('缺少产品信息')
+      let arr = []
+      this.chooselist.forEach(item => {
+        let obj = {
+          goods_id: item.goods_id,
+          goods_name: item.goods_name,
+          old_num: item.old_num,
+          in_cost: item.in_cost,
+          new_num: item.new_num,
+          cha: item.cha
+        }
+        arr.push(obj)
+      })
       let data = qs.stringify({
         storeid: this.storeid,
         stock_no: this.stock_no,
@@ -275,7 +287,7 @@ export default {
         // checkman: JSON.parse(sessionStorage.getItem('userInfo')).username,
         warehouse: '门店仓库',
         pan_userid: this.buyid,
-        goodsinfo: this.chooselist
+        goodsinfo: arr
       })
       const res = await this.$axios.post('/api?datatype=insert_pan_stock', data)
       // console.log(res)
@@ -300,6 +312,7 @@ export default {
         // console.log(a, b)
         arr.push(a)
       })
+      if (arr.length > 60) return this.$message.error('商品数量不能超过60个，请分批盘点！')
       this.chooselist = arr
       this.choosepro = false
     },
@@ -455,6 +468,7 @@ export default {
         overflow-x: hidden;
         overflow-y: auto;
         padding-bottom: 35px;
+        height: calc(100% - 104px);
         .listItem {
           position: relative;
           display: flex;

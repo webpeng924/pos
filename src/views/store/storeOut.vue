@@ -110,7 +110,7 @@
             </div>
             <div class="subItem selectView" v-show="way=='调拨出库'">
               <label>领取门店</label>
-              <div @click="workerDialog=true">{{shopname}}</div>
+              <div @click="shopDialog=true">{{shopname}}</div>
             </div>
             <div class="subItem" v-show="way!='调拨出库'">
               <label>领取用途（必填）</label>
@@ -128,8 +128,8 @@
         <div class="tView">
           出库信息
           <!---->
-          <button class="btn-add btn-audio" @click="opencode">扫码</button>
-          <button class="btn-add btn-audio" @click="openadd">选择产品</button>
+          <!-- <button class="btn-add btn-audio" @click="opencode">扫码</button> -->
+          <button class="btn-add btn-audio" @click="openadd" v-show="!setid">选择产品</button>
           <button style="color:red" v-show="setid" @click="delInstore">删除</button>
         </div>
         <div class="headerView">
@@ -190,8 +190,6 @@
       width="700px"
     >
       <div class="searchView">
-        <!-- <el-input placeholder="请输入产品编号或名称" v-model="searchtxt" @blur="changecate"  prefix-icon="el-icon-search">
-        </el-input>-->
         <input placeholder="请输入产品编号或名称" v-model="searchtxt" @input="changecate" />
       </div>
       <div class="headerView">
@@ -255,6 +253,30 @@
         <el-button type="success" @click="getitem">确 定</el-button>
       </span>
     </el-dialog>
+
+    <!-- 门店列表 -->
+    <el-dialog
+      title="选择门店"
+      :visible.sync="shopDialog"
+      width="30%"
+      center
+      :modal-append-to-body="false"
+      :close-on-click-modal="false"
+      custom-class="dialog"
+    >
+      <div style="padding:10px;display:flex">
+        <el-input v-model="shopCode" placeholder="请输入门店编码" clearable></el-input>
+        <el-button @click="getShop">搜索</el-button>
+      </div>
+      <div class="contentView">
+        <div
+          v-for="(v,k) in shoplist"
+          :key="k"
+          class="listItem one-txt-cut"
+          @click="clickShop(v)"
+        >{{v.shop_code}} -- {{v.shop_name}}</div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -269,8 +291,10 @@ export default {
       addpro: false,
       choosepro: false,
       tableData: [],
+      shoplist: [],
       codebar: '',
       searchtxt: '',
+      shopCode: '',
       list: [],
       storeid: sessionStorage.getItem('storeid'),
       stock_no: '',
@@ -279,6 +303,7 @@ export default {
       dateDialog: false,
       codeDialog: false,
       workerDialog: false,
+      shopDialog: false,
       makeDay: false,
       getType: '员工',
       typeDialog: false,
@@ -287,6 +312,7 @@ export default {
       buyer: '请选择领取员工',
       shopname: "请选择领取门店",
       buyid: '',
+      shopid: '',
       remark: '',
       usefor: '',
       searchtxt: null,
@@ -308,22 +334,35 @@ export default {
     }
   },
   methods: {
-    opencode () {
-      this.codebar = ''
-      this.codeDialog = true
-      this.getCPlist()
-      this.$nextTick(() => { this.$refs['input'].focus() })
+    getShop () {
+      if (!this.shopCode) return this.$message.error('请输入门店编码')
+      this.$axios.get('/api?datatype=get_shoplist', {
+        params: {
+          search: this.shopCode
+        }
+      }).then(res => {
+        if (res.data.code == 1 && res.data.data) {
+          this.shoplist = res.data.data
+        } else {
+          this.$message.error('未搜索到该门店编码')
+        }
+      })
     },
-    getitem () {
-      if (!this.codebar) return this.$message.error('请输入条码')
+    clickShop (v) {
+      this.shopid = v.shop_id
+      this.shopname = v.shop_name
+      this.shopDialog = false
+    },
+    getitem (codebar) {
+      if (!codebar) return
       this.$axios.get('/api?datatype=get_skulist', {
         params: {
           storeid: this.storeid,
           type: 1,
-          search: this.codebar
+          bar_code: codebar
         }
       }).then(res => {
-        console.log(res)
+        // console.log(res)
         if (res.data.code == 1 && res.data.data) {
           let data = res.data.data[0]
           if (this.list.includes(data.id)) {
@@ -337,8 +376,8 @@ export default {
           this.$message.error('未查询到此条码')
         }
       })
-      this.codebar = ''
-      this.$nextTick(() => { this.$refs['input'].focus() })
+      // this.codebar = ''
+      // this.$nextTick(() => { this.$refs['input'].focus() })
     },
     async getinfoByid () {
       const res = await this.$axios.get('/api?datatype=get_one_stock', {
@@ -419,7 +458,8 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_skulist', {
         params: {
           storeid: this.storeid,
-          type: 1
+          type: 1,
+          status: 1
         }
       })
       // console.log(res)
@@ -449,9 +489,26 @@ export default {
       }
     },
     async saveAdd () {
-      if (!this.buyid) return this.$message.error('请选择领取员工')
-      if (!this.usefor) return this.$message.error('请输入领取用途')
+      if (this.way == '调拨出库') {
+        if (!this.shopid) return this.$message.error('请选择领取门店')
+      } else {
+        if (!this.buyid) return this.$message.error('请选择领取员工')
+        if (!this.usefor) return this.$message.error('请输入领取用途')
+      }
       if (!this.chooselist.length) return this.$message.error('缺少产品信息')
+      let arr = []
+      this.chooselist.forEach(item => {
+        let obj = {
+          goods_id: item.goods_id,
+          goods_name: item.goods_name,
+          number: item.number,
+          in_cost: item.in_cost,
+          total: item.total,
+          supplier: item.supplier,
+          makedate: item.makedate
+        }
+        arr.push(obj)
+      })
       let data = qs.stringify({
         storeid: this.storeid,
         stock_no: this.stock_no,
@@ -462,10 +519,11 @@ export default {
         number: this.chooselist.length,
         amount: this.totalPrice,
         get_usertype: '员工',
-        get_userid: this.buyid,
+        db_status: this.way == '调拨出库' ? '1' : null,
+        get_userid: this.way == '调拨出库' ? this.shopid : this.buyid,
         remark: this.remark,
-        useinfo: this.usefor,
-        goodsinfo: this.chooselist
+        useinfo: this.way == '调拨出库' ? this.way : this.usefor,
+        goodsinfo: arr
       })
       const res = await this.$axios.post('/api?datatype=insert_out_stock', data)
       // console.log(res)
@@ -474,6 +532,10 @@ export default {
         this.$emit('close', 1)
       }
     },
+    // savefly () {
+    //   if (!this.shopid) return this.$message.error('请选择领取门店')
+    //   this.$message('调拨开发中')
+    // },
     delchoose (v) {
       this.chooselist = this.chooselist.filter(item => item.id != v.id)
       this.list = this.list.filter(item => item != v.id)
@@ -484,14 +546,15 @@ export default {
         let a = this.tableData.find(item => item.id == id)
         let b = this.chooselist.find(val => val.id == id)
         this.$set(a, 'oldnumber', a.number)
-        this.$set(a, 'outnumber', 0)
-        this.$set(a, 'total', 0)
+        this.$set(a, 'outnumber', 1)
+        this.$set(a, 'total', a.in_cost)
         this.$set(a, 'supplier_id', '供应商A')
         this.$set(a, 'makedate', this.formatDate(new Date()))
         Object.assign(a, b)
         // console.log(a, b)
         arr.push(a)
       })
+      if (arr.length > 60) return this.$message.error('商品数量不能超过60个，请分批出库！')
       this.chooselist = arr
       this.choosepro = false
     },
@@ -519,7 +582,12 @@ export default {
     },
     // 修改数量
     changeNum (v) {
-      v.outnumber = v.outnumber.replace(/[^0-9]/g, '')
+      v.outnumber = window.isNaN(Number(v.outnumber)) ? 1 : Number(v.outnumber)
+      if (v.outnumber < 1) {
+        v.outnumber = 1
+        this.$message.error('数量不能少于1件')
+      }
+      // v.outnumber = v.outnumber.replace(/[^0-9]/g, '')
       this.chooselist.forEach(item => {
         if (item.id == v.id) {
           // if (Number(v.outnumber) > Number(v.oldnumber)) {
@@ -542,6 +610,55 @@ export default {
         }
       })
       this.makeDay = false
+    },
+    opencode () {
+      var _this = this
+      var codeString = "";
+      //定时器每隔200ms 清空codeString
+      //扫码枪读取的速度比手动输入的速度要快很多，这也可以作为区分扫码还是手动输入的条件
+      var scanTimeer = setInterval(function () {
+        var now = new Date().getTime();
+        if (now - lastTime > 200) {
+          codeString = "";
+        }
+      }, 200);
+      var lastTime;
+      var caseFormat = false;
+      document.onkeydown = function (e) {
+        var nextTime = new Date().getTime();
+        var code = e.which;
+        //shift键
+        if (code == 16) {
+          caseFormat = true;
+        } else {
+          if (caseFormat) {
+            if (code >= 65 && code <= 90) {
+              //转小写
+              code = code + 32;
+            } else if (code >= 97 && code <= 122) {
+              //转大写
+              code = code - 32;
+            }
+            caseFormat = false;
+          }
+          var char = String.fromCharCode(code);
+          if (codeString == "") {
+            codeString += char;
+          } else if (nextTime - lastTime <= 30) {
+            codeString += char;
+          }
+        }
+        lastTime = nextTime;
+      };
+
+      window.onkeydown = (function (e) {
+        var nextTime1 = new Date().getTime();
+        var lastTime1;
+        if (e.which == 13) {
+          _this.getitem(codeString.substring(0, codeString.length - 1));
+          codeString = "";
+        }
+      })
     }
   },
   created () {
@@ -551,6 +668,13 @@ export default {
       this.getNewNo()
     }
     this.getworkerlist()
+    this.getCPlist()
+    this.opencode()
+  },
+  beforeDestroy () {
+    // console.log('消毁')
+    document.onkeydown = null
+    window.onkeydown = null
   },
   mounted () { }
 }
@@ -703,6 +827,7 @@ export default {
         overflow-x: hidden;
         overflow-y: auto;
         padding-bottom: 35px;
+        height: calc(100% - 104px);
         .listItem {
           position: relative;
           display: flex;
@@ -852,6 +977,21 @@ export default {
       }
       .listItem:nth-child(odd) {
         background: #f8f8f8;
+      }
+    }
+  }
+
+  /deep/.dialog {
+    padding: 10px;
+    height: 75%;
+    .el-dialog__body {
+      height: calc(100% - 60px);
+      .contentView {
+        height: calc(100% - 60px);
+        overflow: auto;
+        .listItem {
+          width: 100%;
+        }
       }
     }
   }
