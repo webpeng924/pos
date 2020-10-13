@@ -165,7 +165,7 @@
                 @click="toEditPrice(v,k)"
                 v-show="v.is_usecard!=1"
               >修改价格</i>
-              <div class="priceView">￥&nbsp;{{(Number(v.price)*v.num*v.discount).toFixed(2)}}</div>
+              <div class="priceView">￥&nbsp;{{Number(v.subtotal).toFixed(2)}}</div>
             </div>
             <div class="empView">
               <div class="empItem" v-show="!v.worker">
@@ -445,7 +445,7 @@ export default {
     sumprice () {
       let sum = 0
       this.chooslist.forEach(item => {
-        sum += Number(item.price) * Number(item.num) * item.discount
+        sum += Number(item.subtotal)
       })
       return sum.toFixed(2)
     }
@@ -534,18 +534,19 @@ export default {
       this.editIndex = k
       this.editprice = v.price
       this.editdiscount = v.discount
-      this.editdisprice = v.price * v.discount
+      this.editdisprice = (v.subtotal / v.num).toFixed(2)
     },
     changeDisprice () {
-      this.editdiscount = this.editdisprice / this.editprice
+      this.editdiscount = (this.editdisprice / this.editprice).toFixed(2)
     },
     changeDiscount () {
       this.editdisprice = Number(this.editprice * this.editdiscount).toFixed(2)
     },
     modifyPrice () {
+      if (isNaN(Number(this.editdisprice))) return this.$message.error('价格错误')
       this.chooslist.forEach((item, idx) => {
         if (idx == this.editIndex) {
-          // item.price = this.editdisprice
+          item['discount_price'] = Number(this.editdisprice)
           item.discount = Number(this.editdiscount)
           item.subtotal = Number(this.editdisprice) * Number(item.num)
         }
@@ -564,8 +565,8 @@ export default {
         id = this.info ? this.info.id : this.bookinfo.id
       }
       this.chooslist.forEach(item => {
-        item['discount_price'] = (Number(item.price) * item.discount * item.num).toFixed(2)
-        item['subtotal'] = (Number(item.price) * item.discount * item.num).toFixed(2)
+        // item['discount_price'] = (Number(item.subtotal) / item.num).toFixed(2)
+        // item['subtotal'] = (Number(item.price) * item.discount * item.num).toFixed(2)
       })
       let obj = {
         storeid: this.storeid,
@@ -783,10 +784,16 @@ export default {
       })
     },
     setdata (data) {
+      console.log(data)
       if (this.ModifyW != null) {
         this.chooslist.forEach((v, k) => {
           if (k == this.ModifyW) {
             v.num = data.num
+            if (v.discount_price) {
+              v.subtotal = v.discount_price * data.num
+            } else {
+              v.subtotal = v.price * data.num
+            }
             if (data.choose.gong) {
               v.worker = data.choose.gong
               v.staff1 = data.choose.gong.id
@@ -800,7 +807,7 @@ export default {
     },
     // 打开
     openworker (v, k, sign) {
-      // console.log(v, k, sign)
+      console.log(v, k, sign)
       if (sign == 2) {
         this.ModifyW = k
         let worker = ''
@@ -928,6 +935,7 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         inputPattern: /^[0-9]\d*(.\d{1,2})?$/,
+        inputPlaceholder: this.newprice ? this.newprice : this.subtotal,
         // inputValidator: (val) => { return Number(val) <= Number(data.rest_count) },
         inputErrorMessage: '价格为整数或最多保留2位小数'
       }).then(({ value }) => {
@@ -990,7 +998,7 @@ export default {
     },
     // 添加到右侧
     addchooselist (v, data, num) {
-      // console.log(v, data)
+      console.log(v, data, num)
       if (data) {
         if (data.gong) {
           this.$set(v, 'staff1', data.gong.id)

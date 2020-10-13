@@ -4,7 +4,10 @@
       <div class="right">
         <div class="btn" @click="page=true;server = ''">收银</div>
         <span class="i" @click="quickmoney=true">快速收银</span>
-        <p @click="showaddtime=true">系统到期时间：{{shopInfo.pos_period?shopInfo.pos_period:endtime}}</p>
+        <p @click="showaddtime=true" style="color:red">
+          <el-button size="small" type="success">续费</el-button>
+        </p>
+        <p>系统到期时间：{{shopInfo.pos_period?shopInfo.pos_period:endtime}}</p>
         <!-- <el-input placeholder="员工信息查询" v-model="likeName" style="width:240px;border:#dc670b">
           <i slot="prefix" class="el-input__icon el-icon-search"></i>
         </el-input>-->
@@ -174,6 +177,10 @@
       <printpage @close="printpage=false;server='已结账';info=''" :info="info" v-if="printpage"></printpage>
     </div>
 
+    <div class="set_page" :class="{activePage:innerVisible}">
+      <closepage @close="innerVisible=false" v-if="innerVisible" :money="Quickprice"></closepage>
+    </div>
+
     <div class="statusView">
       <div class="flagView">
         <div class="flagItem" v-for="(v,k) in statuslist" :key="k">
@@ -269,22 +276,30 @@
     </el-dialog>
 
     <!-- 续费 -->
-    <el-dialog :visible.sync="showaddtime" width="600px">
+    <el-dialog :visible.sync="showaddtime" width="600px" :close-on-click-modal="false">
       <div class="addtime">
         <p>尊敬的用户，您好：</p>
         <p style="text-indent: 2em;">您的系统使用期限将在{{endtime}}到期；为确保您的用户体验，避免损失；请及时续费！</p>
         <div class="item_i">
-          <div class="item_item opc">
+          <div
+            class="item_item"
+            :class="{opc:addtimeType==1,bdj:addtimeType==2}"
+            @click="addtimeType=2"
+          >
             <span class="tag">续费享优惠</span>
             <h3>续费VIP</h3>
             <p class="money">￥800</p>
             <p class="money1">￥1000</p>
             <div class="line">免费送积分</div>
           </div>
-          <div class="item_item bdj">
+          <div
+            class="item_item"
+            :class="{opc:addtimeType==2,bdj:addtimeType==1}"
+            @click="addtimeType=1"
+          >
             <span class="tag">续费享优惠</span>
             <h3>续费VIP</h3>
-            <p class="money">￥1400</p>
+            <p class="money">￥1500</p>
             <p class="money1">￥2000</p>
             <div class="line">免费送积分</div>
           </div>
@@ -295,11 +310,26 @@
           <el-radio v-model="paytype" label="other" border>其他</el-radio>
         </div>
       </div>
+      <div style="text-align: center;padding:10px">
+        <el-button type="primary" @click="clickpaytype">支付</el-button>
+      </div>
+      <el-dialog width="300px" :visible.sync="showaddewm" append-to-body center>
+        <img
+          src="../assets/images/zfbpay800.jpg"
+          alt
+          style="width:100%"
+          v-show="paytype=='zfb'&&addtimeType==2"
+        />
+        <img src="../assets/images/otherpay.jpg" alt style="width:100%" v-show="paytype=='other'" />
+        <img
+          src="../assets/images/zfbpay1500.jpg"
+          alt
+          style="width:100%"
+          v-show="paytype=='zfb'&&addtimeType==1"
+        />
+        <img src="../assets/images/wxpay.jpg" alt style="width:100%" v-show="paytype=='wx'" />
+      </el-dialog>
     </el-dialog>
-
-    <div class="set_page" :class="{activePage:innerVisible}">
-      <closepage @close="innerVisible=false" v-if="innerVisible" :money="Quickprice"></closepage>
-    </div>
   </div>
 </template>
 
@@ -328,6 +358,7 @@ export default {
       rotate: true,
       choose: null,
       paytype: '',
+      addtimeType: 0,
       gongzhong: 1,
       storeid: sessionStorage.getItem('storeid'),
       page: false,
@@ -352,7 +383,8 @@ export default {
       remark: '',
       statuslist: [{ name: '服务中', status: "1", num: "0", color: 'rgb(237, 179, 57)' }, { name: '待结账', status: "2", num: "0", color: 'rgb(244, 78, 78)' }, { name: '已结账', status: "3", num: "0", color: 'rgb(71, 191, 124)' }, { name: '已作废', status: "4", num: "0", color: 'rgb(221, 221, 221)' }],
       nowModifyOrder: '',
-      showSign: false
+      showSign: false,
+      showaddewm: false
     }
   },
   watch: {
@@ -361,7 +393,7 @@ export default {
     },
     server (val) {
       this.getorderlist()
-    }
+    },
   },
   filters: {
     moment (val) {
@@ -392,6 +424,11 @@ export default {
     }
   },
   methods: {
+    clickpaytype () {
+      if (!this.addtimeType) return this.$message.error('请选择续费金额')
+      if (!this.paytype) return this.$message.error('请选择付款方式')
+      this.showaddewm = true
+    },
     color (val) {
       switch (val) {
         case '1':
@@ -1580,6 +1617,7 @@ export default {
 
   .addtime {
     padding: 20px;
+    height: 400px;
     > p {
       font-weight: 700;
       padding: 0 25px;

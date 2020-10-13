@@ -202,12 +202,29 @@
       class="payDialog"
       :show-close="false"
       :modal-append-to-body="false"
-      title="付款码"
+      title="扫码付款"
       center
     >
-      <img :src="showImg|imgUrl" alt class="payEr" />
+      <img
+        :src="showImg|imgUrl"
+        alt
+        class="payEr"
+        v-show="paytype == 'other'||shopinfo.is_payonline != 1"
+      />
+      <input
+        placeholder="请客户扫码或录入付款码后回车"
+        v-model="codebar"
+        ref="input"
+        @keyup.enter="showpay"
+        style="width:80%;margin:0 10%;"
+        v-show="paytype == 'zfb' || paytype == 'wx'"
+      />
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="fukuanOK">确认收到款项</el-button>
+        <el-button
+          type="primary"
+          @click="fukuanOK"
+          v-show="paytype == 'other'||shopinfo.is_payonline != 1"
+        >确认收到款项</el-button>
       </span>
     </el-dialog>
 
@@ -239,6 +256,8 @@ export default {
       paytype: '',
       itemlist: [],
       storeid: sessionStorage.getItem('storeid'),
+      shopinfo: JSON.parse(sessionStorage.getItem('shopInfo')),
+      codebar: '',
       is_doublescreen: JSON.parse(sessionStorage.getItem('shopInfo')).is_doublescreen,
       wxImg: '',
       zfbImg: '',
@@ -248,6 +267,8 @@ export default {
       dialogVisible: false,
       payend: false,
       sign: 0,
+      paytotal: 0,
+      payorder_no: '',
       isuseCard: true,
       ids: [],
       now: new Date(),
@@ -274,27 +295,41 @@ export default {
     submit () {
       if (!this.paytype) return this.$message.error('请选择支付方式')
       if (this.paytype == 'zfb' || this.paytype == 'wx' || this.paytype == 'other') {
-        if (this.paytype == 'zfb') {
-          this.showImg = this.zfbImg
-        } else if (this.paytype == 'wx') {
-          this.showImg = this.wxImg
+        if (this.shopinfo.is_payonline == 1 && this.paytype != '其他') {
+          this.showcode()
         } else {
-          this.showImg = this.qtImg
-        }
-        if (this.showImg) {
-          this.dialogVisible = true
-        } else {
-          this.$confirm('缺少该付款二维码', '提示', {
-            confirmButtonText: '去上传',
-            cancelButtonText: '更换付款方式',
-            type: 'warning'
-          }).then(() => {
-            this.erweima = true
-          })
+          if (this.paytype == 'zfb') {
+            this.showImg = this.zfbImg
+          } else if (this.paytype == 'wx') {
+            this.showImg = this.wxImg
+          } else {
+            this.showImg = this.qtImg
+          }
+          if (this.showImg) {
+            this.dialogVisible = true
+          } else {
+            this.$confirm('缺少该付款二维码', '提示', {
+              confirmButtonText: '去上传',
+              cancelButtonText: '更换付款方式',
+              type: 'warning'
+            }).then(() => {
+              this.erweima = true
+            })
+          }
         }
       } else {
         this.fukuanOK()
       }
+    },
+    showcode () {
+      if (this.paytype == 'zfb') {
+        this.showImg = this.zfbImg
+      } else {
+        this.showImg = this.wxImg
+      }
+      this.dialogVisible = true
+      this.codebar = ''
+      this.$nextTick(() => { this.$refs['input'].focus() })
     },
     async fukuanOK () {
       if (!this.paytype) return this.$message.error('请选择扣款方式')
@@ -320,6 +355,47 @@ export default {
         this.addmoney()
       } else {
         this.toBuy()
+      }
+    },
+    async showpay () {
+      let that = this
+      if (!that.codebar) return
+      const res = await that.$axios.get('http://hb.rgoo.com/api/sft_pay.php', {
+        params: {
+          storeid: this.storeid,
+          order_no: that.payorder_no,
+          amount: that.paytotal,
+          pay_type: that.paytype == '支付宝' ? 'ZFB01' : 'TX01',
+          authCode: that.codebar
+        }
+      })
+      // console.log(res)
+      if (res.data.code == 1) {
+        that.timer = setInterval(function () {
+          that.checkpay(res.data.order_no, res.data.txnTime, res.data.paytime)
+        }, 2000);
+      }
+    },
+    async checkpay (order_no, time, paytime) {
+      const res = await this.$axios.get('http://hb.rgoo.com/api/sft_return.php', {
+        params: {
+          storeid: this.storeid,
+          order_no: order_no,
+          paytime: paytime,
+          txntime: time
+        }
+      })
+      // console.log(res)
+      if (res.data.errorCode == '00') {
+        clearInterval(this.timer)
+        this.timer = null
+        this.fukuanOK()
+      } else if (res.data.errorCode != 'AW' && res.data.errorCode != 'A7' && res.data.errorCode != '09') {
+        clearInterval(this.timer)
+        this.timer = null
+        this.$message.error('支付失败')
+        this.codebar = ''
+        this.$nextTick(() => { this.$refs['input'].focus() })
       }
     },
     // 充值
@@ -441,6 +517,7 @@ export default {
         let arr = JSON.parse(this.orderlist)
         arr.forEach(item => {
           let obj = res.data.data.find(v => v.order_no == item.order_no)
+          this.paytotal += Number(obj.dis_total)
           if (obj.orderinfo) {
             obj['itemnames'] = '内容：'
             obj.orderinfo.forEach(j => {
@@ -450,6 +527,7 @@ export default {
           this.itemlist.push(obj)
           this.ids.push(item.id)
         })
+        this.paytotal = this.paytotal.toFixed(2)
       }
     },
     getererima () {
@@ -473,17 +551,22 @@ export default {
       this.itemlist.push(this.choose)
       if (this.choose.card_no) {
         this.sign = 6
+        this.paytotal = this.choose.recharge_money
       } else if (this.choose.typeid) {
         this.sign = 1
+        this.paytotal = this.choose.price
       } else {
         this.sign = 2
+        this.paytotal = this.choose.pay_money
       }
     }
     if (this.money) {
       this.sign = 4
+      this.paytotal = this.money
     }
     if (this.closeinfo) {
       this.sign = 5
+      this.paytotal = this.closeinfo.money
     }
     this.getererima()
   },
