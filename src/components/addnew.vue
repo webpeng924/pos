@@ -565,6 +565,9 @@ export default {
         id = this.info ? this.info.id : this.bookinfo.id
       }
       this.chooslist.forEach(item => {
+        if (!item.discount_price) {
+          item['discount_price'] = item.price
+        }
         // item['discount_price'] = (Number(item.subtotal) / item.num).toFixed(2)
         // item['subtotal'] = (Number(item.price) * item.discount * item.num).toFixed(2)
       })

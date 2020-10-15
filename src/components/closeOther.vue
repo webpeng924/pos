@@ -365,7 +365,7 @@ export default {
           storeid: this.storeid,
           order_no: that.payorder_no,
           amount: that.paytotal,
-          pay_type: that.paytype == '支付宝' ? 'ZFB01' : 'TX01',
+          pay_type: that.paytype == 'zfb' ? 'ZFB01' : 'TX01',
           authCode: that.codebar
         }
       })
@@ -405,6 +405,7 @@ export default {
           storeid: this.storeid,
           member_id: this.closeinfo.member_id,
           money: Number(this.closeinfo.money),
+          order_no: this.payorder_no,
           gift_money: Number(this.closeinfo.gift_money),
           paytype: this.paytype
         }
@@ -431,6 +432,7 @@ export default {
         params: {
           storeid: this.storeid,
           dis_total: this.money,
+          order_no: this.payorder_no,
           pay_type: this.paytype
         }
       })
@@ -452,6 +454,7 @@ export default {
             storeid: this.storeid,
             member_id: this.choose.member_id,
             id: this.choose.id,
+            order_no: this.payorder_no,
             pay_type: this.paytype
           }
         })
@@ -470,6 +473,7 @@ export default {
           params: {
             storeid: this.storeid,
             member_id: this.choose.member_id,
+            order_no: this.payorder_no,
             id: this.choose.id,
             pay_type: this.paytype,
             userid: JSON.parse(sessionStorage.getItem('userInfo')).id,
@@ -493,6 +497,7 @@ export default {
             storeid: this.storeid,
             member_id: this.choose.member_id,
             card_id: this.choose.id,
+            order_no: this.payorder_no,
             pay_type: this.paytype
           }
         })
@@ -541,6 +546,12 @@ export default {
         }
       )
     },
+    getOrderNo () {
+      this.$axios.get('/api?datatype=get_order_no').then(res => {
+        console.log(res)
+        this.payorder_no = res.data.data
+      })
+    }
   },
   created () {
     if (this.orderlist) {
@@ -569,6 +580,7 @@ export default {
       this.paytotal = this.closeinfo.money
     }
     this.getererima()
+    this.getOrderNo()
   },
   mounted () {
     if (this.is_doublescreen == 1) {

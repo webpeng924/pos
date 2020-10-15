@@ -19,12 +19,14 @@
         <el-table-column prop="recharge_money" label="起充金额"></el-table-column>
         <el-table-column prop="item_discount" label="项目折扣">
           <template slot-scope="scope">
-            <span>{{scope.row.item_discount}}折</span>
+            <span v-if="scope.row.item_discount!=10">{{scope.row.item_discount}}折</span>
+            <span v-else>无折扣</span>
           </template>
         </el-table-column>
         <el-table-column prop="goods_discount" label="商品折扣">
           <template slot-scope="scope">
-            <span>{{scope.row.goods_discount}}折</span>
+            <span v-if="scope.row.goods_discount!=10">{{scope.row.goods_discount}}折</span>
+            <span v-else>无折扣</span>
           </template>
         </el-table-column>
         <el-table-column prop="usetime" label="有效期"></el-table-column>

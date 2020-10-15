@@ -34,7 +34,32 @@
               <span class="xing">*</span>
             </label>
             <div class="valView">
-              <input type="text" placeholder="请输入" v-model="goodsInfo.goods_name" />
+              <input
+                type="text"
+                placeholder="请输入"
+                v-model="goodsInfo.goods_name"
+                @keyup="changeSelect"
+                v-show="showName"
+              />
+              <el-select
+                v-show="!showName"
+                v-model="chooseOption"
+                ref="select"
+                filterable
+                remote
+                placeholder="请输入"
+                :remote-method="remoteMethod"
+                :loading="loading"
+                @change="setoption"
+                @focus="changeoption"
+              >
+                <el-option
+                  v-for="item in options"
+                  :key="item.goods_no"
+                  :label="item.goods_name"
+                  :value="item"
+                ></el-option>
+              </el-select>
             </div>
           </div>
           <div class="subItem type-input">
@@ -179,8 +204,12 @@ export default {
     return {
       item: 1,
       categoryDialog: false,
+      showName: false,
       categoryName: '',
       catelist: [],
+      options: [],
+      chooseOption: '',
+      loading: false,
       unitlist: ['瓶', '盒', '袋', '份', '克', '个', '千克', '升', '毫升', '双', '套'],
       unitDialog: false,
       supplier: '',
@@ -266,6 +295,53 @@ export default {
         this.back()
       } else {
         this.$message.error(res.data.msg)
+      }
+    },
+    async getgoods (name) {
+      const res = await this.$axios.get('/api?datatype=get_goodslist_byname', {
+        params: {
+          goods_name: name
+        }
+      })
+      if (res.data.code == 1 && res.data.data) {
+        this.options = res.data.data
+      } else {
+        this.options = [];
+        this.goodsInfo.goods_name = name
+        this.showName = true
+        this.$nextTick(() => { this.$refs['select'].blur() })
+      }
+    },
+    remoteMethod (query) {
+      if (query != '') {
+        this.loading = true;
+        setTimeout(() => {
+          this.getgoods(query)
+          this.loading = false;
+        }, 200);
+      } else {
+        this.options = [];
+      }
+    },
+    setoption () {
+      console.log(this.chooseOption)
+      this.showName = true
+      this.goodsInfo.goods_name = this.chooseOption.goods_name
+      this.goodsInfo.goods_no = this.chooseOption.goods_no
+      this.goodsInfo.price = this.chooseOption.price
+      this.goodsInfo.in_cost = this.chooseOption.in_cost
+      this.goodsInfo.goods_unit = this.chooseOption.goods_unit
+      this.img = this.chooseOption.pic
+    },
+    changeoption () {
+      this.showName = false
+      this.options = []
+    },
+    changeSelect () {
+      if (!this.goodsInfo.goods_name) {
+        this.showName = false
+        this.chooseOption = ''
+        this.$nextTick(() => { this.$refs['select'].focus() })
       }
     }
   },
@@ -389,9 +465,9 @@ export default {
             position: relative;
             width: 120px;
             height: 80px;
-            background: url('https://hb.rgoo.com/upload/shop/moren.jpg')
-              no-repeat center center;
-            background-size: 100% 100%;
+            // background: url('https://hb.rgoo.com/upload/shop/moren.jpg')
+            //   no-repeat center center;
+            // background-size: 100% 100%;
             img {
               width: 100%;
               height: 100%;
@@ -413,6 +489,7 @@ export default {
             }
           }
           > input {
+            width: 100%;
             line-height: 28px;
             text-align: right;
             background: transparent;
@@ -424,6 +501,19 @@ export default {
         }
       }
     }
+  }
+  /deep/.el-select .el-input.is-focus .el-input__inner,
+  /deep/ .el-input--suffix .el-input__inner,
+  /deep/ .el-select .el-input__inner {
+    border: none;
+    background-color: transparent;
+    text-align: right;
+    padding: 0;
+    line-height: 28px;
+    font-size: 14px;
+  }
+  /deep/ .el-select .el-input .el-select__caret {
+    display: none;
   }
 }
 </style>

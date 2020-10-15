@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="payEnd" v-if="sign!=3&&sing!=5">
+    <div class="payEnd" v-if="sign!=3&&sign!=5">
       <div class="pay-header">
         <div class="middle">支付</div>
       </div>

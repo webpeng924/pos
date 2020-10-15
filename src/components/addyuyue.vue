@@ -369,6 +369,7 @@ export default {
         if (this.choose) {
           this.chosworker = this.workerlist.find(v => v.id == this.choose.workerid)
           this.worker = this.chosworker.name
+          this.workerid = this.chosworker.id
         }
       }
     },
