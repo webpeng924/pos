@@ -205,7 +205,7 @@
         <button
           class="btn-audio btn-red btn-checkout"
           @click="submit(2)"
-        >结账&nbsp;&nbsp;￥&nbsp;{{sumprice}}</button>
+        >结账&nbsp;&nbsp;￥&nbsp;{{sumprice==newprice?sumprice:newprice}}</button>
       </div>
     </div>
     <el-dialog
@@ -353,7 +353,7 @@ export default {
       keyword: '',
       searchtxt: '',
       setnum: false,
-      CPnum: '1',
+      // CPnum: '1',
       memo: '',
       checked: false,
       memberView: false,
@@ -384,7 +384,8 @@ export default {
       editdisprice: '',
       bookinfo: '',
       newprice: '',
-      ModifyW: ''
+      ModifyW: '',
+      iscomputed: false
     }
   },
   watch: {
@@ -394,8 +395,8 @@ export default {
       }
     },
     sumprice (val) {
-      if (val == 0) {
-        this.newprice = 0
+      if (this.iscomputed) {
+        this.newprice = val
       }
     },
     member (val, oldValue) {
@@ -422,7 +423,8 @@ export default {
     // editdisprice (val) {
     //   this.editdiscount = this.editprice / val
     // },
-    yyitem (val) {
+    yyitem (val, oldValue) {
+      if ((this.info || this.bookinfo) && oldValue) return false
       this.chooslist = this.chooslist.filter(item => item.typeid != 3)
       if (val != '') {
         let item = {
@@ -433,7 +435,7 @@ export default {
           itemname: val.itemname,
           staff1: val.staffid,
           price: val.price,
-          subtotal: val.price,
+          subtotal: val.price * val.discount,
           is_usecard: 0,
           discount: val.discount
         }
@@ -544,13 +546,17 @@ export default {
     },
     modifyPrice () {
       if (isNaN(Number(this.editdisprice))) return this.$message.error('价格错误')
+      this.iscomputed = true
+      this.newprice = 0
       this.chooslist.forEach((item, idx) => {
         if (idx == this.editIndex) {
           item['discount_price'] = Number(this.editdisprice)
           item.discount = Number(this.editdiscount)
           item.subtotal = Number(this.editdisprice) * Number(item.num)
         }
+        this.newprice += Number(item.subtotal)
       })
+      this.newprice = this.newprice.toFixed(2)
       this.editDialog = false
     },
     async submit (status) {
@@ -566,7 +572,7 @@ export default {
       }
       this.chooslist.forEach(item => {
         if (!item.discount_price) {
-          item['discount_price'] = item.price
+          item['discount_price'] = (Number(item.subtotal) / item.num).toFixed(2)
         }
         // item['discount_price'] = (Number(item.subtotal) / item.num).toFixed(2)
         // item['subtotal'] = (Number(item.price) * item.discount * item.num).toFixed(2)
@@ -623,10 +629,12 @@ export default {
       })
       if (res.data.code == 1 && res.data.data) {
         this.member = Object.assign(this.member, res.data.data)
-        if (this.yyitem && this.member.item_discount) {
-          this.yyitem.discount = Number(this.member.item_discount) / 10
-        } else {
-          this.yyitem.discount = 1
+        if (this.yyitem) {
+          if (this.member.item_discount) {
+            this.yyitem.discount = Number(this.member.item_discount) / 10
+          } else {
+            this.yyitem.discount = 1
+          }
         }
         if (this.chooslist.length) {
           this.chooslist.forEach(item => {
@@ -636,6 +644,7 @@ export default {
               } else {
                 item.discount = Number(this.member.item_discount) / 10
               }
+              item.subtotal = item.discount * item.price * item.num
             }
           })
         }
@@ -671,21 +680,23 @@ export default {
       })
     },
     choosecika (data) {
-      if (data.typeid != 1) return this.setcika(1, data)
-      this.$prompt('', '请输入项目使用次数', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputPattern: /^[1-9]+$/,
-        inputValidator: (val) => { return Number(val) <= Number(data.rest_count) },
-        inputErrorMessage: '次数错误或超出'
-      }).then(({ value }) => {
-        this.setcika(value, data)
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '取消使用'
-        });
-      });
+      console.log(data)
+      // if (data.typeid != 1) 
+      return this.setcika(1, data)
+      // this.$prompt('', '请输入项目使用次数', {
+      //   confirmButtonText: '确定',
+      //   cancelButtonText: '取消',
+      //   inputPattern: /^[1-9]+$/,
+      //   inputValidator: (val) => { return Number(val) <= Number(data.rest_count) },
+      //   inputErrorMessage: '次数错误或超出'
+      // }).then(({ value }) => {
+      //   this.setcika(value, data)
+      // }).catch(() => {
+      //   this.$message({
+      //     type: 'info',
+      //     message: '取消使用'
+      //   });
+      // });
     },
     setcika (value, v) {
       let discount = this.member.item_discount ? this.member.item_discount / 10 : 1
@@ -741,17 +752,21 @@ export default {
       })
     },
     changeyyitem (v) {
+      if ((this.info || this.bookinfo) && this.yyitem) return this.$message.error('此单已包含其他预约单，请另开新单')
       if (this.yyitem && v.id != this.yyitem.id) {
         this.$message('更换关联预约，将移除已选预约项目')
       }
       if (v.member_id != 0) {
         // if (!this.member || this.member.member_id != v.member_id) {
         this.member = this.tableData.find(item => item.member_id == v.member_id)
-        this.$set(v, 'discount', 1)
-        let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
-        let worker = workerlist.find(j => j.id == v.staffid)
-        this.yyitem = JSON.parse(JSON.stringify(v))
-        this.$set(this.yyitem, 'worker', worker)
+        this.getmembercount().then(res => {
+          this.$set(v, 'discount', Number(this.member.item_discount) / 10)
+          console.log(v)
+          let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
+          let worker = workerlist.find(j => j.id == v.staffid)
+          this.yyitem = JSON.parse(JSON.stringify(v))
+          this.$set(this.yyitem, 'worker', worker)
+        })
         // }
       } else {
         if (this.member) {
@@ -826,34 +841,36 @@ export default {
         this.showworker = true
       } else {
         this.additem = v
-        this.ModifyW = null
-        if (this.id == 1) {
-          // console.log(v)
-          let option = {
-            title: v.name,
-            serverfor: this.member ? this.member.name : '客B',
-            money: v.price,
-            num: 1
-          }
-          this.setinfo = option
-          this.showworker = true
-        } else {
-          this.CPnum = 1
-          // this.setnum = true
+        if (this.id == 2) {
           this.$set(this.additem, 'name', this.additem.goods_name)
-          this.$prompt('', '请输入产品数量', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            inputValue: 1,
-            inputPattern: /^[0-9]+$/,
-            // inputValidator: (val) => { return Number(val) <= Number(v.number) },
-            inputErrorMessage: '格式错误'
-          }).then(({ value }) => {
-            this.addchooselist(v, '', value)
-          })
         }
+        this.ModifyW = null
+        // if (this.id == 1) {
+        // console.log(v)
+        let option = {
+          title: v.name,
+          serverfor: this.member ? this.member.name : '客B',
+          money: v.price,
+          num: 1
+        }
+        this.setinfo = option
+        this.showworker = true
+        // } else {
+        //   this.CPnum = 1
+        // this.setnum = true
+        // this.$set(this.additem, 'name', this.additem.goods_name)
+        // this.$prompt('', '请输入产品数量', {
+        //   confirmButtonText: '确定',
+        //   cancelButtonText: '取消',
+        //   inputValue: 1,
+        //   inputPattern: /^[0-9]+$/,
+        //   // inputValidator: (val) => { return Number(val) <= Number(v.number) },
+        //   inputErrorMessage: '格式错误'
+        // }).then(({ value }) => {
+        //   this.addchooselist(v, '', value)
+        // })
+        // }
       }
-
     },
     changeActive (id) {
       if (this.delcate) {
@@ -934,15 +951,27 @@ export default {
     },
     //总优惠价
     modifytotalPrice () {
-      this.$prompt('', '请输入优惠后价格', {
+      let that = this
+      that.$prompt('', '请输入优惠后价格', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         inputPattern: /^[0-9]\d*(.\d{1,2})?$/,
-        inputPlaceholder: this.newprice ? this.newprice : this.subtotal,
-        // inputValidator: (val) => { return Number(val) <= Number(data.rest_count) },
+        inputPlaceholder: that.newprice ? that.newprice : that.sumprice,
         inputErrorMessage: '价格为整数或最多保留2位小数'
       }).then(({ value }) => {
-        this.newprice = value
+        if (Number(value) > Number(that.sumprice)) {
+          that.$confirm('优惠价格超出总价，确认修改?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            that.newprice = value
+          }).catch(() => {
+            that.newprice ? that.newprice : that.sumprice
+          });
+        } else {
+          that.newprice = value
+        }
       })
     },
     async submitadd () {
@@ -1001,8 +1030,9 @@ export default {
     },
     // 添加到右侧
     addchooselist (v, data, num) {
+      this.iscomputed = true
       console.log(v, data, num)
-      if (data) {
+      if (!v.goods_id) {
         if (data.gong) {
           this.$set(v, 'staff1', data.gong.id)
         }
@@ -1025,12 +1055,13 @@ export default {
       let obj = {
         worker: data ? data.gong : '',
         typeid: v.typeid,
+        discount_price: Number(v.price) * v.discount,
         itemid: v.goods_id,
         num: num,
         itemname: v.name,
         staff1: v.staff1 ? v.staff1 : 0,
         price: Number(v.price),
-        subtotal: num * Number(v.price),
+        subtotal: num * Number(v.price) * v.discount,
         is_usecard: 0,
         discount: v.discount
       }
@@ -1053,6 +1084,7 @@ export default {
       }
     },
     delchooselist (v, k) {
+      this.iscomputed = true
       this.chooslist.splice(k, 1)
       if (v.typeid == 3) {
         this.yyitem = ''
@@ -1082,6 +1114,9 @@ export default {
                 v['worker'] = workerlist.find(item => item.id == v.staff1)
               } else {
                 v['worker'] = ''
+              }
+              if (v.typeid == 3) {
+                this.yyitem = v
               }
             })
             this.chooslist = this.info.orderinfo

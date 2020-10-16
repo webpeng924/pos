@@ -277,6 +277,7 @@
 
     <!-- 续费 -->
     <el-dialog :visible.sync="showaddtime" width="600px" :close-on-click-modal="false">
+      <h1 slot="title" style="font-style:italic;font-weight:700;color:#409eff">SKIN BOX</h1>
       <div class="addtime">
         <p>尊敬的用户，您好：</p>
         <p style="text-indent: 2em;">您的系统使用期限将在{{endtime}}到期；为确保您的用户体验，避免损失；请及时续费！</p>
@@ -310,8 +311,8 @@
           <el-radio v-model="paytype" label="other" border>其他</el-radio>
         </div>
       </div>
-      <div style="text-align: center;padding:10px">
-        <el-button type="primary" @click="clickpaytype">支付</el-button>
+      <div style="text-align: center;padding-bottom:20px">
+        <el-button type="primary" @click="clickpaytype">支 付</el-button>
       </div>
       <el-dialog width="300px" :visible.sync="showaddewm" append-to-body center>
         <img

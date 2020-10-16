@@ -37,6 +37,7 @@
               <input
                 type="text"
                 placeholder="请输入"
+                ref="sinput"
                 v-model="goodsInfo.goods_name"
                 @keyup="changeSelect"
                 v-show="showName"
@@ -309,7 +310,10 @@ export default {
         this.options = [];
         this.goodsInfo.goods_name = name
         this.showName = true
-        this.$nextTick(() => { this.$refs['select'].blur() })
+        this.$nextTick(() => {
+          this.$refs['select'].blur()
+          this.$refs['sinput'].focus()
+        })
       }
     },
     remoteMethod (query) {

@@ -205,26 +205,17 @@
       title="扫码付款"
       center
     >
-      <img
-        :src="showImg|imgUrl"
-        alt
-        class="payEr"
-        v-show="paytype == 'other'||shopinfo.is_payonline != 1"
-      />
+      <img :src="showImg|imgUrl" alt class="payEr" v-show="showImg" />
       <input
         placeholder="请客户扫码或录入付款码后回车"
         v-model="codebar"
         ref="input"
         @keyup.enter="showpay"
         style="width:80%;margin:0 10%;"
-        v-show="paytype == 'zfb' || paytype == 'wx'"
+        v-show="shopinfo.is_payonline == 1&&paytype != 'other'"
       />
       <span slot="footer" class="dialog-footer">
-        <el-button
-          type="primary"
-          @click="fukuanOK"
-          v-show="paytype == 'other'||shopinfo.is_payonline != 1"
-        >确认收到款项</el-button>
+        <el-button type="primary" @click="fukuanOK" v-show="showImg">确认收到款项</el-button>
       </span>
     </el-dialog>
 
@@ -295,7 +286,7 @@ export default {
     submit () {
       if (!this.paytype) return this.$message.error('请选择支付方式')
       if (this.paytype == 'zfb' || this.paytype == 'wx' || this.paytype == 'other') {
-        if (this.shopinfo.is_payonline == 1 && this.paytype != '其他') {
+        if (this.shopinfo.is_payonline == 1 && this.paytype != 'other') {
           this.showcode()
         } else {
           if (this.paytype == 'zfb') {
