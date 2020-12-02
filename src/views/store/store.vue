@@ -272,7 +272,7 @@ export default {
           storeid: this.storeid
         }
       }).then(res => {
-        console.log(res)
+        // console.log(res)
         this.dbInfo = res.data.data
         this.value = '库存-入库单'
         this.pagedb = true

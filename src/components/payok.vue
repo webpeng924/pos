@@ -8,7 +8,7 @@
         <i class="el-icon-circle-check ok"></i>
         <p>结账完成 !</p>
         <div class="backIndex">
-          <el-button type="success" plain @click="back">返回首页</el-button>
+          <el-button type="success" plain @click="back">返回</el-button>
           <el-button type="success" plain @click="print" v-show="sign!=4&&sign!=5">打印小票</el-button>
           <el-button type="success" plain @click="print2" v-show="sign==4">打印小票</el-button>
           <!-- <el-button type="success" plain @click="print1" v-show="sign==5">打印小票</el-button> -->
@@ -76,6 +76,7 @@ export default {
       storeid: sessionStorage.getItem('storeid'),
       is_doublescreen: JSON.parse(sessionStorage.getItem('shopInfo')).is_doublescreen,
       now: new Date(),
+      memberId: '',
       memberInfo: ''
     }
   },
@@ -88,6 +89,8 @@ export default {
           return '微信';
         case 'cash':
           return '现金';
+        case 'mixed':
+          return '混合支付';
         case 'other':
           return '其他';
         case 'signbill':
@@ -102,6 +105,10 @@ export default {
   },
   methods: {
     back () {
+      if (this.sign != 4) {
+        // this.$router.push({ name: 'members', params: { fromid: this.memberInfo.member_id } })
+        sessionStorage.setItem('fromid', this.memberId)
+      }
       window.history.go(0)
       if (this.is_doublescreen == 1) {
         var a = sessionStorage.getItem('FLAG')
@@ -110,6 +117,7 @@ export default {
       }
     },
     async getMember (member) {
+      this.memberId = member
       const res = await this.$axios.get("/api?datatype=get_one_member", {
         params: {
           storeid: this.storeid,
@@ -123,7 +131,7 @@ export default {
     print () {
       let arr = [{ "name": JSON.parse(sessionStorage.getItem('shopInfo')).shop_name, "style": "1" }, { "name": "收银单", "style": "1" }, { "name": "---" }, { "name": "消费单号：" + this.info.order_no }]
       let time = moment.unix(this.info.paytime).format('YYYY-MM-DD HH:mm')
-      arr.push({ "name": "消费日期：" + time }, { "name": "---" }, { "name": "消费明细", "value": "" }, { "name": "标准价", "value": "数量 #A# 折扣 #A# 金额" }, { "name": "---" })
+      arr.push({ "name": "消费日期：" + time }, { "name": "---" }, { "name": "消费明细", "value": "" }, { "name": "标准价", "value": "数量 #A# 金额" }, { "name": "---" })
       if (this.sign == 1) {
         arr.push({ "name": this.info.cardname })
       } else if (this.sign == 2) {
@@ -131,10 +139,11 @@ export default {
       } else if (this.sign == 6) {
         arr.push({ "name": this.info.name + '（会员卡）' })
       }
-      arr.push({ name: this.info.total, value: 1 + "#A#" + '-' + "#A# " + this.info.dis_total })
+      arr.push({ name: this.info.total, value: 1 + "#A# " + this.info.dis_total })
       arr.push({ "name": "---" }, { "name": "支付方式", "value": "合计" }, { name: this.$options.filters['type'](this.info.pay_type), value: this.info.dis_total })
+      arr.push({ "name": "---" }, { "name": "会员：" + this.memberInfo.name }, { "name": "卡号：" + this.memberInfo.card_num }, { "name": "手机号：" + this.memberInfo.mobile }, { name: '余额：' + this.memberInfo.balance }, { "name": "---" })
       let remark = this.info.remark == null ? '' : this.info.remark
-      arr.push({ "name": "---" }, { "name": "备注: " + remark }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" })
+      arr.push({ "name": "备注: " + remark }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" })
       var a = JSON.stringify(arr);
       // console.log(a)
       javascript: jsSzb.smPrint(a);
@@ -168,7 +177,7 @@ export default {
     }
   },
   created () {
-    console.log(this.sign)
+    // console.log(this.sign)
     if (this.info && this.info.member_id) {
       this.getMember(this.info.member_id)
     }

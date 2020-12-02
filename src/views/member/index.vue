@@ -125,7 +125,7 @@ export default {
       this.getList();
     },
     changeStatus (row) {
-      console.log(row)
+      // console.log(row)
       let status = 3
       if (row.sta) {
         status = 1

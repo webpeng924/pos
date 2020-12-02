@@ -126,6 +126,19 @@
                 </div>
                 <div
                   class="paymentItem listItem btn-audio"
+                  :class="{select:paytype=='混合支付'}"
+                  @click="changepaytype('混合支付')"
+                >
+                  <div class="iconView">
+                    <img src="../assets/images/mixed.png" />
+                  </div>
+                  <div class="textView overflowText">
+                    <label class="label-name">混合支付</label>
+                    <label class="label-amt" v-show="paytype=='混合支付'">应收：{{payPrice}}</label>
+                  </div>
+                </div>
+                <div
+                  class="paymentItem listItem btn-audio"
                   :class="{select:paytype=='会员卡'}"
                   @click="changepaytype('会员卡')"
                   v-show="bookinfo.customer_type == 2"
@@ -157,7 +170,7 @@
           </div>
         </div>
         <div class="btnView">
-          <button class="btn-settle btn-audio" @click="submit">结账</button>
+          <button class="btn-settle btn-audio" @click="submit" v-show="paytype!='混合支付'">结账</button>
         </div>
       </div>
     </div>
@@ -215,6 +228,55 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- 混合支付 -->
+    <el-dialog
+      title="混合支付"
+      :visible.sync="mixedDialog"
+      width="600px"
+      :modal-append-to-body="false"
+      :close-on-click-modal="false"
+    >
+      <div class="paylist">
+        <div class="item" v-if="bookinfo.customer_type==2">
+          <span>会员卡：</span>
+          <el-input
+            type="number"
+            v-model="mixedinfo.card"
+            :max="Number(memberPrice)"
+            :min="0"
+            @blur="()=>{if(mixedinfo.card>Number(memberPrice)){mixedinfo.card=Number(memberPrice)}}"
+            :placeholder="`余额：${memberPrice}元`"
+          ></el-input>
+        </div>
+        <div class="item">
+          <span>支付宝：</span>
+          <el-input type="number" :min="0" v-model="mixedinfo.zfb"></el-input>
+        </div>
+        <div class="item">
+          <span style="margin-right:10px">微 信：</span>
+          <el-input type="number" :min="0" v-model="mixedinfo.wx"></el-input>
+        </div>
+        <div class="item">
+          <span style="margin-right:10px">现 金：</span>
+          <el-input type="number" :min="0" v-model="mixedinfo.cash"></el-input>
+        </div>
+        <div class="item">
+          <span style="margin-right:10px">其 他：</span>
+          <el-input type="number" :min="0" v-model="mixedinfo.other"></el-input>
+        </div>
+        <div class="item" v-if="bookinfo.customer_type==2">
+          <span style="margin-right:10px">签 账：</span>
+          <el-input type="number" :min="0" v-model="mixedinfo.signbill"></el-input>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer" style="position: relative;">
+        <!-- <span class="hyye">会员余额：{{memberPrice}}元</span> -->
+        <span class="hyye">待付金额：{{payPrice}}元</span>
+        <el-button @click="mixedDialog = false">取 消</el-button>
+        <el-button type="primary" @click="mixedSubmit">结 账</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -238,12 +300,22 @@ export default {
       showImg: '',
       erweima: false,
       dialogVisible: false,
+      mixedDialog: false,
+      mixedinfo: {
+        zfb: '',
+        wx: '',
+        cash: '',
+        card: '',
+        other: '',
+        signbill: ''
+      },
       payend: false,
       memberPrice: 0,
       isuseCard: true,
       haveDistotal: false,
       quanDialog: false,
       choosquan: '',
+      checkList: [],
       quanlist: [],
       codebar: '',
       timer: null,
@@ -256,6 +328,48 @@ export default {
     }
   },
   methods: {
+    async getMembercount () {
+      const res = await this.$axios.get('/api?datatype=get_member_discount', {
+        params: {
+          storeid: this.storeid,
+          member_id: this.bookinfo.member_id
+        }
+      })
+      // console.log(res)
+      this.itemlist.forEach(item => {
+        if (res.data.data) {
+          let money = 0
+          if (item.typeid == 1 || item.typeid == 3) {
+            money = item.price * Number(res.data.data.item_discount) / 10
+            if (item.discount_price != money) {
+              this.haveDistotal = true
+            }
+          } else {
+            money = item.price * Number(res.data.data.goods_discount) / 10
+            if (item.discount_price != money) {
+              this.haveDistotal = true
+            }
+          }
+          // console.log(item.discount_price, money)
+        }
+      })
+      if (this.bookinfo.dis_total != this.bookinfo.total) {
+        this.haveDistotal = true
+      }
+    },
+    mixedSubmit () {
+      let sum = 0
+      let arr = Object.values(this.mixedinfo)
+      arr.forEach(item => {
+        sum += Number(item)
+      })
+      // console.log(sum)
+      if (this.bookinfo.dis_total != sum) {
+        this.$message.error('请核对支付金额')
+      } else {
+        this.fukuanOK()
+      }
+    },
     submit () {
       if (!this.paytype) return this.$message.error('请选择支付方式')
       if (this.paytype == '支付宝' || this.paytype == '微信' || this.paytype == '其他') {
@@ -339,20 +453,23 @@ export default {
     async  fukuanOK () {
       if (!this.paytype) return this.$message.error('请选择扣款方式')
       let paytype = this.type(this.paytype)
-      const res = await this.$axios.get('/api?datatype=pay_order', {
-        params: {
-          storeid: this.storeid,
-          pay_type: paytype,
-          order_no: this.bookinfo.order_no,
-          order_id: this.bookinfo.id,
-          full_price: this.haveDistotal ? null : this.isuseCard ? null : this.fullPrice,
-          v_amount: this.choosquan ? this.choosquan.v_amount : 0,
-          v_id: this.choosquan ? this.choosquan.id : null,
-        }
-      })
+      let params = {
+        storeid: this.storeid,
+        pay_type: paytype,
+        mixedinfo: paytype == 'mixed' ? this.mixedinfo : null,
+        order_no: this.bookinfo.order_no,
+        order_id: this.bookinfo.id,
+        full_price: this.haveDistotal ? null : this.isuseCard ? null : this.fullPrice,
+        v_amount: this.choosquan ? this.choosquan.v_amount : 0,
+        v_id: this.choosquan ? this.choosquan.id : null,
+      }
+      // console.log(params)
+      // return false
+      const res = await this.$axios.get('/api?datatype=pay_order', { params })
       if (res.data.code == 1) {
         this.$message.success('完成')
         this.dialogVisible = false
+        this.mixedDialog = false
         this.getinfo()
       } else {
         this.$message.error(res.data.msg)
@@ -369,19 +486,22 @@ export default {
       res.data.list.info.forEach(k => {
         this.$set(k, 'workername', '')
         this.$set(k, 'workerNo', '')
-        if (k.staff1 && k.staff1 != 0) {
-          let workername = workerlist.find(w => w.id == k.staff1)
-          // console.log(workerlist, k.staff1, workername)
-          k.workername = workername.name
-          k.workerNo = workername.job_no
+        if (workerlist) {
+          if (k.staff1 && k.staff1 != 0) {
+            let workername = workerlist.find(w => w.id == k.staff1)
+            // console.log(workerlist, k.staff1, workername)
+            k.workername = workername.name
+            k.workerNo = workername.job_no
+          }
         }
+
       })
       this.info = res.data.list
       this.payend = true
     },
     changepaytype (data) {
       if (this.bookinfo.customer_type == 2) {
-        if (data != '会员卡') {
+        if (data != '会员卡' && data != '混合支付') {
           this.isuseCard = false
           this.choosquan = ''
         } else {
@@ -389,6 +509,9 @@ export default {
         }
       }
       this.paytype = data
+      if (data == '混合支付') {
+        this.mixedDialog = true
+      }
     },
     type (val) {
       switch (val) {
@@ -404,6 +527,8 @@ export default {
           return 'signbill';
         case '会员卡':
           return 'card';
+        case '混合支付':
+          return 'mixed';
       }
     },
     chooseQuan (v) {
@@ -454,10 +579,11 @@ export default {
       });
       if (res.data.code == 1) {
         if (Number(res.data.data.signbill) > 0) {
-          this.memberPrice = '-' + res.data.data.signbill
-        } else {
-          this.memberPrice = res.data.data.balance
+          this.$alert('该会员欠款：' + res.data.data.signbill + ' 元', '提示', {
+            center: true,
+          })
         }
+        this.memberPrice = res.data.data.balance
       }
     },
   },
@@ -467,10 +593,13 @@ export default {
       if (this.bookinfo.customer_type == 2) {
         this.paytype = '会员卡'
         this.getmember()
+        this.getMembercount()
       }
-      if (this.bookinfo.dis_total != this.bookinfo.total) {
-        this.haveDistotal = true
-      }
+      // let member_total = 0
+      // console.log(this.bookinfo.dis_total, this.bookinfo.total)
+      // if (this.bookinfo.dis_total != this.bookinfo.total) {
+      //   this.haveDistotal = true
+      // }
     }
     let obj = JSON.parse(sessionStorage.getItem('shopInfo'))
     if (obj) {
@@ -797,6 +926,52 @@ export default {
               color: rgb(119, 224, 58);
             }
           }
+        }
+      }
+    }
+  }
+  .hyye {
+    position: absolute;
+    top: 20%;
+    left: 30px;
+    font-size: 14px;
+    color: rgb(255, 141, 75);
+  }
+  .paylist {
+    padding: 0 100px;
+    padding-top: 5px;
+
+    .item {
+      // border-bottom: 1px solid #ececec;
+      display: flex;
+      margin: 10px 0;
+      height: 40px;
+      justify-content: space-between;
+      span {
+        line-height: 40px;
+      }
+      /deep/ .el-input,
+      .el-input-number {
+        background-color: #eee;
+        border-radius: 5px;
+        flex: 1;
+        border: none;
+        padding-left: 10px;
+        input.el-input__inner {
+          line-height: 28px;
+          text-align: left;
+          background: transparent;
+          padding: 0;
+          font-size: 14px;
+          color: #28282d;
+          outline: none;
+          border: none;
+        }
+      }
+      /deep/ .el-input-number {
+        .el-input-number__decrease,
+        .el-input-number__increase {
+          display: none;
         }
       }
     }

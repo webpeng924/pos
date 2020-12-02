@@ -105,7 +105,7 @@
           入库信息
           <!-- <button class="btn-add btn-audio" v-show="!setid" @click="opencode">扫码</button> -->
           <button class="btn-add btn-audio" v-show="!setid" @click="openadd">选择产品</button>
-          <button style="color:red" v-show="setid" @click="delInstore">删除</button>
+          <button style="color:red" v-show="setid&&way!='客户退货'" @click="delInstore">删除</button>
         </div>
         <div class="headerView">
           <div class="nameView">产品信息</div>
@@ -340,12 +340,14 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_staff_list', {
         params: {
           storeid: this.storeid,
-          is_li: 0,
+          is_li: 1,
           is_wei: 1
         }
       })
-      if (res.data.code == 1) {
+      if (res.data.code == 1 && res.data.data) {
         this.workerlist = res.data.data
+      } else {
+        this.workerlist = []
       }
     },
     openadd () {

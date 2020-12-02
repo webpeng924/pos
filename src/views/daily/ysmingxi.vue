@@ -278,7 +278,7 @@
         <el-table-column prop="num" label="购买数量" width="180"></el-table-column>
         <el-table-column label="退货数量">
           <template slot-scope="{row}">
-            <el-input-number :min="0" :max="Number(row.num)" v-model="row.number"></el-input-number>
+            <el-input-number :min="1" :max="Number(row.num)" v-model="row.number"></el-input-number>
           </template>
         </el-table-column>
       </el-table>
@@ -382,6 +382,8 @@ export default {
           }
         })
         this.tuiVisible = true
+      } else {
+        this.$message.error('没有产品')
       }
     },
     submitTui () {
@@ -433,6 +435,7 @@ export default {
       if (res.data.code == 1) {
         this.$message.success('退货成功')
         this.tuiVisible = false
+        this.getList()
       }
     },
     // 退货入库
@@ -516,6 +519,8 @@ export default {
           return "支付宝";
         case "cash":
           return "现金";
+        case 'mixed':
+          return '混合支付';
         case "signbill":
           return "会员签账";
         case "card":

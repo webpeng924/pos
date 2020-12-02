@@ -11,6 +11,17 @@
           <div class="editDateView edit">消费日期：{{info.dateline|moment}}</div>
         </div>
       </div>
+      <div class="serviceView" v-if="memberInfo">
+        <div class="tView">会员信息</div>
+        <div
+          style="background: #f4f4f4;padding: 15px 15px 10px 15px;font-size:14px;border-radius: 6px;"
+        >
+          <div>会员：{{memberInfo.name}}</div>
+          <div>卡号：{{memberInfo.card_num}}</div>
+          <div>手机号：{{memberInfo.mobile}}</div>
+          <div>余额：{{memberInfo.balance}}</div>
+        </div>
+      </div>
       <div class="serviceView">
         <div class="tView">消费内容</div>
         <div class="listItem" v-for="(v,k) in orderInfo" :key="k">
@@ -44,6 +55,7 @@
           </div>
         </div>
       </div>
+
       <div class="bottomView">
         <div class="remarkView">{{info.remark?info.remark:'无备注信息'}}</div>
         <div class="totalAmtView">
@@ -65,7 +77,9 @@ export default {
   props: ['info'],
   data () {
     return {
-      orderInfo: []
+      orderInfo: [],
+      storeid: sessionStorage.getItem('storeid'),
+      memberInfo: ''
     }
   },
   filters: {
@@ -86,6 +100,8 @@ export default {
           return '签账';
         case 'card':
           return '会员卡';
+        case 'mixed':
+          return '混合支付';
       }
     }
   },
@@ -93,22 +109,48 @@ export default {
     back () {
       this.$emit('close')
     },
+    async getMember (member) {
+      const res = await this.$axios.get("/api?datatype=get_one_member", {
+        params: {
+          storeid: this.storeid,
+          member_id: member
+        }
+      });
+      if (res.data.code == 1 && res.data.data) {
+        this.memberInfo = res.data.data
+      }
+    },
     print () {
       let arr = [{ "name": JSON.parse(sessionStorage.getItem('shopInfo')).shop_name, "style": "1" }, { "name": "收银单", "style": "1" }, { "name": "---" }, { "name": "消费单号：" + this.info.order_no }]
       let time = moment.unix(this.info.dateline).format('YYYY-MM-DD HH:mm')
-      arr.push({ "name": "消费日期：" + time }, { "name": "---" }, { "name": "消费明细", "value": "" }, { "name": "标准价", "value": "数量 #A# 折扣 #A# 金额" }, { "name": "---" })
+      arr.push({ "name": "消费日期：" + time }, { "name": "---" }, { "name": "消费明细", "value": "" }, { "name": "标准价", "value": "数量 #A# 金额" }, { "name": "---" })
       this.orderInfo.forEach(v => {
         let type = " 服务: "
         if (v.typeid == 2) {
           type = " "
         }
         arr.push({ "name": v.itemname + type + v.workername })
-        let discount = v.discount == 1 ? '原价' : v.discount + '折扣'
+        // let discount = v.discount == 1 ? '原价' : v.discount + '折扣'
         let discount_price = v.discount == 1 ? '-' : v.discount_price
-        arr.push({ name: v.price, value: v.num + "#A#" + discount + "#A# " + discount_price })
+        arr.push({ name: v.price, value: v.num + " #A# " + discount_price })
       })
       let remark = this.info.remark == null ? '' : this.info.remark
-      arr.push({ "name": "---" }, { "name": "支付方式", "value": "合计" }, { name: this.$options.filters['type'](this.info.pay_type), value: this.info.dis_total }, { "name": "---" }, { "name": "备注: " + remark }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" })
+      arr.push({ "name": "---" }, { "name": "支付方式", "value": "合计" })
+      if (this.info.pay_type == 'mixed') {
+        let mixedinfo = JSON.parse(this.info.mixedinfo)
+        for (var i in mixedinfo) {
+          // console.log(i, mixedinfo[i])
+          if (mixedinfo[i]) {
+            arr.push({ name: this.$options.filters['type'](i), value: mixedinfo[i] })
+          }
+        }
+      } else {
+        arr.push({ name: this.$options.filters['type'](this.info.pay_type), value: this.info.dis_total })
+      }
+      if (this.info.customer_type == 2) {
+        arr.push({ "name": "---" }, { "name": "会员：" + this.memberInfo.name }, { "name": "卡号：" + this.memberInfo.card_num }, { "name": "手机号：" + this.memberInfo.mobile }, { name: '余额：' + this.memberInfo.balance })
+      }
+      arr.push({ "name": "---" }, { "name": "备注: " + remark }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" })
       var a = JSON.stringify(arr);
       // console.log(a)
       javascript: jsSzb.smPrint(a);
@@ -118,6 +160,9 @@ export default {
   created () {
     if (this.info) {
       this.orderInfo = this.info.orderinfo
+      if (this.info.customer_type == 2) {
+        this.getMember(this.info.member_id)
+      }
     }
   },
   mounted () { },

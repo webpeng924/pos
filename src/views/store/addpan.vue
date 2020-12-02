@@ -101,7 +101,7 @@
       width="700px"
     >
       <div class="searchView">
-        <input placeholder="请输入产品编号或名称" v-model="searchtxt" @blur="changecate" />
+        <input placeholder="请输入产品编号或名称" v-model="searchtxt" @change="changecate" />
       </div>
       <div class="headerView">
         <label class="label-code">编号</label>
@@ -236,7 +236,7 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_staff_list', {
         params: {
           storeid: this.storeid,
-          is_li: 0,
+          is_li: 1,
           is_wei: 1
         }
       })
@@ -252,6 +252,7 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_skulist', {
         params: {
           storeid: this.storeid,
+          status: 1,
           type: 1
         }
       })
@@ -316,12 +317,12 @@ export default {
       this.chooselist = arr
       this.choosepro = false
     },
-    async changecate (command) {
-      const res = await this.$axios.get('/api?datatype=get_goods_list', {
+    async changecate () {
+      const res = await this.$axios.get('/api?datatype=get_skulist', {
         params: {
           storeid: this.storeid,
-          cate: command,
           status: 1,
+          type: 1,
           search: this.searchtxt
         }
       })
@@ -359,7 +360,14 @@ export default {
   mounted () { }
 }
 </script>
-
+<style lang="scss">
+.chooseDialog.el-dialog {
+  height: 80%;
+  .el-dialog__body {
+    height: calc(100% - 124px) !important;
+  }
+}
+</style>
 <style lang="scss" scoped>
 #addPan {
   height: 100%;

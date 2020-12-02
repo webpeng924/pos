@@ -64,11 +64,11 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_staff_list', {
         params: {
           storeid: this.storeid,
-          is_li: 0,
+          is_li: 1,
           is_wei: 1
         }
       })
-      if (res.data.code == 1) {
+      if (res.data.code == 1 && res.data.data) {
         this.workerlist = res.data.data
         this.active = res.data.data[0].id
         this.getyy(res.data.data[0].id)

@@ -22,7 +22,7 @@
                       <button class="btn-dyqPay"></button>
                     </div>-->
                     <div class="amtView">
-                      <span>还款金额：￥&nbsp;{{v.dis_total}}</span>
+                      <span>还款金额：￥&nbsp;{{v.money}}</span>
                     </div>
                     <!-- <div class="payTypeView">
                       <label class>支付方式：{{paytype}}</label>
@@ -173,7 +173,7 @@
                   class="paymentItem listItem btn-audio"
                   :class="{select:paytype=='card'}"
                   @click="paytype='card'"
-                  v-show="sign==1||sign==2"
+                  v-show="sign==1||sign==2||sign==3"
                 >
                   <div class="iconView">
                     <img src="../assets/images/kalei.png" />
@@ -241,7 +241,7 @@ import payend from './payok'
 import moment from 'moment'
 export default {
   components: { erweima, payend },
-  props: ['orderlist', 'choose', 'money', 'closeinfo'],
+  props: ['orderlist', 'choose', 'money', 'closeinfo', 'member'],
   data () {
     return {
       paytype: '',
@@ -279,6 +279,8 @@ export default {
           return 'wx';
         case '现金':
           return 'cash';
+        case '混合支付':
+          return 'mixed';
         case '其他':
           return 'other';
       }
@@ -502,21 +504,22 @@ export default {
       }
     },
     async getInfo () {
-      const res = await this.$axios.get('/api?datatype=get_orderlist', {
+      const res = await this.$axios.get('/api?datatype=get_signbill_list', {
         params: {
           storeid: this.storeid,
-          status: 3,//1服务中 2待结账 3已结账  4已作废
-          staffid: 'all'
+          // status: 3,//1服务中 2待结账 3已结账  4已作废
+          // staffid: 'all'
+          member_id: this.member.member_id
         }
       })
-      if (res.data.code == 1 && res.data.data) {
+      if (res.data.code == 1 && res.data.list) {
         let arr = JSON.parse(this.orderlist)
         arr.forEach(item => {
-          let obj = res.data.data.find(v => v.order_no == item.order_no)
-          this.paytotal += Number(obj.dis_total)
-          if (obj.orderinfo) {
+          let obj = res.data.list.find(v => v.order_no == item.order_no)
+          this.paytotal += Number(obj.money)
+          if (obj.info) {
             obj['itemnames'] = '内容：'
-            obj.orderinfo.forEach(j => {
+            obj.info.forEach(j => {
               obj['itemnames'] = obj['itemnames'] + ',' + j.itemname
             })
           }
@@ -539,34 +542,40 @@ export default {
     },
     getOrderNo () {
       this.$axios.get('/api?datatype=get_order_no').then(res => {
-        console.log(res)
+        // console.log(res)
         this.payorder_no = res.data.data
       })
     }
   },
   created () {
     if (this.orderlist) {
+      // 还款
       this.sign = 3
       this.getInfo()
     }
     if (this.choose) {
       this.itemlist.push(this.choose)
       if (this.choose.card_no) {
+        // 买会员卡
         this.sign = 6
         this.paytotal = this.choose.recharge_money
       } else if (this.choose.typeid) {
+        // 买次卡
         this.sign = 1
         this.paytotal = this.choose.price
       } else {
+        // 买套餐
         this.sign = 2
         this.paytotal = this.choose.pay_money
       }
     }
     if (this.money) {
+      // 快速收款
       this.sign = 4
       this.paytotal = this.money
     }
     if (this.closeinfo) {
+      // 充值
       this.sign = 5
       this.paytotal = this.closeinfo.money
     }
@@ -588,7 +597,7 @@ export default {
         sum = Number(this.money)
       } else {
         this.itemlist.forEach(item => {
-          sum += Number(item.dis_total)
+          sum += Number(item.money)
         })
       }
       return sum.toFixed(2)

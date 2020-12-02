@@ -550,6 +550,8 @@ export default {
           return '微信';
         case 'cash':
           return '现金';
+        case 'mixed':
+          return '混合支付';
         case 'signbill':
           return '签帐';
         default:
@@ -797,6 +799,7 @@ export default {
     }
   },
   created () {
+    sessionStorage.removeItem('fromid')
     if (this.choose) {
       this.getInfo(this.choose.member_id)
       this.member_id = this.choose.member_id

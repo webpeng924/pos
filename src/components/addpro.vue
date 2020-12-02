@@ -328,7 +328,7 @@ export default {
       }
     },
     setoption () {
-      console.log(this.chooseOption)
+      // console.log(this.chooseOption)
       this.showName = true
       this.goodsInfo.goods_name = this.chooseOption.goods_name
       this.goodsInfo.goods_no = this.chooseOption.goods_no
@@ -369,6 +369,7 @@ export default {
       this.goodsInfo.bar_code = this.choose.bar_code
       this.goodsInfo.goods_spec_format = this.choose.goods_spec_format
       this.goodsInfo.remark = this.choose.remark
+      this.showName = true
     }
   },
   mounted () { }

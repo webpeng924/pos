@@ -29,7 +29,7 @@
           <img :src="v.pic?v.pic:'/upload/shop/moren.jpg'|imgUrl" />
         </div>
         <div class="textView">
-          <div class="nameView overflowText">{{v.name}}</div>
+          <div class="nameView overflowText">{{title == '产品介绍'?v.goods_name:v.name}}</div>
           <div class="priceView">
             ￥
             <span>{{v.price}}</span>
@@ -419,8 +419,12 @@ export default {
       .textView {
         display: flex;
         line-height: 46px;
+        .nameView {
+          flex: 1;
+        }
         .priceView {
-          flex: 2;
+          // flex: 2;
+          width: 85px;
           text-align: right;
           color: #ff5e56;
           font-size: 14px;

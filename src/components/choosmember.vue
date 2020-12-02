@@ -111,7 +111,7 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_staff_list', {
         params: {
           storeid: this.storeid,
-          is_li: 0,
+          is_li: 1,
           is_wei: 1
         }
       })
@@ -137,7 +137,7 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_staff_list', {
         params: {
           storeid: this.storeid,
-          is_li: 0,
+          is_li: 1,
           is_wei: 1,
           search: this.choose1
         }

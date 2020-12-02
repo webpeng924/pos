@@ -168,14 +168,14 @@
               <div class="priceView">￥&nbsp;{{Number(v.subtotal).toFixed(2)}}</div>
             </div>
             <div class="empView">
-              <div class="empItem" v-show="!v.worker">
+              <div class="empItem" v-if="!v.worker">
                 <label
                   class="label-name"
                   style="color: rgb(255, 94, 86);"
                   @click="openworker(v,k,2)"
                 >未设置服务人员</label>
               </div>
-              <div class="empItem" v-show="v.worker">
+              <div class="empItem" v-if="v.worker">
                 <img :src="v.worker.avatar?v.worker.avatar:'/upload/shop/moren.jpg'|imgUrl" />
                 <label
                   class="label-name overflowText"
@@ -571,9 +571,9 @@ export default {
         id = this.info ? this.info.id : this.bookinfo.id
       }
       this.chooslist.forEach(item => {
-        if (!item.discount_price) {
-          item['discount_price'] = (Number(item.subtotal) / item.num).toFixed(2)
-        }
+        // if (!item.discount_price) {
+        item['discount_price'] = (Number(item.subtotal) / item.num).toFixed(2)
+        // }
         // item['discount_price'] = (Number(item.subtotal) / item.num).toFixed(2)
         // item['subtotal'] = (Number(item.price) * item.discount * item.num).toFixed(2)
       })
@@ -637,6 +637,7 @@ export default {
           }
         }
         if (this.chooslist.length) {
+          this.iscomputed = true
           this.chooslist.forEach(item => {
             if (item.discount == 1 && this.member.goods_discount) {
               if (item.typeid == 2) {
@@ -680,7 +681,7 @@ export default {
       })
     },
     choosecika (data) {
-      console.log(data)
+      // console.log(data)
       // if (data.typeid != 1) 
       return this.setcika(1, data)
       // this.$prompt('', '请输入项目使用次数', {
@@ -761,9 +762,11 @@ export default {
         this.member = this.tableData.find(item => item.member_id == v.member_id)
         this.getmembercount().then(res => {
           this.$set(v, 'discount', Number(this.member.item_discount) / 10)
-          console.log(v)
+          // console.log(v)
           let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
-          let worker = workerlist.find(j => j.id == v.staffid)
+          if (workerlist) {
+            let worker = workerlist.find(j => j.id == v.staffid)
+          }
           this.yyitem = JSON.parse(JSON.stringify(v))
           this.$set(this.yyitem, 'worker', worker)
         })
@@ -777,14 +780,18 @@ export default {
           }).then(() => {
             this.$set(v, 'discount', Number(this.member.item_discount) / 10)
             let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
-            let worker = workerlist.find(j => j.id == v.staffid)
+            if (workerlist) {
+              let worker = workerlist.find(j => j.id == v.staffid)
+            }
             this.yyitem = JSON.parse(JSON.stringify(v))
             this.$set(this.yyitem, 'worker', worker)
           })
         } else {
           this.$set(v, 'discount', 1)
           let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
-          let worker = workerlist.find(j => j.id == v.staffid)
+          if (workerlist) {
+            let worker = workerlist.find(j => j.id == v.staffid)
+          }
           this.yyitem = JSON.parse(JSON.stringify(v))
           this.$set(this.yyitem, 'worker', worker)
         }
@@ -802,7 +809,7 @@ export default {
       })
     },
     setdata (data) {
-      console.log(data)
+      // console.log(data)
       if (this.ModifyW != null) {
         this.chooslist.forEach((v, k) => {
           if (k == this.ModifyW) {
@@ -825,7 +832,7 @@ export default {
     },
     // 打开
     openworker (v, k, sign) {
-      console.log(v, k, sign)
+      // console.log(v, k, sign)
       if (sign == 2) {
         this.ModifyW = k
         let worker = ''
@@ -1031,11 +1038,11 @@ export default {
     // 添加到右侧
     addchooselist (v, data, num) {
       this.iscomputed = true
-      console.log(v, data, num)
-      if (!v.goods_id) {
-        if (data.gong) {
-          this.$set(v, 'staff1', data.gong.id)
-        }
+      // console.log(v, data, num)
+      if (data.gong) {
+        this.$set(v, 'staff1', data.gong.id)
+      }
+      if (!v.goods_no) {
         this.$set(v, 'typeid', 1)
         if (this.member && this.member.item_discount) {
           this.$set(v, 'discount', Number(this.member.item_discount) / 10)
@@ -1110,10 +1117,12 @@ export default {
           let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
           if (this.info.orderinfo != 'null') {
             this.info.orderinfo.forEach(v => {
-              if (v.staff1 != 0) {
-                v['worker'] = workerlist.find(item => item.id == v.staff1)
-              } else {
-                v['worker'] = ''
+              if (workerlist) {
+                if (v.staff1 != 0) {
+                  v['worker'] = workerlist.find(item => item.id == v.staff1)
+                } else {
+                  v['worker'] = ''
+                }
               }
               if (v.typeid == 3) {
                 this.yyitem = v

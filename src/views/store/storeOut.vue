@@ -442,12 +442,14 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_staff_list', {
         params: {
           storeid: this.storeid,
-          is_li: 0,
+          is_li: 1,
           is_wei: 1
         }
       })
-      if (res.data.code == 1) {
+      if (res.data.code == 1 && res.data.data) {
         this.workerlist = res.data.data
+      } else {
+        this.workerlist = []
       }
     },
     openadd () {
@@ -547,6 +549,7 @@ export default {
         let b = this.chooselist.find(val => val.id == id)
         this.$set(a, 'oldnumber', a.number)
         this.$set(a, 'outnumber', 1)
+        this.$set(a, 'number', 1)
         this.$set(a, 'total', a.in_cost)
         this.$set(a, 'supplier_id', '供应商A')
         this.$set(a, 'makedate', this.formatDate(new Date()))

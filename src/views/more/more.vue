@@ -116,14 +116,28 @@
         </div>
       </div>
       <div class="reportView" v-show="active=='签到日历'">
-        <p style="font-size:15px">累计签到：{{attendDays}} 天</p>
+        <p style="font-size:15px">
+          累计签到：{{attendDays}} 天
+          <span style="margin-left:20px">
+            累计积分：
+            <img src="../../assets/images/jifen.png" style="width:16px" alt />
+            {{attendintegral}}
+          </span>
+        </p>
         <el-calendar v-if="active=='签到日历'">
           <template slot="dateCell" slot-scope="{date, data}">
             <div
               class="calendar-day"
               v-if="data.day.substring(0, 7)==month"
               :class="{bgo:handleSelected(data.day) == 1,today:data.day==formatDate(new Date)}"
-            >{{ data.day.split('-').slice(2).join('-') }}</div>
+            >
+              {{ data.day.split('-').slice(2).join('-') }}
+              <br />
+              <span v-if="handleSelected(data.day) == 1" style="color:#36c374">
+                <img src="../../assets/images/jifen.png" style="width:16px" alt />
+                +{{handleintegral(data.day)}}
+              </span>
+            </div>
             <!-- <div v-show="handleSelected"> -->
             <!-- //判断显示当前页，value是显示当前月份 -->
             <!-- <p v-if="handleSelected(data.day) == 1" style="line-height:30px">✔️</p> -->
@@ -371,6 +385,7 @@ export default {
       },
       attendData: [],
       attendDays: '',
+      attendintegral: 0,
       month: ''
     }
   },
@@ -387,13 +402,23 @@ export default {
     },
     handleSelected (day) {
       let flag = 0; //默认显示为0
-      this.attendData.forEach(item => { //this.attendanceDetailsData是后台返回的数据
-        if (item == day) {  //判断显示数据
+      this.attendData.forEach(item => { //this.attendData是后台返回的数据
+        if (item.date == day) {  //判断显示数据
           flag = 1;
           return
         }
       })
       return flag
+    },
+    handleintegral (day) {
+      let integral = 0; //默认显示为0
+      this.attendData.forEach(item => { //this.attendData是后台返回的数据
+        if (item.date == day) {  //判断显示数据
+          integral = item.integral;
+          return
+        }
+      })
+      return integral
     },
     changeEWM () {
       this.$axios.get('/api?datatype=more&storeid=' + this.storeid).then(
@@ -475,6 +500,7 @@ export default {
       if (res.data.code == 1) {
         this.attendData = res.data.data
         this.attendDays = res.data.count
+        this.attendintegral = res.data.sum
       }
     },
     logOut () {
@@ -671,20 +697,20 @@ export default {
     }
     .el-calendar-day {
       height: 50px;
-      line-height: 50px;
+      line-height: 30px;
       padding: 0;
       .calendar-day {
-        line-height: 50px;
         text-align: center;
         color: #ccc;
       }
       .bgo {
+        line-height: 25px;
         background-color: #ffe6d3;
         color: #28282d;
       }
       .today {
         color: #fff;
-        background-color: #ff9a4d;
+        background-color: #ffa967;
       }
     }
   }

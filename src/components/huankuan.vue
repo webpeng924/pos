@@ -63,7 +63,7 @@
       </div>
     </div>
     <div class="set_page" :class="{activePage:closepage}">
-      <closepage @close="closepage=false" v-if="closepage" :orderlist="orderlist"></closepage>
+      <closepage @close="closepage=false" v-if="closepage" :orderlist="orderlist" :member="member"></closepage>
     </div>
   </div>
 </template>

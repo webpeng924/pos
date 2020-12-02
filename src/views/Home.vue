@@ -465,11 +465,13 @@ export default {
               item.orderinfo.forEach(k => {
                 this.$set(k, 'workername', '')
                 this.$set(k, 'workerNo', '')
-                if (k.staff1 && k.staff1 != 0) {
-                  let workername = workerlist.find(w => w.id == k.staff1)
-                  // console.log(workerlist, k.staff1, workername)
-                  k.workername = workername.name
-                  k.workerNo = workername.job_no
+                if (workerlist) {
+                  if (k.staff1 && k.staff1 != 0) {
+                    let workername = workerlist.find(w => w.id == k.staff1)
+                    // console.log(workerlist, k.staff1, workername)
+                    k.workername = workername.name
+                    k.workerNo = workername.job_no
+                  }
                 }
               })
             }
@@ -659,7 +661,7 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_staff_list', {
         params: {
           storeid: this.storeid,
-          is_li: 0,
+          is_li: 1,
           is_wei: 1
         }
       })
@@ -673,14 +675,16 @@ export default {
           }
         })
         this.workerlist = res.data.data
-        sessionStorage.setItem('workerlist', JSON.stringify(res.data.data))
+      } else {
+        this.workerlist = []
       }
+      sessionStorage.setItem('workerlist', JSON.stringify(res.data.data))
     },
     async getitem () {
       const res = await this.$axios.get('/api?datatype=get_staff_list', {
         params: {
           storeid: this.storeid,
-          is_li: 0,
+          is_li: 1,
           is_wei: 1,
           search: this.choose
         }

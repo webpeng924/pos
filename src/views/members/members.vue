@@ -455,6 +455,15 @@ export default {
       // console.log(res)
       if (res.data.code == 1) {
         this.tableData = res.data.data
+        let fromid = sessionStorage.getItem('fromid')
+        // console.log(fromid)
+        if (fromid) {
+          this.tableData.forEach(v => {
+            if (v.member_id == fromid) {
+              this.openInfo(v)
+            }
+          })
+        }
       } else {
         this.tableData = []
       }
