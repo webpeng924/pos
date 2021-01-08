@@ -4,6 +4,13 @@
       <div class="tView">会员</div>
     </div>
     <div class="searchResView">
+      <el-select v-model="datetype" class="selectday" placeholder="会员关怀" @change="getList">
+        <el-option label="全部会员" value="0"></el-option>
+        <el-option label="本月生日会员" value="1"></el-option>
+        <el-option label="三天内生日会员" value="2"></el-option>
+        <el-option label="本月未消费会员" value="3"></el-option>
+        <el-option label="7天未消费会员" value="4"></el-option>
+      </el-select>
       <div class="topSearchView">
         <div class="inputView">
           <el-select v-model="type" placeholder="请选择">
@@ -29,9 +36,16 @@
         <el-table-column prop="card_num" label="卡号" width="180"></el-table-column>
         <el-table-column prop="name" label="姓名"></el-table-column>
         <el-table-column prop="mobile" label="手机号"></el-table-column>
-        <!-- <el-table-column prop="cardtype" label="会员卡类型"></el-table-column> -->
+        <el-table-column prop="birthday1" label="会员生日"></el-table-column>
+        <!-- <el-table-column
+          prop="birthday1"
+          label="会员生日"
+          :filters="[{text: '7天内', value: sevenday}, {text: '3天内', value:threeday}]"
+          :filter-method="filterHandler"
+          :filter-multiple="false"
+        ></el-table-column>-->
         <el-table-column prop="balance" label="储值余额"></el-table-column>
-        <el-table-column prop="card_addtime" label="开卡日期" width="110"></el-table-column>
+        <el-table-column prop="last_time" label="上次到店"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             <div>
@@ -60,7 +74,13 @@
       :modal-append-to-body="false"
       custom-class="cardDialog quickmoney"
     >
-      <el-table ref="cardTable" :data="menuList" style="width: 100%" @row-click="choosed">
+      <el-table
+        ref="cardTable"
+        :data="menuList"
+        style="width: 100%"
+        @row-click="choosed"
+        height="100%"
+      >
         <el-table-column width="55">
           <template slot-scope="{row}">
             <div class="seleted" :class="{active:check==row.id}"></div>
@@ -229,6 +249,9 @@ export default {
   props: {},
   data () {
     return {
+      datetype: '',
+      sevenday: moment().add(7, 'days').format('YYYY-MM-DD'),
+      threeday: moment().add(3, 'days').format('YYYY-MM-DD'),
       type: '号码',
       keyword: '',
       tableData: [],
@@ -310,6 +333,12 @@ export default {
       } else {
         this.$message.error(res.data.msg)
       }
+    },
+    // 筛选会员生日
+    filterHandler (value, row, column) {
+      // console.log(value)
+      const property = column['property'];
+      return row[property] < value && row[property] >= moment().format('YYYY-MM-DD');
     },
     addnew () {
       this.name = ""
@@ -449,21 +478,25 @@ export default {
         params: {
           storeid: this.storeid,
           sign: 2,
+          datetype: this.datetype,
           search: this.keyword
         }
       })
       // console.log(res)
-      if (res.data.code == 1) {
+      if (res.data.code == 1 && res.data.data) {
         this.tableData = res.data.data
         let fromid = sessionStorage.getItem('fromid')
         // console.log(fromid)
-        if (fromid) {
-          this.tableData.forEach(v => {
-            if (v.member_id == fromid) {
-              this.openInfo(v)
-            }
-          })
-        }
+        this.tableData.forEach(v => {
+          if (fromid && v.member_id == fromid) {
+            this.openInfo(v)
+          }
+          if (v.last_time && v.last_time != 0) {
+            v.last_time = moment
+              .unix(v.last_time)
+              .format("YYYY-MM-DD");
+          }
+        })
       } else {
         this.tableData = []
       }
@@ -476,6 +509,7 @@ export default {
   mounted () { }
 }
 </script>
+
 
 <style lang="scss" scoped>
 #members {
@@ -558,6 +592,11 @@ export default {
         background: #28282d;
       }
     }
+    .selectday {
+      position: absolute;
+      left: 130px;
+      top: 35px;
+    }
     .addbtn {
       position: absolute;
       right: 20px;
@@ -581,6 +620,10 @@ export default {
       position: absolute;
       right: 30px;
       bottom: 10px;
+    }
+
+    /deep/ .el-dialog__body {
+      height: calc(100% - 120px);
     }
   }
   .props_item {

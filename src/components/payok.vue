@@ -145,7 +145,7 @@ export default {
       let remark = this.info.remark == null ? '' : this.info.remark
       arr.push({ "name": "备注: " + remark }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" })
       var a = JSON.stringify(arr);
-      // console.log(a)
+      console.log(a)
       javascript: jsSzb.smPrint(a);
       return false;
     },
@@ -160,7 +160,7 @@ export default {
       }
       arr.push({ "name": "---" }, { name: '余额', value: this.memberInfo.balance }, { "name": "---" }, { "name": "支付方式", "value": "应收合计" }, { name: this.$options.filters['type'](this.paytype), value: this.info.money }, { "name": "---" }, { "name": "备注: " + '-' }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" })
       var a = JSON.stringify(arr);
-      // console.log(a)
+      console.log(a)
       javascript: jsSzb.smPrint(a);
       return false;
     },
@@ -171,7 +171,7 @@ export default {
       arr.push({ name: '快速收款', value: this.money }, { "name": "---" }, { "name": "支付方式", "value": "合计" }, { name: this.$options.filters['type'](this.paytype), value: this.money })
       arr.push({ "name": "---" }, { "name": "备注: " + '-' }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" })
       var a = JSON.stringify(arr);
-      // console.log(a)
+      console.log(a)
       javascript: jsSzb.smPrint(a);
       return false;
     }

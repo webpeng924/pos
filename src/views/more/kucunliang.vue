@@ -6,8 +6,9 @@
         库存量统计
         <!-- <p>{{date}}</p> -->
       </div>
-      <el-input placeholder="请输入产品编号/名称" v-model="searchtxt" style="width:200px" @input="getCPlist">
+      <el-input placeholder="请输入产品编号/名称" v-model="searchtxt" style="width:260px" @input="getCPlist">
         <i slot="prefix" class="el-input__icon el-icon-search"></i>
+        <!-- <el-button slot="append" icon="el-icon-search" @click="getCPlist">搜索</el-button> -->
       </el-input>
       <!-- <i class="el-icon-date" @click="openDate"></i>
       <el-dialog :visible.sync="dialogVisible" :modal="false" style="height:0;margin-top:10%">
@@ -38,6 +39,7 @@
 </template>
 
 <script>
+import { validate } from 'json-schema';
 export default {
   components: {},
   props: {},

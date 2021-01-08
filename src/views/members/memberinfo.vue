@@ -136,7 +136,7 @@
         <div class="accInfoView">
           <div class="accItem">
             <div class="valueView balanceView">
-              <label>{{ userinfo.balance-userinfo.gift_money>0?userinfo.balance-userinfo.gift_money:userinfo.balance }}</label>
+              <label>{{ userinfo.balance-userinfo.gift_money>0?(userinfo.balance-userinfo.gift_money).toFixed(2):userinfo.balance }}</label>
             </div>
             <div class="nameView">储值账户</div>
           </div>
@@ -376,11 +376,29 @@
       </div>
     </div>
     <div class="contentView" v-show="show == 5">
-      <div class="subTView">{{ name }}</div>
+      <div class="subTView">
+        {{ name }}
+        <el-button
+          class="editBtn"
+          type="primary"
+          size="mini"
+          @click="showedit=true;editname=userinfo.name;editmobile=userinfo.mobile"
+          v-show="!showedit"
+        >修改</el-button>
+        <el-button
+          class="editBtn"
+          type="primary"
+          size="mini"
+          @click="editmember"
+          v-show="showedit"
+        >保存</el-button>
+      </div>
+
       <div class="baseInfoView1">
         <div class="infoItem">
           <div class="leftView">姓名</div>
-          <div class="valView overflowText">{{userinfo.name?userinfo.name:'-'}}</div>
+          <div class="valView overflowText" v-show="!showedit">{{userinfo.name?userinfo.name:'-'}}</div>
+          <el-input v-model="editname" v-show="showedit"></el-input>
         </div>
         <div class="infoItem">
           <div class="leftView">性别</div>
@@ -388,7 +406,11 @@
         </div>
         <div class="infoItem">
           <div class="leftView">手机号码</div>
-          <div class="valView overflowText">{{userinfo.mobile?userinfo.mobile:'-'}}</div>
+          <div
+            class="valView overflowText"
+            v-show="!showedit"
+          >{{userinfo.mobile?userinfo.mobile:'-'}}</div>
+          <el-input v-model="editmobile" v-show="showedit"></el-input>
         </div>
         <!-- <div class="infoItem">
           <div class="leftView">微信openId</div>
@@ -500,9 +522,12 @@ export default {
     return {
       urls: [],
       show: 1,
+      showedit: false,
       name: "",
       showMemo: false,
       showDesc: false,
+      editname: '',
+      editmobile: '',
       img: '',
       innerVisible: false,
       desc: '',
@@ -524,7 +549,7 @@ export default {
   },
   watch: {
     sign (val) {
-      if (this.name == '品相信息') {
+      if (this.name == '品项信息') {
         this.getcicardInfo();
       } else if (this.name == '抵用券信息') {
         this.getvoucher();
@@ -573,6 +598,24 @@ export default {
   },
   computed: {},
   methods: {
+    editmember () {
+      if (!this.editmobile.trim() || !this.editmobile.trim()) return this.$message.error('信息不可为空')
+      let params = {
+        storeid: this.storeid,
+        member_id: this.member_id,
+        mobile: this.editmobile,
+        name: this.editname
+      }
+      this.$axios.get('/api?datatype=update_one_member', { params }).then(res => {
+        if (res.data.code == 1) {
+          this.$message.success(res.data.msg)
+          this.getInfo(this.member_id)
+          this.showedit = false
+        } else {
+          this.$message.error(res.data.msg)
+        }
+      })
+    },
     //修改会员备注
     async updateRemark () {
       const res = await this.$axios.get('/api?datatype=update_member_remark', {
@@ -705,21 +748,6 @@ export default {
       }
       this.innerVisible = true
       this.showaddMoney = false
-      // const res = await this.$axios.get('/api?datatype=recharge', {
-      //   params: {
-      //     storeid: this.storeid,
-      //     member_id: this.member_id,
-      //     money: Number(this.money),
-      //     gift_money: Number(this.gift_money)
-      //   }
-      // })
-      // if (res.data.code == 1) {
-      //   this.$message.success('充值成功')
-      //   this.showaddMoney = false
-      //   this.getInfo(this.member_id)
-      // } else {
-      //   this.$message.error('充值失败')
-      // }
     },
     returnCard () {
       this.$confirm('确认将此会员卡退款并注销吗?', '提示', {
@@ -1119,6 +1147,11 @@ export default {
       color: #28282d;
       text-align: center;
       border-bottom: 0.5px solid rgba(220, 220, 220, 0.3);
+      .editBtn {
+        position: absolute;
+        right: 50px;
+        top: 40px;
+      }
     }
     .memberEquityView {
       padding: 0 20px 25px 20px;

@@ -34,13 +34,19 @@ axios.interceptors.request.use(config => {
     config.url = 'https://hb.rgoo.com/api/api.php' + config.url.substr(4)
   }
   if (config.url.substr(0, 4) === '/apt') {
-    config.url = 'http://hb.rgoo.com/api/api_table.php' + config.url.substr(4)
+    config.url = 'https://hb.rgoo.com/api/api_table.php' + config.url.substr(4)
+  }
+  if (config.url.substr(0, 4) === '/app') {
+    config.url = 'https://hb.rgoo.com/api/api_integral.php' + config.url.substr(4)
   }
   // if (config.url.substr(0, 4) === '/api') {
   //   config.url = 'https://sz.rgoo.com/api/api.php' + config.url.substr(4)
   // }
   // if (config.url.substr(0, 4) === '/apt') {
   //   config.url = 'http://sz.rgoo.com/api/api_table.php' + config.url.substr(4)
+  // }
+  // if (config.url.substr(0, 4) === '/app') {
+  //   config.url = 'https://sz.rgoo.com/api/api_integral.php' + config.url.substr(4)
   // }
   return config
 })

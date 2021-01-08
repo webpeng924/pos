@@ -185,7 +185,6 @@
       title="收款"
       center
     >
-      <img :src="showImg|imgUrl" alt class="payEr" v-show="showImg" />
       <input
         placeholder="请客户扫码或录入付款码后回车"
         v-model="codebar"
@@ -194,6 +193,7 @@
         style="width:80%;margin:0 10%;"
         v-show="paytype != '其他'&&shopinfo.is_payonline == 1"
       />
+      <img :src="showImg|imgUrl" alt class="payEr" v-show="showImg" />
       <span slot="footer" class="dialog-footer" v-show="showImg">
         <el-button type="primary" @click="fukuanOK">确认收到款项</el-button>
       </span>

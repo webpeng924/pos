@@ -35,7 +35,7 @@
                 </label>
               </div>
             </div>
-            <div class="categoryItem itemadd" v-if="!delcate">
+            <div class="itemadd" v-if="!delcate">
               <label @click="addcate=true">
                 <i class="el-icon-circle-plus-outline"></i>
                 添加
@@ -44,7 +44,7 @@
                 <i class="el-icon-remove-outline"></i> 删除
               </label>
             </div>
-            <div class="categoryItem itemadd" v-else>
+            <div class="itemadd" v-else>
               <label @click="delcate=false">完成</label>
             </div>
           </div>
@@ -160,6 +160,10 @@
                 style="color:#EDB339;height:20px;line-height: 16px;padding:2px 6px;border-radius:3px;margin-right:10px;font-size:13px;margin-top:10px;background:#876c37;"
                 v-show="v.discount&&v.discount!=1&&v.is_usecard!=1"
               >折扣 {{v.discount}}</i>
+              <i
+                style="color:#EDB339;height:20px;line-height: 16px;padding:2px 6px;border-radius:3px;margin-right:10px;font-size:13px;margin-top:10px;background:#876c37;"
+                v-show="v.is_usecard==1"
+              >次卡</i>
               <i
                 style="color:orange;margin-right:10px"
                 @click="toEditPrice(v,k)"
@@ -437,7 +441,12 @@ export default {
           price: val.price,
           subtotal: val.price * val.discount,
           is_usecard: 0,
-          discount: val.discount
+          discount: val.discount,
+          maxNum: 1
+        }
+        if (val.cicard_id != 0) {
+          item.is_usecard = 1
+          this.$set(item, 'cikaid', val.cicard_id)
         }
         this.chooslist.push(item)
       }
@@ -715,6 +724,10 @@ export default {
         discount: discount,
         maxNum: v.typeid == 1 ? v.rest_count : ''
       }
+      let id = this.chooslist.map(j => j.typeid == 3)
+      if (id == v.cikaid) {
+        obj.typeid = 3
+      }
       this.chooslist = this.chooslist.filter(item => !item.cikaid || item.cikaid != v.id)
       this.chooslist.push(obj)
       this.openworker(obj, this.chooslist.length - 1, 2)
@@ -764,8 +777,9 @@ export default {
           this.$set(v, 'discount', Number(this.member.item_discount) / 10)
           // console.log(v)
           let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
+          let worker
           if (workerlist) {
-            let worker = workerlist.find(j => j.id == v.staffid)
+            worker = workerlist.find(j => j.id == v.staffid)
           }
           this.yyitem = JSON.parse(JSON.stringify(v))
           this.$set(this.yyitem, 'worker', worker)
@@ -1327,29 +1341,29 @@ export default {
           border-radius: 5px;
           background: #f8f8f8;
           .line {
-            overflow-y: hidden;
             overflow-x: scroll;
+            overflow-y: hidden;
             display: flex;
-            flex-wrap: nowrap;
+          }
+          .itemadd {
+            position: absolute;
+            right: 0;
+            top: 0;
+            color: #dc670b;
+            padding: 0 18px;
+            height: 44px;
           }
           .categoryItem {
+            flex-shrink: 0;
             text-align: center;
             padding: 0 18px;
             height: 44px;
             color: #5a5a5a;
-            &.itemadd {
-              position: absolute;
-              right: 0;
-              top: 0;
-              color: #dc670b;
-            }
             label.select {
               color: #47bf7c;
             }
             label {
-              display: inline-block;
               height: 32px;
-              min-width: 30px;
               box-sizing: border-box;
               line-height: 32px;
               font-size: 15px;

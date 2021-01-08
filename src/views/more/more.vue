@@ -91,10 +91,10 @@
               <img src="../../assets/images/xiaofeimingxi.png" />
               <div>消费明细表</div>
             </div>
-            <div class="listItem btn-audio" @click="openTable('cardSale')">
+            <!-- <div class="listItem btn-audio" @click="openTable('cardSale')" >
               <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Report_JCTJ.png" />
               <div>会员卡销售统计</div>
-            </div>
+            </div>-->
             <div class="listItem btn-audio" @click="openTable('staffRank')">
               <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Report_JCTJ.png" />
               <div>员工销售排行</div>
@@ -238,6 +238,23 @@
               <img src="../../assets/images/erweima.png" />
               <div>付款二维码</div>
             </div>
+            <div class="listItem btn-audio" @click="updatepass=true">
+              <img src="../../assets/images/pc.png" />
+              <div>修改登录密码</div>
+            </div>
+            <el-dialog title="修改登录密码" :visible.sync="updatepass" width="30%" center>
+              <div style="text-align: center;padding: 20px;">
+                <div style="padding-bottom: 10px;">
+                  <el-input placeholder="请输入原密码" v-model="oldpass"></el-input>
+                </div>
+                <div>
+                  <el-input placeholder="请输入新密码" v-model="newpass"></el-input>
+                </div>
+                <div style="padding-top: 10px;">
+                  <el-button type="primary" @click="changepass">确认修改</el-button>
+                </div>
+              </div>
+            </el-dialog>
           </div>
         </div>
         <div class="groupView">
@@ -376,6 +393,9 @@ export default {
       quanlist: false,
       showTable: false,
       kexian: false,
+      updatepass: false,
+      newpass: '',
+      oldpass: '',
       tableName: '',
       userInfo: JSON.parse(sessionStorage.getItem('userInfo')),
       role: JSON.parse(sessionStorage.getItem('userInfo')).role,
@@ -396,6 +416,26 @@ export default {
   },
   computed: {},
   methods: {
+    async changepass () {
+      if (!this.newpass.trim() || !this.oldpass.trim()) return this.$message.error('请输入密码')
+      let username = JSON.parse(sessionStorage.getItem('userInfo')).username
+      const res = await this.$axios.get('/api?datatype=update_password', {
+        params: {
+          username: username,
+          password: this.oldpass.trim(),
+          newpass: this.newpass.trim()
+        }
+      })
+      if (res.data.code == 1) {
+        this.$message.success(res.data.msg)
+        setTimeout(() => {
+          sessionStorage.clear()
+          this.$router.push({ name: 'login' })
+        }, 1000)
+      } else {
+        this.$message.error('失败：' + res.data.msg)
+      }
+    },
     openTable (name) {
       this.showTable = true
       this.tableName = name

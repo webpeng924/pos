@@ -7,6 +7,8 @@
 
 <script>
 import nav from './views/nav.vue'
+import { setInterval } from 'timers';
+import moment from 'moment'
 
 export default {
   components: {
@@ -49,6 +51,46 @@ export default {
         //将img加到body中时就会立刻发送请求
         document.body.appendChild(img);
       }
+    },
+    async getList () {
+      let that = this
+      const res = await this.$axios.get('/api?datatype=get_memberlist', {
+        params: {
+          storeid: sessionStorage.getItem('storeid'),
+          sign: 2,
+        }
+      })
+      // console.log(res)
+      if (res.data.code == 1 && res.data.data) {
+        let tableData = res.data.data
+        let now = moment().format('YYYY-MM-DD')
+        tableData.forEach(v => {
+          if ((v.birthday1 || v.birthday2) && (v.birthday1 == now || v.birthday2 == now)) {
+            v.notify = this.$notify({
+              title: '提示',
+              message: '今天是会员 ' + v.name + ' 的生日。    我知道了',
+              type: 'warning',
+              showClose: false,
+              duration: 0,
+              offset: 80,
+              onClick: () => { that.openIn(v.notify, v.member_id, v) },
+              position: 'top-right'
+            });
+          }
+        })
+      }
+    },
+    openIn (notify, memberId, v) {
+      // console.log('点击了')
+      notify.close()
+      // if (this.$route.path == '/members') {
+      //   sessionStorage.setItem('fromid', memberId)
+      //   this.$router.push({ name: 'Home' })
+      //   // window.history.go(0)
+      // } else {
+      // sessionStorage.setItem('fromid', memberId)
+      // this.$router.push({ name: 'members' })
+      // }
     }
   },
   mounted () {
@@ -62,13 +104,36 @@ export default {
         }, 0);
       }
     })
-
+    let now = moment().format('YYYY-MM-DD HH:ss')
+    let duration = ''
+    let newtime = moment().format('YYYY-MM-DD 10:00')
+    let member = null
+    if (moment(now) > moment(newtime)) {
+      // 超过
+      this.getList()
+      newtime = moment().add(1, 'days').format('YYYY-MM-DD 10:00')
+      duration = moment.duration(new moment(newtime).diff(new moment()))._milliseconds
+      // console.log(newtime)
+      // console.log(duration)
+    } else {
+      // 未超过
+      duration = moment.duration(new moment(newtime).diff(new moment()))._milliseconds
+      console.log(duration)
+    }
+    let timeout = setTimeout(() => {
+      this.getList()
+      timeout = null
+      member = setInterval(() => {
+        this.getList()
+      }, 86400000)
+      // console.log(member)
+    }, duration)
   }
 }
 </script>
 
 <style lang="css">
-@import '//at.alicdn.com/t/font_1902156_6niq9bbqylf.css';
+@import '//at.alicdn.com/t/font_1902156_rvovt6fc0m.css';
 
 /* html {
   min-width: 960px;

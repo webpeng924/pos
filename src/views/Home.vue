@@ -7,7 +7,7 @@
         <p @click="showaddtime=true" style="color:red">
           <el-button size="small" type="success">续费</el-button>
         </p>
-        <p>系统到期时间：{{shopInfo.pos_period?shopInfo.pos_period:endtime}}</p>
+        <p>系统到期时间：{{endtime}}</p>
         <!-- <el-input placeholder="员工信息查询" v-model="likeName" style="width:240px;border:#dc670b">
           <i slot="prefix" class="el-input__icon el-icon-search"></i>
         </el-input>-->
@@ -313,6 +313,9 @@
       </div>
       <div style="text-align: center;padding-bottom:20px">
         <el-button type="primary" @click="clickpaytype">支 付</el-button>
+        <!-- <div>
+          <el-checkbox v-model="checked" @change="changeCheck">今日不再提醒</el-checkbox>
+        </div>-->
       </div>
       <el-dialog width="300px" :visible.sync="showaddewm" append-to-body center>
         <img
@@ -353,6 +356,7 @@ export default {
       mainPay: false,
       innerVisible: false,
       showaddtime: false,
+      checked: false,
       value: '今日收银',
       people: '单据人员',
       server: '服务中',
@@ -421,10 +425,23 @@ export default {
   computed: {
     endtime () {
       let time = moment(this.shopInfo.adt).add('1', 'years').format('YYYY-MM-DD')
+      if (this.shopInfo.pos_period) {
+        time = this.shopInfo.pos_period
+      }
       return time
     }
   },
   methods: {
+    changeCheck () {
+      let today = moment().format('YYYY-MM-DD')
+      if (this.checked) {
+        sessionStorage.setItem(today, 1)
+        console.log('勾选')
+      } else {
+        sessionStorage.removeItem(today)
+        console.log('取消')
+      }
+    },
     clickpaytype () {
       if (!this.addtimeType) return this.$message.error('请选择续费金额')
       if (!this.paytype) return this.$message.error('请选择付款方式')
@@ -512,6 +529,7 @@ export default {
       })
     },
     toSubmit () {
+      this.Quickprice = Number(this.Quickprice).toFixed(2)
       if (!this.Quickprice || this.Quickprice <= 0) {
         this.$message.error('请输入正确价格')
       } else {
@@ -519,23 +537,6 @@ export default {
         this.innerVisible = true
       }
     },
-    // 快速收款
-    // async setCard () {
-    //   const res = await this.$axios.get('/api?datatype=quick_pay', {
-    //     params: {
-    //       storeid: this.storeid,
-    //       dis_total: this.Quickprice,
-    //       pay_type: this.paytype
-    //     }
-    //   })
-    //   if (res.data.code == 1) {
-    //     this.$message.success('收款成功')
-    //     this.innerVisible = false
-    //     this.quickmoney = false
-    //   } else {
-    //     this.$message.error('收款失败')
-    //   }
-    // },
     toSign () {
       this.$axios.get('/api?datatype=insert_sign&storeid=' + this.storeid).then(res => {
         if (res.data.code == 1) {
@@ -720,6 +721,24 @@ export default {
     this.getworkerlist()
     this.getorderlist()
   },
+  // mounted () {
+  //   let now = moment().format('YYYY-MM-DD')
+  //   let weekday = moment().add('7', 'days').format('YYYY-MM-DD')
+  //   let notice = sessionStorage.getItem(now)
+  //   if (notice) {
+  //     this.checked = true
+  //   }
+  //   console.log(weekday)
+  //   if (this.endtime < now) {
+  //     sessionStorage.clear()
+  //     this.$message.error('使用时间已到期，请联系管理员')
+  //     this.$router.push({ name: 'login' })
+  //   } else {
+  //     if (this.endtime < weekday && !notice) {
+  //       this.showaddtime = true
+  //     }
+  //   }
+  // }
 }
 </script>
 

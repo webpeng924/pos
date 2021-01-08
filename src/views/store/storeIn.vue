@@ -166,7 +166,9 @@
       <div class="searchView">
         <!-- <el-input placeholder="请输入产品编号或名称" v-model="searchtxt" @blur="changecate"  prefix-icon="el-icon-search">
         </el-input>-->
-        <input placeholder="请输入产品编号或名称" v-model="searchtxt" @input="changecate" />
+        <el-input placeholder="请输入产品编号或名称" v-model="searchtxt">
+          <el-button slot="append" icon="el-icon-search" @click="changecate">搜索</el-button>
+        </el-input>
       </div>
       <div class="headerView">
         <label class="label-code">编号</label>
@@ -189,10 +191,7 @@
               供应商
               <i class="el-icon-arrow-down el-icon--right"></i>
             </span>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>黄金糕</el-dropdown-item>
-              <el-dropdown-item>狮子头</el-dropdown-item>
-            </el-dropdown-menu>
+            <el-dropdown-menu slot="dropdown"></el-dropdown-menu>
           </el-dropdown>
         </label>
       </div>
@@ -229,7 +228,7 @@
       </div>
     </el-dialog>
 
-    <!-- 选择入库产品 -->
+    <!-- 选择入库产品扫码 -->
     <el-dialog
       title="输入条码"
       :visible.sync="codeDialog"
@@ -261,6 +260,7 @@ export default {
       addpro: false,
       choosepro: false,
       tableData: [],
+      tableData1: [],
       codebar: '',
       searchtxt: '',
       list: [],
@@ -277,7 +277,6 @@ export default {
       buyer: '请选择采购人',
       buyid: '',
       remark: '',
-      searchtxt: null,
       cateList: [],
       chooselist: [],
       cate: { id: null, title: '全部' },
@@ -352,6 +351,7 @@ export default {
     },
     openadd () {
       this.choosepro = true
+      // this.searchtxt = null
       this.getCPlist()
     },
     async getCPlist () {
@@ -363,15 +363,17 @@ export default {
       })
       // console.log(res)
       this.tableData = res.data.data
+      this.tableData1 = this.tableData
       this.tableData.forEach(item => {
         this.cateList = []
         res.data.data.forEach(item => {
           if (this.cateList.length != 0) {
-            this.cateList.every(v => {
-              if (v.id != item.category_id) {
-                this.cateList.push({ 'id': item.category_id, 'title': item.title })
-              }
-            })
+            // this.cateList.every(v => {
+            let cateL = this.cateList.map(v => v.id)
+            if (!cateL.includes(item.category_id)) {
+              this.cateList.push({ 'id': item.category_id, 'title': item.title })
+            }
+            // })
           } else {
             this.cateList.push({ 'id': item.category_id, 'title': item.title })
           }
@@ -440,14 +442,14 @@ export default {
     submitGoods () {
       let arr = []
       this.list.forEach(id => {
-        let a = this.tableData.find(item => item.id == id)
+        let a = this.tableData1.find(item => item.id == id)
         let b = this.chooselist.find(val => val.id == id)
         this.$set(a, 'number', 1)
         this.$set(a, 'total', Number(a.in_cost))
         // this.$set(a, 'supplier_id', '供应商A')
         this.$set(a, 'makedate', this.formatDate(new Date()))
         Object.assign(a, b)
-        // console.log(a, b)
+        console.log(a, b)
         arr.push(a)
       })
       if (arr.length > 60) return this.$message.error('商品数量不能超过60个，请分批入库！')

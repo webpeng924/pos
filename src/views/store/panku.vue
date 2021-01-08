@@ -45,8 +45,8 @@
             <div class="props_item" v-for="(v,k) in props.row.goodsinfo" :key="k">
               <span>产品名称：{{v.goods_name}}</span>
               <span>盘点前数量：{{v.old_num}}</span>
-              <span>当前数量：{{v.number}}</span>
-              <span>差值：{{v.new_num}}</span>
+              <span>当前数量：{{v.new_num}}</span>
+              <span>差值：{{v.number}}</span>
             </div>
           </template>
         </el-table-column>

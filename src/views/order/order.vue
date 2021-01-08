@@ -3,7 +3,7 @@
     <div class="topView">
       <div class="tView">
         <div class="typeView">员工预约</div>
-        <button class="btn-pendRes"></button>
+        <!-- <button class="btn-pendRes"></button> -->
       </div>
       <div class="dateView">
         <button class="btn-date-before" @click="daybefore"></button>
@@ -276,7 +276,7 @@ export default {
     },
     async toSearch () {
       // console.log(this.keyword)
-      if (!this.keyword) return this.$message.errer('请输入查询手机号')
+      if (!this.keyword) return this.$message.error('请输入查询手机号')
       const res = await this.$axios.get('/api?datatype=get_yylist', {
         params: {
           storeid: this.storeid,

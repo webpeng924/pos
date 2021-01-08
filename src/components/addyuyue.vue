@@ -416,6 +416,7 @@ export default {
         name: data.itemname,
         id: data.itemid,
         price: 0,
+        cardid: data.id,
         usecika: 1
       }
       // }).catch(() => {
@@ -604,6 +605,7 @@ export default {
         yytime: this.staTime,
         itemid: this.chosItem.id,
         itemname: this.chosItem.name,
+        cicardId: this.chosItem.cardid,
         checkman: JSON.parse(sessionStorage.getItem('userInfo')).username,
         price: this.chosItem.price,
         remark: this.remark

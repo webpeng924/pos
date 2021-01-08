@@ -190,7 +190,9 @@
       width="700px"
     >
       <div class="searchView">
-        <input placeholder="请输入产品编号或名称" v-model="searchtxt" @input="changecate" />
+        <el-input placeholder="请输入产品编号或名称" v-model="searchtxt">
+          <el-button slot="append" icon="el-icon-search" @click="changecate">搜索</el-button>
+        </el-input>
       </div>
       <div class="headerView">
         <label class="label-code">编号</label>
@@ -203,8 +205,8 @@
               <i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>黄金糕</el-dropdown-item>
-              <el-dropdown-item>狮子头</el-dropdown-item>
+              <el-dropdown-item> </el-dropdown-item>
+              <el-dropdown-item> </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </label>-->
@@ -291,6 +293,7 @@ export default {
       addpro: false,
       choosepro: false,
       tableData: [],
+      tableData1: [],
       shoplist: [],
       codebar: '',
       searchtxt: '',
@@ -467,15 +470,17 @@ export default {
       // console.log(res)
       if (res.data.code == 1 && res.data.data) {
         this.tableData = res.data.data
+        this.tableData1 = this.tableData
         this.tableData.forEach(item => {
           this.cateList = []
           res.data.data.forEach(item => {
             if (this.cateList.length != 0) {
-              this.cateList.every(v => {
-                if (v.id != item.category_id) {
-                  this.cateList.push({ 'id': item.category_id, 'title': item.title })
-                }
-              })
+              // this.cateList.every(v => {
+              let cateL = this.cateList.map(v => v.id)
+              if (!cateL.includes(item.category_id)) {
+                this.cateList.push({ 'id': item.category_id, 'title': item.title })
+              }
+              // })
             } else {
               this.cateList.push({ 'id': item.category_id, 'title': item.title })
             }
@@ -545,7 +550,7 @@ export default {
     submitGoods () {
       let arr = []
       this.list.forEach(id => {
-        let a = this.tableData.find(item => item.id == id)
+        let a = this.tableData1.find(item => item.id == id)
         let b = this.chooselist.find(val => val.id == id)
         this.$set(a, 'oldnumber', a.number)
         this.$set(a, 'outnumber', 1)

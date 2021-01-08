@@ -42,7 +42,7 @@
     <el-dialog
       title="添加卡类"
       :visible.sync="add"
-      width="500px"
+      width="550px"
       custom-class="formDialog"
       :modal-append-to-body="false"
     >
@@ -85,25 +85,31 @@
             </div>
           </el-form-item>
           <el-form-item label="项目折扣">
-            <el-col :span="12">
-              <el-input-number v-model="form.item_discount" :max="10" :min="0"></el-input-number>
+            <el-col :span="8">
+              <el-input-number v-model="form.item_discount" :max="10" :min="0" size="small"></el-input-number>
             </el-col>
-            <el-col :span="2">
+            <el-col :span="1">
               <p style="text-align:center">折</p>
             </el-col>
-            <el-col :span="10">
-              <p style="text-align:center">（ 默认：10-无折扣 ）</p>
+            <el-col :span="15">
+              <p>
+                （ 默认：10-无折扣 ）
+                <a @click="openChoose(1)">特殊项目折扣</a>
+              </p>
             </el-col>
           </el-form-item>
           <el-form-item label="产品折扣">
-            <el-col :span="12">
-              <el-input-number v-model="form.goods_discount" :max="10" :min="0"></el-input-number>
+            <el-col :span="8">
+              <el-input-number v-model="form.goods_discount" :max="10" :min="0" size="small"></el-input-number>
             </el-col>
-            <el-col :span="2">
+            <el-col :span="1">
               <p style="text-align:center">折</p>
             </el-col>
-            <el-col :span="10">
-              <p style="text-align:center">（ 默认：10-无折扣 ）</p>
+            <el-col :span="15">
+              <p>
+                （ 默认：10-无折扣 ）
+                <a @click="openChoose(2)">特殊产品折扣</a>
+              </p>
             </el-col>
           </el-form-item>
         </el-form>
@@ -115,21 +121,47 @@
         <el-button type="primary" @click="submit">确 定</el-button>
       </div>
     </el-dialog>
+
+    <!-- 单独折扣页面 -->
+    <el-dialog
+      :visible.sync="showXMlist"
+      :modal="false"
+      width="100%"
+      custom-class="proDialog"
+      center
+    >
+      <XMdiscount @close="setXMdata" v-if="showXMlist" :XMdata="XMinfo"></XMdiscount>
+    </el-dialog>
+    <!-- 单独折扣页面 -->
+    <el-dialog
+      :visible.sync="showCPlist"
+      :modal="false"
+      width="100%"
+      custom-class="proDialog"
+      center
+    >
+      <CPdiscount @close="setCPdata" v-if="showCPlist" :CPdata="CPinfo"></CPdiscount>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import xcropper from '@/components/xcropper.vue'
+import XMdiscount from './XMdiscount'
+import CPdiscount from './CPdiscount'
 import qs from 'qs'
 export default {
-  components: { xcropper },
+  components: { xcropper, XMdiscount, CPdiscount },
   props: [],
   data () {
     return {
       storeid: sessionStorage.getItem('storeid'),
-      fromtype: false,
+      showXMlist: false,
+      showCPlist: false,
       type: 1,
       id: 0,
+      XMinfo: '',
+      CPinfo: '',
       tableData: [1, 2, 3],
       add: false,
       form: {
@@ -169,6 +201,28 @@ export default {
   watch: {},
   computed: {},
   methods: {
+    openChoose (type) {
+      this.add = false
+      if (type == 1) {
+        this.showXMlist = true
+      } else {
+        this.showCPlist = true
+      }
+    },
+    setXMdata (data) {
+      this.showXMlist = false
+      this.add = true
+      if (data) {
+        this.XMinfo = data
+      }
+    },
+    setCPdata (data) {
+      this.showCPlist = false
+      this.add = true
+      if (data) {
+        this.CPinfo = data
+      }
+    },
     back () {
       this.$emit('close')
     },
@@ -219,6 +273,8 @@ export default {
       this.form = JSON.parse(JSON.stringify(data))
       this.form.dateType = data.usetime.match(/[\u4e00-\u9fa5]/g).join("")
       this.form.usetime = data.usetime.slice(0, data.usetime.length - 1)
+      this.XMinfo = data.XMinfo
+      this.CPinfo = data.CPinfo
     },
     addnew () {
       this.add = true
@@ -237,6 +293,8 @@ export default {
         goods_discount: '10'
       }
       this.form = data
+      this.XMinfo = ''
+      this.CPinfo = ''
     },
     async delitem (id) {
       const res = await this.$axios.get('/api?datatype=del_card&id=' + id)
@@ -393,6 +451,7 @@ export default {
     background-size: 100% 100%;
     img {
       width: 100%;
+      height: 100%;
     }
     span {
       position: absolute;

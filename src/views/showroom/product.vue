@@ -34,6 +34,7 @@ export default {
   methods: {
     back () {
       this.$emit('close')
+
     },
     changeActive (id) {
       this.active = id

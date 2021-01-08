@@ -38,11 +38,11 @@
                 <div class="listItem">
                   <div class="masterView">
                     <div class="nameView">
-                      <span class="span-name one-txt-cut">{{choose?choose.cardname:''}}</span>
+                      <span class="span-name one-txt-cut">{{chooseinfo?chooseinfo.cardname:''}}</span>
                       <span class="span-quantity one-txt-cut">X1</span>
                     </div>
                     <div class="amtView">
-                      <span>支付金额：￥&nbsp;{{choose.price}}</span>
+                      <span>支付金额：￥&nbsp;{{chooseinfo.price}}</span>
                     </div>
                   </div>
                 </div>
@@ -54,11 +54,11 @@
                 <div class="listItem">
                   <div class="masterView">
                     <div class="nameView">
-                      <span class="span-name one-txt-cut">{{choose.name}}</span>
+                      <span class="span-name one-txt-cut">{{chooseinfo.name}}</span>
                       <span class="span-quantity one-txt-cut">X1</span>
                     </div>
                     <div class="amtView">
-                      <span>支付金额：￥&nbsp;{{choose.pay_money}}</span>
+                      <span>支付金额：￥&nbsp;{{chooseinfo.pay_money}}</span>
                     </div>
                   </div>
                 </div>
@@ -84,11 +84,11 @@
                 <div class="listItem">
                   <div class="masterView">
                     <div class="nameView">
-                      <span class="span-name one-txt-cut">{{choose.name}}</span>
+                      <span class="span-name one-txt-cut">{{chooseinfo.name}}</span>
                       <span class="span-quantity one-txt-cut">会员卡X1</span>
                     </div>
                     <div class="amtView">
-                      <span>支付金额：￥&nbsp;{{choose.recharge_money}}</span>
+                      <span>支付金额：￥&nbsp;{{chooseinfo.recharge_money}}</span>
                     </div>
                   </div>
                 </div>
@@ -102,7 +102,7 @@
                 </div>
                 <div class="payableAmt" style="font-size:20px" v-if="sign==1||sign==2">
                   应付金额：
-                  <label style="color:red;">￥{{sign==1?choose.price:choose.pay_money}}</label>
+                  <label style="color:red;">￥{{sign==1?chooseinfo.price:chooseinfo.pay_money}}</label>
                 </div>
               </div>
             </div>
@@ -205,7 +205,6 @@
       title="扫码付款"
       center
     >
-      <img :src="showImg|imgUrl" alt class="payEr" v-show="showImg" />
       <input
         placeholder="请客户扫码或录入付款码后回车"
         v-model="codebar"
@@ -215,6 +214,7 @@
         v-show="shopinfo.is_payonline == 1&&paytype != 'other'"
       />
       <span slot="footer" class="dialog-footer">
+        <img :src="showImg|imgUrl" alt class="payEr" v-show="showImg" />
         <el-button type="primary" @click="fukuanOK" v-show="showImg">确认收到款项</el-button>
       </span>
     </el-dialog>
@@ -228,7 +228,7 @@
         :paytype="paytype"
         :member="itemlist.length?itemlist[0].member_id:''"
         :sign="sign"
-        :info="choose"
+        :info="chooseinfo"
         v-if="payend"
       ></payend>
     </div>
@@ -245,6 +245,7 @@ export default {
   data () {
     return {
       paytype: '',
+      chooseinfo: '',
       itemlist: [],
       storeid: sessionStorage.getItem('storeid'),
       shopinfo: JSON.parse(sessionStorage.getItem('shopInfo')),
@@ -407,7 +408,7 @@ export default {
         // this.$message.success('充值成功')
         // this.showaddMoney = false
         // this.getInfo(this.member_id)
-        this.choose = {
+        this.chooseinfo = {
           member_id: this.closeinfo.member_id,
           money: this.closeinfo.money,
           gift_money: this.closeinfo.gift_money,
@@ -445,8 +446,8 @@ export default {
         const res = await this.$axios.get('/api?datatype=buy_ccard', {
           params: {
             storeid: this.storeid,
-            member_id: this.choose.member_id,
-            id: this.choose.id,
+            member_id: this.chooseinfo.member_id,
+            id: this.chooseinfo.id,
             order_no: this.payorder_no,
             pay_type: this.paytype
           }
@@ -455,7 +456,7 @@ export default {
           // this.$message.success('购买成功')
           // this.menuDialog = false
           // this.innerVisible = false
-          Object.assign(this.choose, res.data.list)
+          Object.assign(this.chooseinfo, res.data.list)
           this.dialogVisible = false
           this.payend = true
         } else {
@@ -465,9 +466,9 @@ export default {
         const res = await this.$axios.get('/api?datatype=buy_package', {
           params: {
             storeid: this.storeid,
-            member_id: this.choose.member_id,
+            member_id: this.chooseinfo.member_id,
             order_no: this.payorder_no,
-            id: this.choose.id,
+            id: this.chooseinfo.id,
             pay_type: this.paytype,
             userid: JSON.parse(sessionStorage.getItem('userInfo')).id,
             username: JSON.parse(sessionStorage.getItem('userInfo')).username
@@ -478,7 +479,7 @@ export default {
           // this.TCDialog = false
           // this.innerVisible = false
           // this.getList()
-          Object.assign(this.choose, res.data.list)
+          Object.assign(this.chooseinfo, res.data.list)
           this.dialogVisible = false
           this.payend = true
         } else {
@@ -488,14 +489,14 @@ export default {
         const res = await this.$axios.get('/api?datatype=buy_member_card', {
           params: {
             storeid: this.storeid,
-            member_id: this.choose.member_id,
-            card_id: this.choose.id,
+            member_id: this.chooseinfo.member_id,
+            card_id: this.chooseinfo.id,
             order_no: this.payorder_no,
             pay_type: this.paytype
           }
         })
         if (res.data.code == 1) {
-          Object.assign(this.choose, res.data.list)
+          Object.assign(this.chooseinfo, res.data.list)
           this.dialogVisible = false
           this.payend = true
         } else {
@@ -554,19 +555,21 @@ export default {
       this.getInfo()
     }
     if (this.choose) {
-      this.itemlist.push(this.choose)
-      if (this.choose.card_no) {
+      console.log(this.choose)
+      this.chooseinfo = JSON.parse(JSON.stringify(this.choose))
+      this.itemlist.push(this.chooseinfo)
+      if (this.chooseinfo.card_no) {
         // 买会员卡
         this.sign = 6
-        this.paytotal = this.choose.recharge_money
-      } else if (this.choose.typeid) {
+        this.paytotal = this.chooseinfo.recharge_money
+      } else if (this.chooseinfo.typeid) {
         // 买次卡
         this.sign = 1
-        this.paytotal = this.choose.price
+        this.paytotal = this.chooseinfo.price
       } else {
         // 买套餐
         this.sign = 2
-        this.paytotal = this.choose.pay_money
+        this.paytotal = this.chooseinfo.pay_money
       }
     }
     if (this.money) {
@@ -819,7 +822,7 @@ export default {
     }
   }
   .payEr {
-    width: 500px;
+    width: 460px;
     padding: 20px 100px;
   }
 }

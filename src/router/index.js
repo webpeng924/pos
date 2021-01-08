@@ -64,6 +64,11 @@ const routes = [
     path: '/store',
     name: 'store',
     component: () => import('@/views/store/store.vue')
+  },
+  {
+    path: '/integralShop',
+    name: 'integralShop',
+    component: () => import('@/views/integral/integralShop.vue')
   }
 ]
 
@@ -86,8 +91,8 @@ router.beforeEach((to, from, next) => {
   }
   if ((user && shop) || to.path == '/login' || to.path == '/signPage' || to.path == '/sign') {
     if (shop) {
-      let shoptype = JSON.parse(shop).type_id
-      if (shoptype == 1) {
+      let shop_type = JSON.parse(shop).type_id
+      if (shop_type == 1) {
         document.title = '诗泊蕾尔管理系统'
       } else {
         document.title = '诗臻泊管理系统'

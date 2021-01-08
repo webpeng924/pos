@@ -112,7 +112,7 @@
               <el-progress
                 :text-inside="true"
                 :stroke-width="15"
-                :percentage="kaika.point"
+                :percentage="kaika.point>100?100:kaika.point"
                 status="warning"
               ></el-progress>
             </div>
@@ -127,7 +127,7 @@
               <el-progress
                 :text-inside="true"
                 :stroke-width="15"
-                :percentage="chong.point"
+                :percentage="chong.point>100?100:chong.point"
                 status="exception"
               ></el-progress>
             </div>
@@ -284,7 +284,7 @@
               <el-progress
                 :text-inside="true"
                 :stroke-width="15"
-                :percentage="kaika.point"
+                :percentage="kaika.point>100?100:kaika.point"
                 status="warning"
               ></el-progress>
             </div>
@@ -299,7 +299,7 @@
               <el-progress
                 :text-inside="true"
                 :stroke-width="15"
-                :percentage="chong.point"
+                :percentage="chong.point>100?100:chong.point"
                 status="exception"
               ></el-progress>
             </div>
@@ -657,7 +657,7 @@ export default {
           res.data.data.member.forEach(item => {
             if (item.type == '充值') {
               this.chong = item
-            } else if (item.type == '卖卡') {
+            } else if (item.type == '会员卡') {
               this.kaika = item
             }
           })

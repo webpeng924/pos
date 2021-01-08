@@ -57,6 +57,12 @@
         <span>更多</span>
       </div>
     </router-link>
+    <router-link :to="{name:'integralShop'}">
+      <div class="nav_item">
+        <i class="iconfont icon-jifenshangcheng"></i>
+        <span>积分商城</span>
+      </div>
+    </router-link>
   </div>
 </template>
 

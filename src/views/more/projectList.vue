@@ -120,11 +120,12 @@ export default {
         this.cateList = []
         res.data.data.forEach(item => {
           if (this.cateList.length != 0) {
-            this.cateList.every(v => {
-              if (v.id != item.category_id) {
-                this.cateList.push({ 'id': item.category_id, 'title': item.title })
-              }
-            })
+            // this.cateList.every(v => {
+            let cateL = this.cateList.map(v => v.id)
+            if (!cateL.includes(item.category_id)) {
+              this.cateList.push({ 'id': item.category_id, 'title': item.title })
+            }
+            // })
           } else {
             this.cateList.push({ 'id': item.category_id, 'title': item.title })
           }
