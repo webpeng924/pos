@@ -52,7 +52,14 @@
               :class="{gr:val.shilist.includes(v.shi+':'+v.fen)}"
               :style="val[v.shi + ':' + v.fen]?'background:'+color(val[v.shi + ':' + v.fen].split(',')[1]):''"
               @click="checktime(v,val)"
-            ></div>
+            >
+              <span style="z-index: 9;
+          position: absolute;">
+                <p>{{val[v.shi + ':' + v.fen]?val[v.shi + ':' + v.fen].split(',')[2]:''}}</p>
+                <p>{{val[v.shi + ':' + v.fen]?val[v.shi + ':' + v.fen].split(',')[3]:''}}</p>
+                <p>{{val[v.shi + ':' + v.fen]?val[v.shi + ':' + v.fen].split(',')[4]:''}}</p>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -195,6 +202,7 @@
 <script>
 import addyuyue from '@/components/addyuyue'
 import moment from 'moment'
+import { cornsilk } from 'color-name';
 export default {
   components: { addyuyue },
   props: {},
@@ -313,9 +321,14 @@ export default {
           let now = new Date
           if (moment(this.date) < moment(this.formatDate(now))) return this.$message.error('时间已过，不可预约')
           let flag1 = this.date == this.formatDate(now)
-          let nowshi = moment(now).format('HH')
-          let nowfen = moment(now).format('m')
-          if (flag1 && (v.shi <= nowshi && v.fen < nowfen)) {
+          // let nowshi = moment(now).format('HH')
+          // let nowfen = moment(now).format('m')
+          // if (flag1 && (v.shi <= nowshi && v.fen < nowfen)) {
+          //   return this.$message.error('时间已过，不可预约')
+          // }
+          let choosetime = moment().format('YYYY-MM-DD ') + v.shi + ':' + v.fen
+          let times = moment(choosetime).diff(moment().format('YYYY-MM-DD HH:mm'))
+          if (flag1 && times < 0) {
             return this.$message.error('时间已过，不可预约')
           }
           this.typeDialog = true
@@ -324,9 +337,9 @@ export default {
         let now = new Date
         if (moment(this.date) < moment(this.formatDate(now))) return this.$message.error('时间已过，不可预约')
         let flag1 = this.date == this.formatDate(now)
-        let nowshi = moment(now).format('HH')
-        let nowfen = moment(now).format('m')
-        if (flag1 && (v.shi <= nowshi && v.fen < nowfen)) {
+        let choosetime = moment().format('YYYY-MM-DD ') + v.shi + ':' + v.fen
+        let times = moment(choosetime).diff(moment().format('YYYY-MM-DD HH:mm'))
+        if (flag1 && times < 0) {
           return this.$message.error('时间已过，不可预约')
         }
         this.typeDialog = true
@@ -367,7 +380,7 @@ export default {
             if (v.id == item.staffid) {
               v.shilist.push(shi + ':' + fen)
               v.shilist.push(shi1 + ':' + fen1)
-              this.$set(v, shi + ':' + fen, item.id + ',' + item.status)
+              this.$set(v, shi + ':' + fen, item.id + ',' + item.status + ',' + item.name + ',' + item.mobile + ',' + item.itemname)
               this.$set(v, shi1 + ':' + fen1, item.id + ',' + item.status)
             }
           })
@@ -638,8 +651,16 @@ export default {
       .b_item {
         cursor: pointer;
         height: 150px;
+        font-size: 12px;
+        color: #eee;
+        padding: 10px 5px;
         border-bottom: 0.5px solid rgba(220, 220, 220, 0.7);
         border-right: 0.5px dashed rgba(220, 220, 220, 0.7);
+        position: relative;
+        p {
+          // word-break: break-all;
+          margin-bottom: 5px;
+        }
       }
       .gr {
         background-color: #67c23a;

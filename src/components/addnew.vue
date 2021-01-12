@@ -439,9 +439,9 @@ export default {
           itemname: val.itemname,
           staff1: val.staffid,
           price: val.price,
-          subtotal: val.price * val.discount,
+          subtotal: val.discount ? val.price * val.discount : Number(val.price),
           is_usecard: 0,
-          discount: val.discount,
+          discount: val.discount ? val.discount : 1,
           maxNum: 1
         }
         if (val.cicard_id != 0) {
