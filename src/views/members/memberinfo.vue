@@ -382,7 +382,7 @@
           class="editBtn"
           type="primary"
           size="mini"
-          @click="showedit=true;editname=userinfo.name;editmobile=userinfo.mobile"
+          @click="showedit=true;editname=userinfo.name;editmobile=userinfo.mobile;editbirthday=userinfo.birthday?userinfo.birthday:''"
           v-show="!showedit"
         >修改</el-button>
         <el-button
@@ -420,10 +420,6 @@
           <div class="leftView">家庭住址</div>
           <div class="valView overflowText">-</div>
         </div>-->
-        <div class="infoItem">
-          <div class="leftView">证件号码</div>
-          <div class="valView overflowText">{{userinfo.IDcard?userinfo.IDcard:'-'}}</div>
-        </div>
         <!-- <div class="infoItem">
           <div class="leftView">客户来源</div>
           <div class="valView overflowText">-</div>
@@ -434,7 +430,21 @@
         </div>-->
         <div class="infoItem">
           <div class="leftView">生日</div>
-          <div class="valView overflowText">{{userinfo.birthday?userinfo.birthday:'-'}}</div>
+          <div
+            class="valView overflowText"
+            v-show="!showedit"
+          >{{userinfo.birthday?userinfo.birthday:'-'}}</div>
+          <el-date-picker
+            value-format="yyyy-MM-dd"
+            v-show="showedit"
+            v-model="editbirthday"
+            type="date"
+            placeholder="选择日期"
+          ></el-date-picker>
+        </div>
+        <div class="infoItem">
+          <div class="leftView">证件号码</div>
+          <div class="valView overflowText">{{userinfo.IDcard?userinfo.IDcard:'-'}}</div>
         </div>
       </div>
     </div>
@@ -528,6 +538,7 @@ export default {
       showDesc: false,
       editname: '',
       editmobile: '',
+      editbirthday: '',
       img: '',
       innerVisible: false,
       desc: '',
@@ -604,7 +615,8 @@ export default {
         storeid: this.storeid,
         member_id: this.member_id,
         mobile: this.editmobile,
-        name: this.editname
+        name: this.editname,
+        birthday: this.editbirthday
       }
       this.$axios.get('/api?datatype=update_one_member', { params }).then(res => {
         if (res.data.code == 1) {

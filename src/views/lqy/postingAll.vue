@@ -1,10 +1,10 @@
 <template>
   <div class="lqy-postingAll">
     <div class="block">
-      <div class="block-title">导入方式</div>
+      <div class="block-title"></div>
       <div class="block-content">
         <div class="block-item">
-          <el-button type="primary" @click="getList();memberView=true">选择会员</el-button>
+          <el-button type="warning" plain @click="getList();memberView=true">选择会员</el-button>
           <!-- <input type="text" class="entry" /> -->
         </div>
         <!-- <div class="block-item">
@@ -24,7 +24,7 @@
           共导入
           <span class="num">{{checklist.length}}</span>个号码
         </p>
-        <el-button type="primary" class="middle" @click="listView=true">号码清单</el-button>
+        <el-button type="success" plain class="middle" @click="listView=true">号码清单</el-button>
         <div class="footer-box">
           <!-- <el-checkbox v-model="checkedThree" class="pd15">过滤七天内已发送过的手机号</el-checkbox> -->
           <p class="red">发送短信前，请先仔细核对号码清单！！</p>
@@ -38,7 +38,7 @@
         <div class="edit-top pd15">短信内容</div>
         <div class="edit-content">
           <textarea
-            v-model="write"
+            v-model="smstxt"
             readonly
             cols="30"
             rows="10"
@@ -55,23 +55,22 @@
               <span class="num">{{count}}</span>
               <span>条短信</span>
             </div>
-            <div class="fonts">{{ write.length }}/{{ maxLength }}</div>
+            <div class="fonts">{{ smstxt.length }}/{{ maxLength }}</div>
           </div>
         </div>
         <div class="edit-box pd15">
-          <el-button type="primary" class="md10" @click="smstemplate=true">短信模板</el-button>
-          <el-button type="primary" @click="sendsms">发送短信</el-button>
+          <el-button type="primary" plain class="md10" @click="smstemplate=true;gettamp()">短信模板</el-button>
+          <el-button type="warning" plain @click="sendsms">发送短信</el-button>
         </div>
       </div>
     </div>
     <div class="line"></div>
-    <div class="block">
+    <!-- <div class="block">
       <div class="block-title">功能选项</div>
       <div class="block-content bottom-btn">
-        <!-- <el-button type="primary">黑名单</el-button> -->
         <el-button type="primary" class="ml50">短信历史</el-button>
       </div>
-    </div>
+    </div>-->
     <el-dialog
       :visible.sync="memberView"
       width="70%"
@@ -135,7 +134,16 @@
       center
     >
       <div class="templist">
-        <div class="titem active">111111111111111111111111111111111111</div>
+        <div
+          class="titem"
+          v-for="(val,k) in tempList"
+          :key="k"
+          :class="{active:val.content==smstxt}"
+          @click="smstxt=val.content"
+        >{{'“'+val.name+'”：'+val.content}}</div>
+      </div>
+      <div style="text-align:center">
+        <el-button type="primary" @click="smstemplate=false">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -145,37 +153,66 @@
 export default {
   data () {
     return {
+      tempList: [],
+      smstxt: '',
       title: '短信群发',
       checkedOne: false,
       checkedTwo: false,
       checkedThree: false,
       check: [],
       checklist: [],
-      List: [],
       count: 0,
       type: '号码',
       storeid: sessionStorage.getItem('storeid'),
+      shopinfo: sessionStorage.getItem('shopInfo'),
       keyword: '',
       tableData: [],
       maxLength: 180,
       memberView: false,
       smstemplate: false,
-      listView: false,
-      write: ''
+      listView: false
     }
   },
   methods: {
     handleClose () {
       this.memberView = false
     },
+    gettamp () {
+      this.$axios.get('/api?datatype=get_store_smstemp').then(
+        res => {
+          if (res.data.code == 1) {
+            this.tempList = res.data.data
+            this.tempList.forEach(item => {
+              item.content = item.content.replace(/{s10}/g, JSON.parse(this.shopinfo).shop_name)
+            })
+          }
+        }
+      )
+    },
     sendsms () {
-      this.$axios.get('/api?datatype=sendsms', {
-        params: {
-          storeid: this.storeid,
-          ids: this.check
+      if (!this.check.length) return this.$message.error('请选择会员')
+      if (!this.smstxt) return this.$message.error('请选择短信模板')
+      let data = {
+        storeid: this.storeid,
+        ids: this.check,
+        content: this.smstxt
+      }
+      this.$axios.post('http://saas.4001801812.com/index.php/sysmanage/Sms/sms_send_pos_api/', data).then(res => {
+        if (res.data.code == 1) {
+          this.$message.success(res.data.msg)
+          this.checksms()
+        } else {
+          this.$message.error(res.data.msg)
         }
       })
-      this.checksms()
+      // this.$axios.post('/s?datatype=send_sms', data).then(res => {
+      //   if (res.data.code == 1) {
+      //     this.$message.success(res.data.msg)
+      //     this.checksms()
+      //   } else {
+      //     this.$message.error(res.data.msg)
+      //   }
+      // })
     },
     choosMember (row) {
       // console.log(row)
@@ -248,16 +285,16 @@ export default {
     height: calc(100% - 60px);
   }
   .templist {
-    height: 100%;
+    height: calc(100% - 60px);
     overflow: auto;
     .titem {
       margin: 10px;
       padding: 10px;
-      border: 1px solid #ccc;
+      border: 1px solid #eee;
       border-radius: 6px;
     }
     .active {
-      border-color: rgb(133, 206, 97);
+      border: 3px solid rgb(133, 206, 97);
     }
   }
 }

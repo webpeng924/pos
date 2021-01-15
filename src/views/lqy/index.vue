@@ -4,10 +4,15 @@
       <div class="tView">短信营销</div>
       <button class="btn-back btn-audio" @click="$emit('close')"></button>
     </div>
-    <el-tabs tab-position="left" style="width“120px">
+    <el-tabs tab-position="left">
       <el-tab-pane label="短信群发">
         <div class="box">
           <lqyPosting></lqyPosting>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane label="短信历史">
+        <div class="box">
+          <history></history>
         </div>
       </el-tab-pane>
       <el-tab-pane label="短信充值">
@@ -15,11 +20,6 @@
           <lqyRecharge></lqyRecharge>
         </div>
       </el-tab-pane>
-      <!-- <el-tab-pane label="短信设置">
-        <div class="box">
-          <lqyErWeiMaPay></lqyErWeiMaPay>
-        </div>
-      </el-tab-pane>-->
     </el-tabs>
   </div>
 </template>
@@ -27,11 +27,13 @@
 <script>
 import lqyPosting from "./postingAll.vue";
 import lqyRecharge from "./recharge.vue";
+import history from './history'
 export default {
   created () { },
   components: {
     lqyPosting,
     lqyRecharge,
+    history
   }
 };
 </script>
