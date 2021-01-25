@@ -45,6 +45,7 @@
           <i class="el-icon-arrow-right"></i>
         </div>
         <el-dialog
+          :close-on-click-modal="false"
           title="性别"
           :visible.sync="sexDialog"
           width="30%"
@@ -74,6 +75,7 @@
           <i class="el-icon-arrow-right"></i>
         </div>
         <el-dialog
+          :close-on-click-modal="false"
           title="部门"
           :visible.sync="sectionDialog"
           width="30%"
@@ -120,6 +122,7 @@
           <i class="el-icon-arrow-right"></i>
         </div>
         <el-dialog
+          :close-on-click-modal="false"
           title="服务职称"
           :visible.sync="serviceJobDialog"
           width="30%"
@@ -186,6 +189,7 @@
           <i class="el-icon-arrow-right"></i>
         </div>
         <el-dialog
+          :close-on-click-modal="false"
           title="职位"
           :visible.sync="jobDialog"
           width="30%"
@@ -243,6 +247,7 @@
           <i class="el-icon-arrow-right"></i>
         </div>
         <el-dialog
+          :close-on-click-modal="false"
           title="目前状态"
           :visible.sync="nowStatusDialog"
           width="30%"

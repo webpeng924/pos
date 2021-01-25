@@ -185,6 +185,23 @@
                     />
                   </div>
                 </div>
+                <div
+                  class="paymentItem listItem btn-audio"
+                  :class="{select:paytype=='mixed'}"
+                  @click="paytype='mixed'"
+                >
+                  <div class="iconView">
+                    <img src="../assets/images/mixed.png" />
+                  </div>
+                  <div class="textView overflowText">
+                    <label class="label-name">混合支付</label>
+                    <div class="selectView">
+                      <img
+                        src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_Black.png"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -197,10 +214,10 @@
 
     <!-- 支付弹窗 -->
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="dialogVisible"
       width="500px"
       class="payDialog"
-      :show-close="false"
       :modal-append-to-body="false"
       title="扫码付款"
       center
@@ -217,6 +234,55 @@
         <img :src="showImg|imgUrl" alt class="payEr" v-show="showImg" />
         <el-button type="primary" @click="fukuanOK" v-show="showImg">确认收到款项</el-button>
       </span>
+    </el-dialog>
+
+    <!-- 混合支付 -->
+    <el-dialog
+      :close-on-click-modal="false"
+      title="混合支付"
+      :visible.sync="mixedDialog"
+      width="600px"
+      :modal-append-to-body="false"
+    >
+      <div class="paylist">
+        <div class="item" v-if="sign==1||sign==2||sign==3">
+          <span>会员卡：</span>
+          <el-input
+            type="number"
+            v-model="mixedinfo.card"
+            :max="Number(memberPrice)"
+            :min="0"
+            @blur="()=>{if(mixedinfo.card>Number(memberPrice)){mixedinfo.card=Number(memberPrice)}}"
+            :placeholder="`余额：${memberPrice}元`"
+          ></el-input>
+        </div>
+        <div class="item">
+          <span>支付宝：</span>
+          <el-input type="number" :min="0" v-model="mixedinfo.zfb"></el-input>
+        </div>
+        <div class="item">
+          <span style="margin-right:10px">微 信：</span>
+          <el-input type="number" :min="0" v-model="mixedinfo.wx"></el-input>
+        </div>
+        <div class="item">
+          <span style="margin-right:10px">现 金：</span>
+          <el-input type="number" :min="0" v-model="mixedinfo.cash"></el-input>
+        </div>
+        <div class="item">
+          <span style="margin-right:10px">其 他：</span>
+          <el-input type="number" :min="0" v-model="mixedinfo.other"></el-input>
+        </div>
+        <div class="item" v-if="sign==1||sign==2">
+          <span style="margin-right:10px">签 账：</span>
+          <el-input type="number" :min="0" v-model="mixedinfo.signbill"></el-input>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer" style="position: relative;">
+        <!-- <span class="hyye">会员余额：{{memberPrice}}元</span> -->
+        <!-- <span class="hyye">待付金额：{{total}}元</span> -->
+        <el-button @click="mixedDialog = false">取 消</el-button>
+        <el-button type="primary" @click="mixedSubmit">结 账</el-button>
+      </div>
     </el-dialog>
 
     <div class="set_page" :class="{activePage:erweima}">
@@ -246,6 +312,17 @@ export default {
     return {
       paytype: '',
       chooseinfo: '',
+      mixedDialog: false,
+      mixedDialog: false,
+      mixedinfo: {
+        zfb: '',
+        wx: '',
+        cash: '',
+        card: '',
+        other: '',
+        signbill: ''
+      },
+      memberPrice: 0,
       itemlist: [],
       storeid: sessionStorage.getItem('storeid'),
       shopinfo: JSON.parse(sessionStorage.getItem('shopInfo')),
@@ -286,6 +363,20 @@ export default {
           return 'other';
       }
     },
+    mixedSubmit () {
+      let sum = 0
+      let arr = Object.values(this.mixedinfo)
+      arr.forEach(item => {
+        sum += Number(item)
+      })
+      // console.log(sum)
+      if (this.total != sum) {
+        this.$message.error('请核对支付金额')
+      } else {
+        this.fukuanOK()
+        this.mixedDialog = false
+      }
+    },
     submit () {
       if (!this.paytype) return this.$message.error('请选择支付方式')
       if (this.paytype == 'zfb' || this.paytype == 'wx' || this.paytype == 'other') {
@@ -311,6 +402,8 @@ export default {
             })
           }
         }
+      } else if (this.paytype == 'mixed') {
+        this.mixedDialog = true
       } else {
         this.fukuanOK()
       }
@@ -332,6 +425,7 @@ export default {
           params: {
             storeid: this.storeid,
             member_id: this.itemlist[0].member_id,
+            mixedinfo: this.paytype == 'mixed' ? this.mixedinfo : null,
             id: this.ids,
             pay_type: this.paytype
           }
@@ -399,6 +493,7 @@ export default {
           storeid: this.storeid,
           member_id: this.closeinfo.member_id,
           money: Number(this.closeinfo.money),
+          mixedinfo: this.paytype == 'mixed' ? this.mixedinfo : null,
           order_no: this.payorder_no,
           gift_money: Number(this.closeinfo.gift_money),
           paytype: this.paytype
@@ -427,6 +522,7 @@ export default {
           storeid: this.storeid,
           dis_total: this.money,
           order_no: this.payorder_no,
+          mixedinfo: this.paytype == 'mixed' ? this.mixedinfo : null,
           pay_type: this.paytype
         }
       })
@@ -436,6 +532,7 @@ export default {
         // this.quickmoney = false
         this.dialogVisible = false
         this.payend = true
+        this.chooseinfo = res.data.order
       } else {
         this.$message.error('收款失败')
       }
@@ -447,6 +544,7 @@ export default {
           params: {
             storeid: this.storeid,
             member_id: this.chooseinfo.member_id,
+            mixedinfo: this.paytype == 'mixed' ? this.mixedinfo : null,
             id: this.chooseinfo.id,
             order_no: this.payorder_no,
             pay_type: this.paytype
@@ -467,6 +565,7 @@ export default {
           params: {
             storeid: this.storeid,
             member_id: this.chooseinfo.member_id,
+            mixedinfo: this.paytype == 'mixed' ? this.mixedinfo : null,
             order_no: this.payorder_no,
             id: this.chooseinfo.id,
             pay_type: this.paytype,
@@ -490,6 +589,7 @@ export default {
           params: {
             storeid: this.storeid,
             member_id: this.chooseinfo.member_id,
+            mixedinfo: this.paytype == 'mixed' ? this.mixedinfo : null,
             card_id: this.chooseinfo.id,
             order_no: this.payorder_no,
             pay_type: this.paytype
@@ -541,6 +641,22 @@ export default {
         }
       )
     },
+    async getmember (id) {
+      const res = await this.$axios.get("/api?datatype=get_one_member", {
+        params: {
+          storeid: this.storeid,
+          member_id: id
+        }
+      });
+      if (res.data.code == 1) {
+        if (Number(res.data.data.signbill) > 0) {
+          this.$alert('该会员欠款：' + res.data.data.signbill + ' 元', '提示', {
+            center: true,
+          })
+        }
+        this.memberPrice = res.data.data.balance
+      }
+    },
     getOrderNo () {
       this.$axios.get('/api?datatype=get_order_no').then(res => {
         // console.log(res)
@@ -553,11 +669,13 @@ export default {
       // 还款
       this.sign = 3
       this.getInfo()
+      this.memberPrice = this.member.balance
     }
     if (this.choose) {
       console.log(this.choose)
       this.chooseinfo = JSON.parse(JSON.stringify(this.choose))
       this.itemlist.push(this.chooseinfo)
+      this.getmember(this.choose.member_id)
       if (this.chooseinfo.card_no) {
         // 买会员卡
         this.sign = 6
@@ -598,9 +716,19 @@ export default {
       let sum = 0
       if (this.money) {
         sum = Number(this.money)
+      } else if (this.closeinfo && this.closeinfo.money) {
+        sum = Number(this.closeinfo.money)
       } else {
         this.itemlist.forEach(item => {
-          sum += Number(item.money)
+          if (item.price) {
+            sum += Number(item.price)
+          } else if (item.recharge_money) {
+            sum += Number(item.recharge_money)
+          } else if (item.pay_money) {
+            sum += Number(item.pay_money)
+          } else {
+            sum += Number(item.money)
+          }
         })
       }
       return sum.toFixed(2)
@@ -824,6 +952,45 @@ export default {
   .payEr {
     width: 460px;
     padding: 20px 100px;
+  }
+  .paylist {
+    padding: 0 100px;
+    padding-top: 5px;
+
+    .item {
+      // border-bottom: 1px solid #ececec;
+      display: flex;
+      margin: 10px 0;
+      height: 40px;
+      justify-content: space-between;
+      span {
+        line-height: 40px;
+      }
+      /deep/ .el-input,
+      .el-input-number {
+        background-color: #eee;
+        border-radius: 5px;
+        flex: 1;
+        border: none;
+        padding-left: 10px;
+        input.el-input__inner {
+          line-height: 28px;
+          text-align: left;
+          background: transparent;
+          padding: 0;
+          font-size: 14px;
+          color: #28282d;
+          outline: none;
+          border: none;
+        }
+      }
+      /deep/ .el-input-number {
+        .el-input-number__decrease,
+        .el-input-number__increase {
+          display: none;
+        }
+      }
+    }
   }
 }
 </style>

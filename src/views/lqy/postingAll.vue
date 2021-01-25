@@ -72,6 +72,7 @@
       </div>
     </div>-->
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="memberView"
       width="70%"
       :before-close="handleClose"
@@ -113,6 +114,7 @@
       </span>
     </el-dialog>
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="listView"
       width="400px"
       :append-to-body="true"
@@ -126,6 +128,7 @@
       </el-table>
     </el-dialog>
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="smstemplate"
       width="60%"
       :append-to-body="true"

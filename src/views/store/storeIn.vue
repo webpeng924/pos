@@ -25,6 +25,7 @@
               <div @click="wayDialog=true">{{way}}</div>
             </div>
             <el-dialog
+              :close-on-click-modal="false"
               title="入库方式"
               :visible.sync="wayDialog"
               width="30%"
@@ -76,6 +77,7 @@
               <div @click="workerDialog=true">{{buyer}}</div>
             </div>
             <el-dialog
+              :close-on-click-modal="false"
               title="选择采购人"
               :visible.sync="workerDialog"
               width="30%"
@@ -155,6 +157,7 @@
 
     <!-- 选择入库产品 -->
     <el-dialog
+      :close-on-click-modal="false"
       title="选择产品"
       :visible.sync="choosepro"
       custom-class="chooseDialog"
@@ -210,6 +213,7 @@
       </span>
     </el-dialog>
     <el-dialog
+      :close-on-click-modal="false"
       title="日期选择"
       :visible.sync="dateDialog"
       center
@@ -222,7 +226,13 @@
     </el-dialog>
 
     <!-- 生产日期 -->
-    <el-dialog :visible.sync="makeDay" center :append-to-body="true" custom-class="dialog">
+    <el-dialog
+      :close-on-click-modal="false"
+      :visible.sync="makeDay"
+      center
+      :append-to-body="true"
+      custom-class="dialog"
+    >
       <div @click="chosMakeDay">
         <el-calendar v-model="prodate"></el-calendar>
       </div>
@@ -230,6 +240,7 @@
 
     <!-- 选择入库产品扫码 -->
     <el-dialog
+      :close-on-click-modal="false"
       title="输入条码"
       :visible.sync="codeDialog"
       :modal-append-to-body="false"

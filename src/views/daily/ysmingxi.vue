@@ -109,8 +109,8 @@
         </el-table-column>
         <el-table-column prop="address" label="消费内容">
           <template slot-scope="scope">
-            <!-- {{ scope.row.iteminfo }} -->
-            <p v-for="(item, index) in scope.row.iteminfo" :key="index">{{ item.itemname }}</p>
+            <p v-if="scope.row.customer_type==1&&!scope.row.iteminfo">快速收银</p>
+            <p v-else v-for="(item, index) in scope.row.iteminfo" :key="index">{{ item.itemname }}</p>
           </template>
         </el-table-column>
         <el-table-column prop="address" label="支付方式">
@@ -181,8 +181,9 @@
     </div>
 
     <!-- 卡项详情 -->
-    <div class="receipt">
+    <!-- <div class="receipt">
       <el-dialog
+        :close-on-click-modal="false"
         :visible.sync="receiptVisible"
         width="35%"
         custom-class="receipt-box"
@@ -255,10 +256,11 @@
           </div>
         </div>
       </el-dialog>
-    </div>
+    </div>-->
 
     <!-- 退货窗口 -->
     <el-dialog
+      :close-on-click-modal="false"
       title="可退货列表"
       :visible.sync="tuiVisible"
       width="60%"

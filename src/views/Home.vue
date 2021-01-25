@@ -197,6 +197,7 @@
     </div>
 
     <el-dialog
+      :close-on-click-modal="false"
       title="快速收款"
       :visible.sync="quickmoney"
       width="620px"
@@ -223,7 +224,7 @@
           @focus="chosIput(2)"
         ></el-input>-->
       </div>
-      <!-- <el-dialog
+      <!--  <el-dialog :close-on-click-modal="false" 
         width="50%"
         title="请选择支付方式"
         :visible.sync="innerVisible"
@@ -243,7 +244,14 @@
       </el-dialog>-->
     </el-dialog>
 
-    <el-dialog title="备注" :visible.sync="showMemo" width="430px" center custom-class="quickmoney">
+    <el-dialog
+      :close-on-click-modal="false"
+      title="备注"
+      :visible.sync="showMemo"
+      width="430px"
+      center
+      custom-class="quickmoney"
+    >
       <!-- <div class="customerTypeView">
         <el-radio v-model="radio" label="1">老客</el-radio>
         <el-radio v-model="radio" label="2">新客</el-radio>
@@ -258,6 +266,7 @@
 
     <!-- 选择服务人员 -->
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="showworker"
       width="1024px"
       center
@@ -268,7 +277,7 @@
     </el-dialog>
 
     <!-- 签到 -->
-    <el-dialog :visible.sync="showSign" width="30%">
+    <el-dialog :close-on-click-modal="false" :visible.sync="showSign" width="30%">
       <div style="text-align: center;padding:20px;font-size:16px">今天是 {{new Date()|moment1}}</div>
       <div style="text-align: center;padding:20px">
         <el-button type="primary" @click="toSign" style="width:80%">点击签到</el-button>
@@ -276,7 +285,7 @@
     </el-dialog>
 
     <!-- 续费 -->
-    <el-dialog :visible.sync="showaddtime" width="600px" :close-on-click-modal="false">
+    <el-dialog :close-on-click-modal="false" :visible.sync="showaddtime" width="600px">
       <h1 slot="title" style="font-style:italic;font-weight:700;color:#409eff">SKIN BOX</h1>
       <div class="addtime">
         <p>尊敬的用户，您好：</p>
@@ -317,7 +326,13 @@
           <el-checkbox v-model="checked" @change="changeCheck">今日不再提醒</el-checkbox>
         </div>-->
       </div>
-      <el-dialog width="300px" :visible.sync="showaddewm" append-to-body center>
+      <el-dialog
+        :close-on-click-modal="false"
+        width="300px"
+        :visible.sync="showaddewm"
+        append-to-body
+        center
+      >
         <img
           src="../assets/images/zfbpay800.jpg"
           alt

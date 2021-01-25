@@ -45,6 +45,7 @@
               <div>{{buyer}}</div>
             </div>
             <el-dialog
+              :close-on-click-modal="false"
               title="选择采购人"
               :visible.sync="workerDialog"
               width="30%"

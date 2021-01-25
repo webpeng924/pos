@@ -177,10 +177,10 @@
 
     <!-- 支付弹窗 -->
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="dialogVisible"
       width="500px"
       class="payDialog"
-      :show-close="false"
       :modal-append-to-body="false"
       title="收款"
       center
@@ -207,6 +207,7 @@
     </div>
 
     <el-dialog
+      :close-on-click-modal="false"
       title="抵用券列表"
       :visible.sync="quanDialog"
       width="400px"
@@ -231,11 +232,11 @@
 
     <!-- 混合支付 -->
     <el-dialog
+      :close-on-click-modal="false"
       title="混合支付"
       :visible.sync="mixedDialog"
       width="600px"
       :modal-append-to-body="false"
-      :close-on-click-modal="false"
     >
       <div class="paylist">
         <div class="item" v-if="bookinfo.customer_type==2">

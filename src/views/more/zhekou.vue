@@ -77,6 +77,7 @@
       </el-table>
     </div>
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="projectList"
       :modal-append-to-body="false"
       width="100%"
@@ -86,6 +87,7 @@
       <projectList @close="setdata" v-if="projectList" :from="fromtype"></projectList>
     </el-dialog>
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="product"
       :modal-append-to-body="false"
       width="100%"
@@ -95,6 +97,7 @@
       <product @close="setdata1" v-if="product" :from="fromtype"></product>
     </el-dialog>
     <el-dialog
+      :close-on-click-modal="false"
       title="添加套餐"
       :visible.sync="add"
       width="500px"

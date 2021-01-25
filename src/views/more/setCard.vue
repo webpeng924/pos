@@ -40,6 +40,7 @@
     </div>
 
     <el-dialog
+      :close-on-click-modal="false"
       title="添加卡类"
       :visible.sync="add"
       width="550px"
@@ -94,7 +95,7 @@
             <el-col :span="15">
               <p>
                 （ 默认：10-无折扣 ）
-                <a @click="openChoose(1)">特殊项目折扣</a>
+                <!-- <a @click="openChoose(1)">特殊项目折扣</a> -->
               </p>
             </el-col>
           </el-form-item>
@@ -108,7 +109,7 @@
             <el-col :span="15">
               <p>
                 （ 默认：10-无折扣 ）
-                <a @click="openChoose(2)">特殊产品折扣</a>
+                <!-- <a @click="openChoose(2)">特殊产品折扣</a> -->
               </p>
             </el-col>
           </el-form-item>
@@ -124,6 +125,7 @@
 
     <!-- 单独折扣页面 -->
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="showXMlist"
       :modal="false"
       width="100%"
@@ -134,6 +136,7 @@
     </el-dialog>
     <!-- 单独折扣页面 -->
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="showCPlist"
       :modal="false"
       width="100%"

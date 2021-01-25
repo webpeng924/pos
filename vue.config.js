@@ -1,5 +1,5 @@
 module.exports = {
-  publicPath: process.env.NODE_ENV === 'production' ? '/POS/' : '/',
+  publicPath: process.env.NODE_ENV === 'production' ? '/mobile/' : '/',
   // devServer: {
   //   host: 'localhost',
   //   port: 8080,

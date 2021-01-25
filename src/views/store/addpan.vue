@@ -25,6 +25,7 @@
               <div @click="workerDialog=true">{{buyer}}</div>
             </div>
             <el-dialog
+              :close-on-click-modal="false"
               title="选择盘点人员"
               :visible.sync="workerDialog"
               width="30%"
@@ -93,6 +94,7 @@
 
     <!-- 选择入库产品 -->
     <el-dialog
+      :close-on-click-modal="false"
       title="选择产品"
       :visible.sync="choosepro"
       custom-class="chooseDialog"
@@ -122,6 +124,7 @@
       </span>
     </el-dialog>
     <el-dialog
+      :close-on-click-modal="false"
       title="日期选择"
       :visible.sync="dateDialog"
       center

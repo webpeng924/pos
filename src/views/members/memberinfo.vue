@@ -453,6 +453,7 @@
     </div>
 
     <el-dialog
+      :close-on-click-modal="false"
       title="会员充值"
       :visible.sync="showaddMoney"
       width="430px"
@@ -481,6 +482,7 @@
     </el-dialog>
 
     <el-dialog
+      :close-on-click-modal="false"
       title="备注"
       :visible.sync="showMemo"
       width="430px"
@@ -499,6 +501,7 @@
     <!-- 图片上传 -->
     <xcropper ref="cropper"></xcropper>
     <el-dialog
+      :close-on-click-modal="false"
       title="描述"
       :visible.sync="showDesc"
       width="430px"

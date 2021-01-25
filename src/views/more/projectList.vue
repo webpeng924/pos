@@ -4,7 +4,7 @@
       <button class="btn-close btn-audio" @click="back"></button>
       <div class="tView">项目资料</div>
       <button class="btn-audio btn-filter" @click="drawer=true"></button>
-      <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="add=true">新增</button>
+      <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="choose='';add=true">新增</button>
     </div>
     <div class="set_page" :class="{activePage:add}">
       <addproject @close="add=false;getList()" :choose="choose" v-if="add"></addproject>

@@ -67,6 +67,7 @@
 
     <!-- 次卡弹窗 -->
     <el-dialog
+      :close-on-click-modal="false"
       title="次卡列表"
       :visible.sync="menuDialog"
       width="70%"
@@ -101,7 +102,7 @@
         <el-button type="primary" @click="choosePay" style="background-color:#dc670b;">确 定</el-button>
       </span>
 
-      <!-- <el-dialog
+      <!--  <el-dialog :close-on-click-modal="false" 
         width="550px"
         title="请选择支付方式"
         :visible.sync="innerVisible"
@@ -124,6 +125,7 @@
 
     <!-- 套餐弹窗 -->
     <el-dialog
+      :close-on-click-modal="false"
       title="套餐列表"
       :visible.sync="TCDialog"
       width="70%"
@@ -172,6 +174,7 @@
 
     <!-- 会员卡弹窗 -->
     <el-dialog
+      :close-on-click-modal="false"
       title="会员卡列表"
       :visible.sync="cardDialog"
       width="70%"
@@ -198,6 +201,7 @@
     </el-dialog>
 
     <el-dialog
+      :close-on-click-modal="false"
       title="添加会员"
       :visible.sync="addmember"
       width="350px"
@@ -353,6 +357,8 @@ export default {
       this.info = true
     },
     async getCard (member, type) {
+      this.check = 0
+      this.checkData = ''
       this.buytype = type
       this.choose = member
       if (type == 1) {

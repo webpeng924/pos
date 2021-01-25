@@ -31,7 +31,7 @@
         </el-col>
       </el-row>
     </div>
-    <el-dialog title="请核对收货信息" :visible.sync="showinfo" width="30%" :close-on-click-modal="false">
+    <el-dialog :close-on-click-modal="false" title="请核对收货信息" :visible.sync="showinfo" width="30%">
       <div style="margin:20px" class="inteinfo">
         <div style="margin-top:10px">
           <span>收货人：</span>

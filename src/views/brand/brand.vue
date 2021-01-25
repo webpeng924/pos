@@ -94,10 +94,10 @@
       </div>
     </div>
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="dialogVisible"
       width="800px"
       :before-close="handleClose"
-      :show-close="false"
       custom-class="addDialog"
     >
       <div class="topView" slot="title">

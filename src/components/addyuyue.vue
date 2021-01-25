@@ -182,6 +182,7 @@
       </div>
     </div>
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="memberView"
       width="70%"
       :before-close="handleClose"
@@ -222,6 +223,7 @@
     </el-dialog>
 
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="workerDialog"
       center
       :modal-append-to-body="false"
@@ -258,6 +260,7 @@
     </el-dialog>
 
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="dateDialog"
       center
       :append-to-body="true"

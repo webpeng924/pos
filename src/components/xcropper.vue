@@ -1,5 +1,6 @@
 <template>
   <el-dialog
+    :close-on-click-modal="false"
     append-to-body
     :title="title"
     :visible.sync="cropperVisible"

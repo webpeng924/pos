@@ -37,6 +37,7 @@
 
     <!-- 选择产品 -->
     <el-dialog
+      :close-on-click-modal="false"
       title="选择产品"
       :visible.sync="showList"
       custom-class="Dialog"

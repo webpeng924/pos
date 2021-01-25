@@ -41,6 +41,7 @@
     </div>
 
     <el-dialog
+      :close-on-click-modal="false"
       title="添加抵用券"
       :visible.sync="add"
       width="500px"

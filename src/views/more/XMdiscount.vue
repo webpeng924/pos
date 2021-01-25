@@ -37,6 +37,7 @@
 
     <!-- 选择项目 -->
     <el-dialog
+      :close-on-click-modal="false"
       title="选择项目"
       :visible.sync="showList"
       custom-class="Dialog"

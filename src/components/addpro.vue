@@ -92,6 +92,7 @@
             <i class="el-icon-arrow-right"></i>
           </div>
           <el-dialog
+            :close-on-click-modal="false"
             title="分类"
             :visible.sync="categoryDialog"
             width="30%"
@@ -130,6 +131,7 @@
             <i class="el-icon-arrow-right"></i>
           </div>
           <el-dialog
+            :close-on-click-modal="false"
             title="标准单位"
             :visible.sync="unitDialog"
             width="30%"

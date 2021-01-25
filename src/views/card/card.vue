@@ -52,7 +52,12 @@
       </div>
     </div>
 
-    <el-dialog :visible.sync="cardDialog" :before-close="handleClose" width="64em">
+    <el-dialog
+      :close-on-click-modal="false"
+      :visible.sync="cardDialog"
+      :before-close="handleClose"
+      width="64em"
+    >
       <div class="cardDetailView">
         <div class="topView">
           <div class="imgView">

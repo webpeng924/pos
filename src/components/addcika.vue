@@ -24,6 +24,7 @@
             <i class="el-icon-arrow-right"></i>
           </div>
           <el-dialog
+            :close-on-click-modal="false"
             title="次卡类型"
             :visible.sync="categoryDialog"
             width="30%"
@@ -58,6 +59,7 @@
           </div>
 
           <el-dialog
+            :close-on-click-modal="false"
             title="选择项目"
             :visible.sync="XMDialog"
             width="30%"
@@ -148,6 +150,7 @@ export default {
       }
     },
     async submit () {
+      if (!this.price || !this.number || !this.category_id || !this.item.id) return this.$message.error('请填写完整信息')
       let params = {
         storeid: this.storeid,
         itemid: this.item.id,

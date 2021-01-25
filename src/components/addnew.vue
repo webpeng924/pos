@@ -213,6 +213,7 @@
       </div>
     </div>
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="memberView"
       width="70%"
       :before-close="handleClose"
@@ -250,7 +251,13 @@
         </el-table>
       </div>
     </el-dialog>
-    <el-dialog title="添加分类" :visible.sync="addcate" width="30%" :modal-append-to-body="false">
+    <el-dialog
+      :close-on-click-modal="false"
+      title="添加分类"
+      :visible.sync="addcate"
+      width="30%"
+      :modal-append-to-body="false"
+    >
       <div style="padding:20px">
         <el-input v-model="newcate"></el-input>
       </div>
@@ -261,6 +268,7 @@
     </el-dialog>
 
     <el-dialog
+      :close-on-click-modal="false"
       title="修改价格"
       :visible.sync="editDialog"
       width="40%"
@@ -289,6 +297,7 @@
     </el-dialog>
 
     <el-dialog
+      :close-on-click-modal="false"
       title="备注"
       :visible.sync="showMemo"
       width="430px"
@@ -323,6 +332,7 @@
 
     <!-- 选择服务人员 -->
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="showworker"
       width="1024px"
       center

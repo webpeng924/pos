@@ -199,7 +199,13 @@
               <img src="../../assets/images/mendian1.png" />
               <div>订货系统</div>
             </div>
-            <el-dialog title="扫描下方二维码进入订货商城" :visible.sync="dinghuo" width="30%" center>
+            <el-dialog
+              :close-on-click-modal="false"
+              title="扫描下方二维码进入订货商城"
+              :visible.sync="dinghuo"
+              width="30%"
+              center
+            >
               <div style="text-align: center;padding: 20px;">
                 <img style="width: 200px; height: 200px" src="../../assets/images/dinghuoPic.png" />
               </div>
@@ -213,7 +219,13 @@
               <img src="../../assets/images/pc.png" />
               <div>客显屏轮播设置</div>
             </div>
-            <el-dialog title="客显屏轮播设置" :visible.sync="kexian" width="30%" center>
+            <el-dialog
+              :close-on-click-modal="false"
+              title="客显屏轮播设置"
+              :visible.sync="kexian"
+              width="30%"
+              center
+            >
               <div style="text-align: center;padding: 20px;">
                 <div style="padding-bottom: 20px;">
                   <el-button type="primary" @click="changeFLAG(1)">轮播图片</el-button>
@@ -242,7 +254,13 @@
               <img src="../../assets/images/pc.png" />
               <div>修改登录密码</div>
             </div>
-            <el-dialog title="修改登录密码" :visible.sync="updatepass" width="30%" center>
+            <el-dialog
+              :close-on-click-modal="false"
+              title="修改登录密码"
+              :visible.sync="updatepass"
+              width="30%"
+              center
+            >
               <div style="text-align: center;padding: 20px;">
                 <div style="padding-bottom: 10px;">
                   <el-input placeholder="请输入原密码" v-model="oldpass"></el-input>

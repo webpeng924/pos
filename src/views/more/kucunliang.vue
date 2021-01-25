@@ -11,7 +11,7 @@
         <!-- <el-button slot="append" icon="el-icon-search" @click="getCPlist">搜索</el-button> -->
       </el-input>
       <!-- <i class="el-icon-date" @click="openDate"></i>
-      <el-dialog :visible.sync="dialogVisible" :modal="false" style="height:0;margin-top:10%">
+       <el-dialog :close-on-click-modal="false"  :visible.sync="dialogVisible" :modal="false" style="height:0;margin-top:10%">
         <el-date-picker v-model="date" type="date" ref="date" value-format="yyyy年MM月dd日"></el-date-picker>
       </el-dialog>-->
     </div>
@@ -29,10 +29,11 @@
         <el-table-column prop="goods_name" label="产品名称"></el-table-column>
         <el-table-column prop="title" label="统计类别"></el-table-column>
         <el-table-column prop="number" label="数量"></el-table-column>
-        <el-table-column prop="in_cost" label="进货单价"></el-table-column>
-        <el-table-column prop="price" label="成本单价"></el-table-column>
+        <el-table-column prop="in_cost" label="成本价"></el-table-column>
+        <el-table-column prop="in_costSum" label="成本合计"></el-table-column>
+        <el-table-column prop="price" label="售价"></el-table-column>
+        <el-table-column prop="priceSum" label="售价合计"></el-table-column>
         <el-table-column prop="goods_unit" label="产品规格"></el-table-column>
-        <!-- <el-table-column prop="address" label="单位换算"></el-table-column> -->
       </el-table>
     </div>
   </div>
@@ -70,7 +71,7 @@ export default {
           return;
         }
         const values = data.map(item => Number(item[column.property]));
-        if (!values.every(value => isNaN(value)) && (column['label'] == '数量' || column['label'] == '进货单价' || column['label'] == '成本单价')) {
+        if (!values.every(value => isNaN(value)) && (column['label'] == '数量' || column['label'] == '成本合计' || column['label'] == '售价合计')) {
           sums[index] = values.reduce((prev, curr) => {
             const value = Number(curr);
             if (!isNaN(value)) {
@@ -80,7 +81,7 @@ export default {
             }
           }, 0);
         } else {
-          sums[index] = '-';
+          sums[index] = '.';
         }
       });
       return sums;
@@ -96,6 +97,10 @@ export default {
       // console.log(res)
       if (res.data.code == 1 && res.data.data) {
         this.tableData = res.data.data
+        this.tableData.forEach(item => {
+          item['in_costSum'] = item.number * item.in_cost
+          item['priceSum'] = item.number * item.price
+        })
       } else {
         this.tableData = []
       }

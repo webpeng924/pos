@@ -92,6 +92,7 @@
       </div>
     </div>
     <el-dialog
+      :close-on-click-modal="false"
       title="选择预约"
       :visible.sync="typeDialog"
       center
@@ -105,6 +106,7 @@
     </el-dialog>
 
     <el-dialog
+      :close-on-click-modal="false"
       :title="showcurrent.customer_type==0?'占用信息':'预约信息'"
       :visible.sync="yuyueDialog"
       center
@@ -155,6 +157,7 @@
       </span>
     </el-dialog>
     <el-dialog
+      :close-on-click-modal="false"
       :visible.sync="listDialog"
       center
       custom-class="quickmoney"

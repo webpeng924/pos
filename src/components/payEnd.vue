@@ -22,6 +22,7 @@ export default {
     return {
       orderInfo: [],
       storeid: sessionStorage.getItem('storeid'),
+      cikalist: [],
       is_doublescreen: JSON.parse(sessionStorage.getItem('shopInfo')).is_doublescreen,
       memberInfo: ''
     }
@@ -66,6 +67,7 @@ export default {
         this.memberInfo = res.data.data
       }
     },
+
     print () {
       let arr = [{ "name": JSON.parse(sessionStorage.getItem('shopInfo')).shop_name, "style": "1" }, { "name": "收银单", "style": "1" }, { "name": "---" }, { "name": "消费单号：" + this.info.order_no }]
       let time = moment.unix(this.info.dateline).format('YYYY-MM-DD HH:mm')
@@ -80,6 +82,12 @@ export default {
         let discount_price = v.discount == 1 ? '-' : v.discount_price
         arr.push({ name: v.price, value: v.num + " #A# " + discount_price })
       })
+      if (this.cikalist.length > 0) {
+        arr.push({ "name": "---" }, { "name": "抵扣", "value": "使用 #A# 剩余" })
+        this.cikalist.forEach(j => {
+          arr.push({ name: j.itemname, value: j.use_num + " #A# " + j.rest_count })
+        })
+      }
       let remark = this.info.remark == null ? '' : this.info.remark
       arr.push({ "name": "---" }, { "name": "支付方式", "value": "合计" })
       if (this.info.pay_type == 'mixed') {
@@ -98,7 +106,7 @@ export default {
       }
       arr.push({ "name": "---" }, { "name": "备注: " + remark }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" })
       var a = JSON.stringify(arr);
-      // console.log(a)
+      console.log(a)
       javascript: jsSzb.smPrint(a);
       return false;
     }
@@ -106,6 +114,7 @@ export default {
   created () {
     if (this.info) {
       this.orderInfo = this.info.info
+      this.cikalist = this.info.cilist
       if (this.info.customer_type == 2) {
         this.getMember(this.info.member_id)
       }

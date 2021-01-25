@@ -9,6 +9,9 @@ import 'element-ui/lib/theme-chalk/index.css'
 import './assets/css/reset.css'
 import './assets/css/global.css'
 
+import Print from './assets/js/print'
+Vue.use(Print)
+
 import VueDND from 'awe-dnd'
 
 Vue.use(VueDND)

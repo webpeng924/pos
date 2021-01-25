@@ -352,11 +352,16 @@
     </div>
     <!-- 弹框 -->
     <div class="dialog">
-      <el-dialog :visible.sync="dialogVisible" class="news">
+      <el-dialog
+        :close-on-click-modal="false"
+        :visible.sync="dialogVisible"
+        class="news"
+        :append-to-body="false"
+      >
         <span slot="title" class="dialog-title">打印预览</span>
         <div id="print">
           <div id="printContent" class="print-58">
-            <div id="print-bcView">
+            <div id="print-bcView" ref="print">
               <div class="header">
                 <h4>{{shopInfo.shop_name}}</h4>
                 <h4>{{date[0] == date[1]?'日结汇总':'营收汇总'}}</h4>
@@ -405,7 +410,7 @@
         </div>
         <span slot="footer" class="dialog-footer">
           <div class="btn gray" @click="dialogVisible = false">关闭</div>
-          <div class="btn green" @click="print">打印</div>
+          <div class="btn green" @click="print1">打印</div>
           <!-- <el-button @click="dialogVisible = false" class="btn gray">取 消</el-button>
         <el-button type="primary"
           @click="dialogVisible = false" class="btn green">确 定</el-button>-->
@@ -543,6 +548,9 @@ export default {
       if (res.data.code == 1) {
         this.target = Number(res.data.data)
       }
+    },
+    print1 () {
+      this.$print(this.$refs.print)
     },
     print () {
       let arr = [{ "name": JSON.parse(sessionStorage.getItem('shopInfo')).shop_name, "style": "1" }]

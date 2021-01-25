@@ -57,6 +57,7 @@
           <i class="el-icon-arrow-right"></i>
         </div>
         <el-dialog
+          :close-on-click-modal="false"
           title="分类"
           :visible.sync="categoryDialog"
           width="30%"
@@ -82,6 +83,7 @@
           <i class="el-icon-arrow-right"></i>
         </div>
         <el-dialog
+          :close-on-click-modal="false"
           title="归属部门"
           :visible.sync="belongDialog"
           width="30%"

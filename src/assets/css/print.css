@@ -1,5 +1,6 @@
 #printContent {
   position: relative;
+  top: 0;
   left: 0;
   right: 0;
   margin: auto;
@@ -83,6 +84,13 @@
   display: table-row-group;
   vertical-align: middle;
   border-color: inherit;
+}
+
+@media print{
+#printContent{
+  width: 200px;
+  font-size: 12px;
+}
 }
 
   
