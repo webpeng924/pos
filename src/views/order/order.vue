@@ -176,11 +176,6 @@
               <label>{{v.yytime}}</label>
             </div>
             <div class="empView">
-              <!-- <div class="imgView">
-                <img
-                  src="https://static.bokao2o.com/wisdomCashier/images/Icon_noLogo.jpg?imageView2/1/w/200/h/200/interlace/1/q/100"
-                />
-              </div>-->
               <div class="textView">
                 <div class="nameView overflowText">{{v.name}}</div>
                 <div class="jobView overflowText">{{v.mobile}}</div>
@@ -547,9 +542,6 @@ export default {
         width: 40px;
         height: 40px;
         padding: 0;
-        background: #fff
-          url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_ResTip.png)
-          center / 28px no-repeat;
       }
     }
     .dateView {
@@ -566,9 +558,8 @@ export default {
       }
       .btn-date-before {
         width: 40px;
-        background: #fff
-          url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Before.png)
-          center / 32px no-repeat;
+        background: #fff url(../../assets/images/Icon_left.png) center / 32px
+          no-repeat;
       }
       .btn-dateText {
         width: 260px;
@@ -577,9 +568,8 @@ export default {
       }
       .btn-date-next {
         width: 40px;
-        background: #fff
-          url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Next.png)
-          center / 32px no-repeat;
+        background: #fff url(../../assets/images/Icon_Right.png) center / 32px
+          no-repeat;
       }
     }
     .tags {
@@ -735,9 +725,8 @@ export default {
       right: 0;
       margin: auto;
       height: 40px;
-      background: #f4f4f4
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Search.png)
-        13px center / 24px no-repeat;
+      background: #f4f4f4 url(../../assets/images/search.png) 13px center / 24px
+        no-repeat;
       border-radius: 5px;
       overflow: hidden;
       padding: 5px 65px 5px 44px;

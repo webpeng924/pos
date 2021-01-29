@@ -309,3 +309,14 @@ i {
     opacity: 1;
   }
 
+  .el-icon-close{
+    font-size: 24px;
+  }
+  .el-icon-delete,.el-icon-edit{
+    font-size: 20px;
+  }
+
+  .el-icon-error{
+    font-size: 18px;
+  }
+

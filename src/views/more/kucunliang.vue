@@ -1,7 +1,7 @@
 <template>
   <div id="prolist">
     <div class="topView">
-      <button class="btn-close btn-audio" @click="back"></button>
+      <button class="el-icon-close btn-audio" @click="back"></button>
       <div class="tView">
         库存量统计
         <!-- <p>{{date}}</p> -->
@@ -144,13 +144,7 @@ export default {
     line-height: 40px;
     background: #fff;
     text-align: center;
-    .btn-close {
-      width: 40px;
-      height: 40px;
-      background: transparent
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_X_Black.png)
-        left center / 24px no-repeat;
-    }
+
     .tView {
       flex: 1;
       font-size: 24px;

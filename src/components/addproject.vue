@@ -291,9 +291,8 @@ export default {
     line-height: 20px;
   }
   .listItem.select {
-    background: #fff
-      url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_R_Green.png)
-      right center / 28px no-repeat;
+    background: #fff url(../assets/images/select_green.png) right center / 28px
+      no-repeat;
   }
 }
 </style>
@@ -312,7 +311,7 @@ export default {
     .btn-back {
       width: 40px;
       height: 40px;
-      background-image: url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_NavBack.png);
+      background-image: url(../assets/images/back.png);
       background-position: left center;
       background-size: 28px;
       background-repeat: no-repeat;

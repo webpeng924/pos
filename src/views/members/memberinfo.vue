@@ -94,7 +94,7 @@
       </div>
       <div class="btnView">
         <button class="btn-topup btn-audio" @click="showaddMoney=true">
-          <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Topup_White.png" />充值
+          <img src="../../assets/images/chongzhi.png" />充值
         </button>
       </div>
     </div>
@@ -125,8 +125,9 @@
               <div class="valView">
                 {{ userinfo.remark ? userinfo.remark : "暂无备注" }}
                 <img
-                  src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Edit_Green.png"
+                  src="../../assets/images/edit.png"
                   class="img-edit"
+                  style="width:20px;height:20px"
                   @click="showMemo = true"
                 />
               </div>
@@ -153,14 +154,6 @@
             <div class="nameView">欠款账户</div>
           </div>
         </div>
-        <!-- <div class="tagsView">
-          <div class="subTView">标签</div>
-          <div class="contentView">
-            <div class="btn-audio addItem">
-              <div></div>
-            </div>
-          </div>
-        </div>-->
         <div class="consumptionView">
           <div class="subTView">消费情况</div>
           <div class="contentView">
@@ -268,10 +261,6 @@
               </template>
             </el-table-column>
           </el-table>
-          <!-- <div class="tipView">
-            <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_NoData_Bill.png" />
-            <div>暂无数据</div>
-          </div>-->
         </div>
       </div>
     </div>
@@ -918,14 +907,12 @@ export default {
         }
       }
       .btnView > .btn-tk {
-        background: #fff
-          url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_TK.png) 10px
-          center / 28px no-repeat;
+        background: #fff url(../../assets/images/tuikuan.png) 10px center / 28px
+          no-repeat;
       }
       .btn-hk {
-        background: #fff
-          url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_HK.png) 10px
-          center / 28px no-repeat;
+        background: #fff url(../../assets/images/huankuan.png) 10px center /
+          28px no-repeat;
       }
     }
     .menuView {
@@ -992,9 +979,8 @@ export default {
         text-align: center;
         font-size: 20px;
         color: #fff;
-        background: transparent
-          url(https://static.bokao2o.com/wisdomDesk/images/Member_CardIInfo_TopImg.png)
-          center top / 100% no-repeat;
+        background: transparent url(../../assets/images/m_topImg.png) center top /
+          100% no-repeat;
       }
       .baseInfoView {
         display: flex;
@@ -1012,9 +998,8 @@ export default {
             height: 90px;
             border-radius: 6px;
             overflow: hidden;
-            background: #eee
-              url(https://static.bokao2o.com/wisdomCashier/images/Member_AddGray.png)
-              center / 28px no-repeat;
+            background: #eee url(../../assets/images/add.png) center / 28px
+              no-repeat;
           }
         }
         .contentView {
@@ -1124,20 +1109,6 @@ export default {
       .tagsView > .contentView {
         overflow: hidden;
         padding: 10px 0 10px 10px;
-        .addItem {
-          float: left;
-          padding: 5px 6px;
-          cursor: pointer;
-          > div {
-            width: 68px;
-            height: 34px;
-            background: #fff
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Add.png)
-              center / 28px no-repeat;
-            border-radius: 5px;
-            border: 1px solid #28282d;
-          }
-        }
       }
       .consumptionView > .contentView {
         padding: 5px 15px 135px 15px;

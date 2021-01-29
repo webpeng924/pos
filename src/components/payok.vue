@@ -18,7 +18,7 @@
     <div class="cardSuccessView" v-if="sign==3">
       <div class="bcView">
         <div class="tView">
-          <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_PaySuccess.png" />
+          <img src="../assets/images/Payok.png" />
           还款成功！
         </div>
         <div class="orderInfoView">
@@ -41,7 +41,7 @@
     <div class="cardSuccessView" v-if="sign==5">
       <div class="bcView">
         <div class="tView">
-          <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_PaySuccess.png" />
+          <img src="../assets/images/Payok.png" />
           充值成功！
         </div>
         <div class="orderInfoView">

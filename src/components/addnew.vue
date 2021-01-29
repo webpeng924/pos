@@ -138,7 +138,7 @@
               <img :src="member.img|imgUrl" />
             </div>
             <div class="textView">{{member.name}}</div>
-            <button class="btn-del btn-audio" @click="clearMember"></button>
+            <button class="el-icon-error btn-audio btn-del" @click="clearMember"></button>
           </div>
           <div class="sexView">
             <button class="btn-female" :class="{select:male=='female'}"></button>
@@ -147,7 +147,6 @@
           <div class="normalView" v-show="!member">
             <button class="btn-selectVip" @click="getList();memberView=true">选择会员</button>
           </div>
-          <!-- <button class="btn-audio btn-more"></button> -->
         </div>
         <div class="listView" style="margin-top: -20px;">
           <div class="subItem serviceItem btn-audio" v-for="(v,k) in chooslist" :key="k">
@@ -189,7 +188,7 @@
                 <label class="label-job overflowText" v-show="v.typeid!=2">服务人员</label>
               </div>
             </div>
-            <button class="btn-del" @click="delchooselist(v,k)"></button>
+            <button class="el-icon-error btn-del" @click="delchooselist(v,k)"></button>
           </div>
         </div>
         <div class="remarkView">
@@ -403,6 +402,12 @@ export default {
     }
   },
   watch: {
+    chooslist: {
+      handler (newName, oldName) {
+        this.checkdiscount()
+      },
+      deep: true
+    },
     id (val) {
       if (val == 3) {
         this.checkyuyue()
@@ -472,6 +477,25 @@ export default {
     }
   },
   methods: {
+    checkdiscount () {
+      if (!this.member) return false
+      let ids = []
+      this.chooslist.forEach(item => {
+        if (item.is_usecard == 0) {
+          if (this.member.itemInfo && (item.typeid == 1 || item.typeid == 3)) {
+            let obj = this.member.itemInfo.find(j => j.itemid == item.itemid)
+            if (obj) { item['discount'] = obj.discount }
+
+          }
+          if (this.member.goodsInfo && item.typeid == 2) {
+            let obj = this.member.goodsInfo.find(j => j.itemid == item.itemid)
+            if (obj) { item['discount'] = obj.discount }
+
+          }
+        }
+        item.subtotal = item.discount * item.price * item.num
+      })
+    },
     scanCode () {
       let code = ''
       let lastTime, nextTime
@@ -669,6 +693,7 @@ export default {
           })
         }
       }
+      this.checkdiscount()
     },
     async getcicardInfo () {
       const res = await this.$axios.get('/api?datatype=get_card_memberitem', {
@@ -1285,7 +1310,7 @@ export default {
   .btn-back {
     width: 40px;
     height: 40px;
-    background-image: url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_NavBack.png);
+    background-image: url(../assets/images/back.png);
     background-position: left center;
     background-size: 28px;
     background-repeat: no-repeat;
@@ -1322,7 +1347,7 @@ export default {
       .btn-back {
         width: 40px;
         height: 40px;
-        background-image: url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_NavBack.png);
+        background-image: url(../assets/images/back.png);
         background-position: left center;
         background-size: 28px;
         background-repeat: no-repeat;
@@ -1516,9 +1541,8 @@ export default {
       height: 44px;
       .inputView {
         position: relative;
-        background: #f4f4f4
-          url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Search.png)
-          8px center / 24px no-repeat;
+        background: #f4f4f4 url(../assets/images/search.png) 8px center / 24px
+          no-repeat;
         line-height: 44px;
         border-radius: 6px;
         padding: 0 60px 0 38px;
@@ -1581,9 +1605,8 @@ export default {
         .cardThumbView {
           width: 168px;
           display: inline-flex;
-          background: #d6c361
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_VIP_Small.png)
-            90% center / 82px no-repeat;
+          background: #d6c361 url(../assets/images/VIPsmall.png) 90% center /
+            82px no-repeat;
           height: 40px;
           border-radius: 6px;
           padding: 0 6px;
@@ -1609,14 +1632,6 @@ export default {
             font-size: 14px;
             line-height: 20px;
           }
-          .btn-del {
-            min-width: 36px;
-            width: 36px;
-            height: 40px;
-            background: transparent
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_VipDel.png)
-              center / 28px no-repeat;
-          }
         }
         .tView {
           min-width: 60px;
@@ -1630,24 +1645,20 @@ export default {
           width: 100px;
           display: inline-flex;
           .btn-female {
-            background: transparent
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Female_N.png)
-              center / 30px no-repeat;
+            background: transparent url(../assets/images/nv1.png) center / 30px
+              no-repeat;
           }
           .btn-male {
-            background: transparent
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Male_N.png)
-              center / 30px no-repeat;
+            background: transparent url(../assets/images/nan1.png) center / 30px
+              no-repeat;
           }
           .btn-female.select {
-            background: transparent
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Female_S.png)
-              center / 30px no-repeat;
+            background: transparent url(../assets/images/nv.png) center / 30px
+              no-repeat;
           }
           .btn-male.select {
-            background: transparent
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Male_S.png)
-              center / 30px no-repeat;
+            background: transparent url(../assets/images/nan.png) center / 30px
+              no-repeat;
           }
           button {
             width: 40px;
@@ -1662,24 +1673,13 @@ export default {
             width: 100px;
             height: 40px;
             background: rgba(255, 255, 255, 0.1)
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_OrderItemVipFlag.png)
-              5px center / 28px no-repeat;
+              url(../assets/images/Vipicon.png) 5px center / 28px no-repeat;
             border-radius: 6px;
             color: #fff;
             font-size: 14px;
             padding-left: 34px;
             text-align: left;
           }
-        }
-        .btn-more {
-          position: absolute;
-          top: 7px;
-          right: 10px;
-          width: 40px;
-          height: 40px;
-          background: transparent
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_More_White.png)
-            right center / 28px no-repeat;
         }
       }
       .listView {
@@ -1741,9 +1741,6 @@ export default {
             right: 0;
             width: 28px;
             height: 28px;
-            background: transparent
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_ServiceDel.png)
-              right top / 28px no-repeat;
           }
         }
       }
@@ -1752,9 +1749,8 @@ export default {
           padding: 12px 12px 12px 35px;
           line-height: 20px;
           border-radius: 5px;
-          background: #fff
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Edit_Gray.png)
-            8px center / 24px no-repeat;
+          background: #fff url(../assets/images/edit.png) 8px center / 24px
+            no-repeat;
           font-size: 14px;
           color: #28282d;
         }
@@ -1840,9 +1836,8 @@ export default {
             font-family: DINAlternate-Bold;
           }
           &.select > .resTagView {
-            background: #fff
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_R_Green.png)
-              right center / 28px no-repeat;
+            background: #fff url(../assets/images/select_green.png) right center /
+              28px no-repeat;
           }
           .empView {
             display: flex;

@@ -1,7 +1,7 @@
 <template>
   <div id="setCard">
     <div class="topView">
-      <button class="btn-close btn-audio" @click="back"></button>
+      <button class="el-icon-close btn-audio" @click="back"></button>
       <div class="tView">卡类别资料</div>
       <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="addnew">添加</button>
     </div>
@@ -87,29 +87,47 @@
           </el-form-item>
           <el-form-item label="项目折扣">
             <el-col :span="8">
-              <el-input-number v-model="form.item_discount" :max="10" :min="0" size="small"></el-input-number>
+              <!-- <el-input-number v-model="form.item_discount" :max="10" :min="0" size="small"></el-input-number> -->
+              <el-input-number
+                v-model="form.item_discount"
+                size="small"
+                type="number"
+                @change="changeitemDiscount"
+                :step="0.01"
+                :min="0"
+                :max="1"
+              ></el-input-number>
             </el-col>
-            <el-col :span="1">
+            <!-- <el-col :span="1">
               <p style="text-align:center">折</p>
-            </el-col>
+            </el-col>-->
             <el-col :span="15">
               <p>
-                （ 默认：10-无折扣 ）
-                <!-- <a @click="openChoose(1)">特殊项目折扣</a> -->
+                （ 默认：1-无折扣 ）
+                <a @click="openChoose(1)">特殊项目折扣</a>
               </p>
             </el-col>
           </el-form-item>
           <el-form-item label="产品折扣">
             <el-col :span="8">
-              <el-input-number v-model="form.goods_discount" :max="10" :min="0" size="small"></el-input-number>
+              <!-- <el-input-number v-model="form.goods_discount" :max="10" :min="0" size="small"></el-input-number> -->
+              <el-input-number
+                v-model="form.goods_discount"
+                @change="changegoodsDiscount"
+                size="small"
+                type="number"
+                :step="0.01"
+                :min="0"
+                :max="1"
+              ></el-input-number>
             </el-col>
-            <el-col :span="1">
+            <!-- <el-col :span="1">
               <p style="text-align:center">折</p>
-            </el-col>
+            </el-col>-->
             <el-col :span="15">
               <p>
-                （ 默认：10-无折扣 ）
-                <!-- <a @click="openChoose(2)">特殊产品折扣</a> -->
+                （ 默认：1-无折扣 ）
+                <a @click="openChoose(2)">特殊产品折扣</a>
               </p>
             </el-col>
           </el-form-item>
@@ -176,8 +194,8 @@ export default {
         gift_money: '',
         usetime: '',
         dateType: '年',
-        item_discount: '10',
-        goods_discount: '10'
+        item_discount: '1',
+        goods_discount: '1'
       },
       rules: {
         card_no: [
@@ -204,6 +222,13 @@ export default {
   watch: {},
   computed: {},
   methods: {
+    changeitemDiscount (currentValue) {
+      this.form.item_discount = currentValue.toFixed(2)
+    },
+    changegoodsDiscount (currentValue) {
+      console.log(currentValue)
+      this.form.goods_discount = currentValue.toFixed(2)
+    },
     openChoose (type) {
       this.add = false
       if (type == 1) {
@@ -275,9 +300,11 @@ export default {
       this.id = data.id
       this.form = JSON.parse(JSON.stringify(data))
       this.form.dateType = data.usetime.match(/[\u4e00-\u9fa5]/g).join("")
+      this.form.item_discount = (data.item_discount / 10).toFixed(2)
+      this.form.goods_discount = (data.goods_discount / 10).toFixed(2)
       this.form.usetime = data.usetime.slice(0, data.usetime.length - 1)
-      this.XMinfo = data.XMinfo
-      this.CPinfo = data.CPinfo
+      this.XMinfo = data.itemInfo
+      this.CPinfo = data.goodsInfo
     },
     addnew () {
       this.add = true
@@ -292,8 +319,8 @@ export default {
         recharge_money: '',
         usetime: '',
         dateType: '年',
-        item_discount: '10',
-        goods_discount: '10'
+        item_discount: 1,
+        goods_discount: 1
       }
       this.form = data
       this.XMinfo = ''
@@ -309,21 +336,28 @@ export default {
     },
     async submit () {
       if (!this.form.card_no || !this.form.name || !this.form.recharge_money || !this.form.usetime || !this.form.gift_money) return this.$message.error('缺少必填信息')
-      let data = qs.stringify({
+      if (this.XMinfo) {
+        this.XMinfo.forEach(k => { k['id'] = k.itemid })
+      }
+      if (this.CPinfo) {
+        this.CPinfo.forEach(j => { j['id'] = j.itemid })
+      }
+      let data = {
         storeid: this.storeid,
         type: this.type,//1增加  2编辑
         id: this.id,
         card_no: this.form.card_no,//编号
         name: this.form.name,
         img: this.form.img,
-        // deposit_amount: this.form.deposit_amount,//储值金额
+        itemInfo: this.XMinfo,
+        goodsInfo: this.CPinfo,
         gift_money: this.form.gift_money,
         recharge_money: this.form.recharge_money,//起充金额
         usetime: this.form.usetime + this.form.dateType,
-        item_discount: this.form.item_discount,
-        goods_discount: this.form.goods_discount
-      })
-      const res = await this.$axios.post('/api?datatype=insert_card', data)
+        item_discount: this.form.item_discount * 10,
+        goods_discount: this.form.goods_discount * 10
+      }
+      const res = await this.$axios.post('http://saas.4001801812.com/api/api.php?datatype=insert_card_list', data)
       // console.log(res)
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)
@@ -420,13 +454,7 @@ export default {
     line-height: 40px;
     background: #fff;
     text-align: center;
-    .btn-close {
-      width: 40px;
-      height: 40px;
-      background: transparent
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_X_Black.png)
-        left center / 24px no-repeat;
-    }
+
     .tView {
       flex: 1;
       font-size: 24px;

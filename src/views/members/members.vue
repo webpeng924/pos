@@ -579,9 +579,8 @@ export default {
           height: 44px;
           right: 0;
           top: 0;
-          background: transparent
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_InputClean.png)
-            center / 18px no-repeat;
+          background: transparent url(../../assets/images/close.png) center /
+            18px no-repeat;
         }
       }
       button {

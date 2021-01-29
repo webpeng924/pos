@@ -40,10 +40,7 @@
             v-dragging="{ item: item, list: menberlist, group: '1' }"
           >
             <div class="timeLenView" style="background: rgb(71, 191, 124);"></div>
-            <div
-              class="imgView"
-              style="background-image: url(&quot;https://static.bokao2o.com/13958133-5cfe-41ac-8336-0de324ea78ce.png?imageView2/1/w/200/h/200/interlace/1/q/100&quot;);"
-            >
+            <div class="imgView" style="background-image: url();">
               <!---->
             </div>
             <div class="empIdView">{{item}}</div>
@@ -51,10 +48,7 @@
           </div>
           <div class="empItem">
             <div class="timeLenView" style="background: rgb(71, 191, 124);"></div>
-            <div
-              class="imgView"
-              style="background-image: url(&quot;https://img1.bokao2o.com/FncyfVL1E0_7vEIgxUwjF22x7bgk?imageView2/1/w/200/h/200/interlace/1/q/100&quot;);"
-            >
+            <div class="imgView" style="background-image: url();">
               <!---->
             </div>
             <div class="empIdView">1001</div>
@@ -68,10 +62,7 @@
         <div class="empsBox">
           <div class="empItem">
             <div class="timeLenView" style="background: rgb(71, 191, 124);"></div>
-            <div
-              class="imgView"
-              style="background-image: url(&quot;https://static.bokao2o.com/13958133-5cfe-41ac-8336-0de324ea78ce.png?imageView2/1/w/200/h/200/interlace/1/q/100&quot;);"
-            >
+            <div class="imgView" style="background-image: url();">
               <!---->
             </div>
             <div class="empIdView">001</div>
@@ -81,7 +72,7 @@
             <div class="timeLenView" style="background: rgb(71, 191, 124);"></div>
             <div
               class="imgView"
-              style="background-image: url(&quot;https://static.bokao2o.com/09a04914-6dc5-47e6-95fa-b7e82e885e49.png?imageView2/1/w/200/h/200/interlace/1/q/100&quot;);"
+              style="background-image: url(09a04914-6dc5-47e6-95fa-b7e82e885e49.png?imageView2/1/w/200/h/200/interlace/1/q/100&quot;);"
             >
               <!---->
             </div>
@@ -231,9 +222,6 @@ export default {
         box-shadow: 0 0 3px 0 #bbb;
         overflow: hidden;
         &.addItem {
-          background: #eee
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Add_Gray.png)
-            center / 28px no-repeat;
         }
         .timeLenView {
           position: absolute;

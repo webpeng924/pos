@@ -76,29 +76,7 @@
         <div class="shopImgsView">
           <div class="imgList">
             <div class="listItem">
-              <img
-                src="https://img1.bokao2o.com/1e9a7acd-ecff-44b0-94ab-d4791a0847e6.png?imageView2/1/w/312/h/176/interlace/1/q/100"
-              />
-            </div>
-            <div class="listItem">
-              <img
-                src="https://img1.bokao2o.com/e5d2055d-9920-477e-bd5b-148db5c50e3f.png?imageView2/1/w/312/h/176/interlace/1/q/100"
-              />
-            </div>
-            <div class="listItem">
-              <img
-                src="https://img1.bokao2o.com/4e94f11d-946f-4665-9faf-21819a8a46cc.png?imageView2/1/w/312/h/176/interlace/1/q/100"
-              />
-            </div>
-            <div class="listItem">
-              <img
-                src="https://img1.bokao2o.com/963602ca-c7ec-4226-a06b-e474e2e017d5.png?imageView2/1/w/312/h/176/interlace/1/q/100"
-              />
-            </div>
-            <div class="listItem">
-              <img
-                src="https://img1.bokao2o.com/f4ceca41-0600-47ba-99db-5bf7b5361f4e.png?imageView2/1/w/312/h/176/interlace/1/q/100"
-              />
+              <img src />
             </div>
           </div>
         </div>
@@ -213,7 +191,7 @@ export default {
       top: 25px;
       width: 40px;
       height: 40px;
-      background-image: url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_NavBack.png);
+      background-image: url(../../assets/images/back.png);
       background-position: left center;
       background-size: 28px;
       background-repeat: no-repeat;

@@ -49,7 +49,7 @@
         <div class="tView">支付方式</div>
         <div class="payInfoView">
           <div class="typeItem">
-            <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Pay_XJ.png" class="img-icon" />
+            <img src="../assets/images/xianjin.png" class="img-icon" />
             <label>{{info.pay_type|type}}</label>
             <label class="label-amt">￥&nbsp;{{info.dis_total}}</label>
           </div>

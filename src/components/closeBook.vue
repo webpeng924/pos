@@ -78,7 +78,7 @@
                   @click="changepaytype('支付宝')"
                 >
                   <div class="iconView">
-                    <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Pay_ZFB.png" />
+                    <img src="../assets/images/zfb.png" />
                   </div>
                   <div class="textView overflowText">
                     <label class="label-name">支付宝</label>
@@ -91,7 +91,7 @@
                   @click="changepaytype('微信')"
                 >
                   <div class="iconView">
-                    <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Pay_WX.png" />
+                    <img src="../assets/images/wx.png" />
                   </div>
                   <div class="textView overflowText">
                     <label class="label-name">微信</label>
@@ -117,7 +117,7 @@
                   @click="changepaytype('其他')"
                 >
                   <div class="iconView">
-                    <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Pay_XJ.png" />
+                    <img src="../assets/images/other.png" />
                   </div>
                   <div class="textView overflowText">
                     <label class="label-name">其他</label>
@@ -144,7 +144,7 @@
                   v-show="bookinfo.customer_type == 2"
                 >
                   <div class="iconView">
-                    <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Pay_XJ.png" />
+                    <img src="../assets/images/pay-card.png" />
                   </div>
                   <div class="textView overflowText">
                     <label class="label-name">会员卡</label>
@@ -773,9 +773,6 @@ export default {
             line-height: 25px;
             padding: 0 35px 0 65px;
             text-align: left;
-            // background: #fff
-            //   url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Edit_Green.png)
-            //   35px center / 28px no-repeat;
           }
         }
         .paymentView {
@@ -811,9 +808,8 @@ export default {
                 bottom: 0;
                 width: 22px;
                 height: 22px;
-                background: transparent
-                  url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Payment_S.png)
-                  right bottom / 22px no-repeat;
+                background: transparent url(../assets/images/Payment.png) right
+                  bottom / 22px no-repeat;
               }
               .iconView {
                 margin-right: 10px;

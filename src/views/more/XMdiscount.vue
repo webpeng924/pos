@@ -1,7 +1,7 @@
 <template>
   <div class="discountlist">
     <div class="topView">
-      <!-- <button class="btn-close btn-audio" @click="back"></button> -->
+      <!-- <button class="el-icon-close btn-audio" @click="back"></button> -->
       <button
         class="btn-audio"
         style="font-size:16px;color:#dc670b;margin-right:20px"
@@ -57,7 +57,7 @@
       </div>
       <div class="listView">
         <div class="listItem" v-for="(v,k) in XMlist" :key="k" @click="chosCp(v)">
-          <label class="label-icon" :class="{select:list.includes(v.id)}"></label>
+          <label class="label-icon" :class="{select:list.includes(v.itemid)}"></label>
           <label class="label-code">{{v.item_no}}</label>
           <label class="label-name">{{v.name}}</label>
         </div>
@@ -93,25 +93,26 @@ export default {
       this.$emit('close', this.tableData)
     },
     chosCp (v) {
-      if (!this.list.includes(v.id)) {
-        this.list.push(v.id)
+      if (!this.list.includes(v.itemid)) {
+        this.list.push(v.itemid)
       } else {
-        this.list = this.list.filter(value => value != v.id)
+        this.list = this.list.filter(value => value != v.itemid)
       }
     },
     submitGoods () {
       this.showList = false
       this.tableData = []
       this.XMlist.forEach(v => {
-        if (this.list.includes(v.id)) {
+        if (this.list.includes(v.itemid)) {
           let discount = 1
           if (this.XMdata) {
-            let cp = this.XMdata.find(k => k.id == v.id)
+            let cp = this.XMdata.find(k => k.itemid == v.itemid)
             if (cp) {
               discount = cp.discount
             }
           }
           this.$set(v, 'discount', discount)
+          this.$set(v, 'id', v.itemid)
           this.tableData.push(v)
         }
       })
@@ -134,6 +135,9 @@ export default {
       // console.log(res)
       if (res.data.data) {
         this.XMlist = res.data.data
+        this.XMlist.forEach(item => {
+          item['itemid'] = item.id
+        })
       } else {
         this.XMlist = []
       }
@@ -145,15 +149,16 @@ export default {
       console.log(index, row);
     },
     handleDelete (index, row) {
-      // console.log(index, row);
-      this.list = this.list.filter(v => v != row.id)
-      this.submitGoods()
+      console.log(index, row);
+      this.list = this.list.filter(v => v != row.itemid)
+      this.tableData = this.tableData.filter(v => v.itemid != row.itemid)
+      // this.submitGoods()
     }
   },
   created () {
     if (this.XMdata) {
       this.tableData = JSON.parse(JSON.stringify(this.XMdata))
-      this.list = this.tableData.map(v => v.id)
+      this.list = this.tableData.map(v => v.itemid)
     }
   },
   mounted () { },
@@ -180,13 +185,7 @@ export default {
     line-height: 40px;
     background: #fff;
     text-align: center;
-    .btn-close {
-      width: 40px;
-      height: 40px;
-      background: transparent
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_X_Black.png)
-        left center / 24px no-repeat;
-    }
+
     .tView {
       flex: 1;
       font-size: 24px;
@@ -227,14 +226,12 @@ export default {
           bottom: 0;
           left: 0;
           width: 58px;
-          background: #fff
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_N.png)
-            center / 24px no-repeat;
+          background: #fff url(../../assets/images/check-kong.png) center / 24px
+            no-repeat;
         }
         .label-icon.select {
-          background: #fff
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_S.png)
-            center / 24px no-repeat;
+          background: #fff url(../../assets/images/check-s.png) center / 24px
+            no-repeat;
         }
         label {
           flex: 1;

@@ -323,9 +323,6 @@ export default {
     color: #8a8a8a;
     cursor: pointer;
     padding-right: 25px;
-    // background: #fff
-    //   url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Next.png) right
-    //   center / 28px no-repeat;
     i {
       position: absolute;
       right: 50px;

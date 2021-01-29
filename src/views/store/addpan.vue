@@ -149,6 +149,7 @@ export default {
       addpro: false,
       choosepro: false,
       tableData: [],
+      tableData1: [],
       searchtxt: '',
       list: [],
       storeid: sessionStorage.getItem('storeid'),
@@ -261,6 +262,7 @@ export default {
       })
       // console.log(res)
       this.tableData = res.data.data
+      this.tableData1 = this.tableData
     },
     chosCp (v) {
       if (!this.list.includes(v.id)) {
@@ -307,7 +309,7 @@ export default {
     submitGoods () {
       let arr = []
       this.list.forEach(id => {
-        let a = this.tableData.find(item => item.id == id)
+        let a = this.tableData1.find(item => item.id == id)
         let b = this.chooselist.find(val => val.id == id)
         this.$set(a, 'old_num', a.number)
         this.$set(a, 'new_num', 0)
@@ -435,8 +437,7 @@ export default {
             padding: 12px 25px 12px 20px;
             font-size: 14px;
             &.selectView {
-              background: transparent
-                url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Right.png)
+              background: transparent url(../../assets/images/Icon_Right.png)
                 right center / 28px no-repeat;
             }
             > div {
@@ -518,9 +519,8 @@ export default {
             bottom: 0;
             margin: auto;
             width: 55px;
-            background: #fff
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Del_Red.png)
-              center / 24px no-repeat;
+            background: #fff url(../../assets/images/Del_Red.png) center / 24px
+              no-repeat;
           }
         }
       }
@@ -539,9 +539,8 @@ export default {
         border: none;
         font-size: 14px;
         border-radius: 5px;
-        background: #fff
-          url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Search.png)
-          10px center / 24px no-repeat;
+        background: #fff url(../../assets/images/search.png) 10px center / 24px
+          no-repeat;
       }
     }
     .headerView {
@@ -577,14 +576,12 @@ export default {
           bottom: 0;
           left: 0;
           width: 58px;
-          background: #fff
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_N.png)
-            center / 24px no-repeat;
+          background: #fff url(../../assets/images/check-kong.png) center / 24px
+            no-repeat;
         }
         .label-icon.select {
-          background: #fff
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_S.png)
-            center / 24px no-repeat;
+          background: #fff url(../../assets/images/check-s.png) center / 24px
+            no-repeat;
         }
         label {
           flex: 1;

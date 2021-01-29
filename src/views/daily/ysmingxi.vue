@@ -1,7 +1,7 @@
 <template>
   <div id="prolist">
     <div class="topView">
-      <button class="btn-close btn-audio" @click="back"></button>
+      <button class="el-icon-close btn-audio" @click="back"></button>
       <div class="tView">
         <span class="el-dropdown-link">
           {{ title }}
@@ -554,20 +554,6 @@ export default {
     line-height: 40px;
     background: #fff;
     text-align: center;
-    .btn-close {
-      width: 40px;
-      height: 40px;
-      background: transparent
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_X_Black.png)
-        left center / 24px no-repeat;
-    }
-    .btn-filter {
-      width: 40px;
-      height: 40px;
-      background: #fff
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Filter.png)
-        center / 28px no-repeat;
-    }
     .tView {
       flex: 1;
       .el-dropdown {
@@ -580,9 +566,6 @@ export default {
       width: 40px;
       height: 40px;
       position: relative;
-      background: #fff
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Add.png)
-        center / 28px no-repeat;
     }
   }
   .bomView {
@@ -594,9 +577,6 @@ export default {
     padding: 0 10px;
     height: 700px;
     overflow: hidden;
-    // background: transparent
-    //   url(https://static.bokao2o.com/wisdomDesk/images/Def_Bc_ReporTop.png)
-    //   center top / 100% 6px no-repeat;
     .receipt-title {
       text-align: center;
     }

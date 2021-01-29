@@ -173,7 +173,7 @@
           <div class="subTView">预约项目</div>
           <div class="listItem" v-if="chosItem">
             <label class="label-name">{{chosItem.name}}</label>
-            <button class="btn-del btn-audio" @click="chosItem=''"></button>
+            <button class="el-icon-delete btn-audio" @click="chosItem=''"></button>
           </div>
         </div>
       </div>
@@ -664,9 +664,8 @@ export default {
     padding: 20px 0 20px 15px;
     .empItem {
       display: flex;
-      background: #f4f4f4
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Check_N.png)
-        95% center / 28px no-repeat;
+      background: #f4f4f4 url(../assets/images/check-kong.png) 95% center / 28px
+        no-repeat;
       padding: 12px 50px 12px 0;
       .imgView {
         margin-right: 15px;
@@ -691,9 +690,8 @@ export default {
       }
     }
     .empItem.select {
-      background: #f4f4f4
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Check_S.png)
-        95% center / 28px no-repeat;
+      background: #f4f4f4 url(../assets/images/check-xuan.png) 95% center / 28px
+        no-repeat;
     }
   }
   /deep/ .el-dialog__footer {
@@ -793,7 +791,7 @@ export default {
   .btn-back {
     width: 40px;
     height: 40px;
-    background-image: url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_NavBack.png);
+    background-image: url(../assets/images/back.png);
     background-position: left center;
     background-size: 28px;
     background-repeat: no-repeat;
@@ -841,7 +839,7 @@ export default {
       .btn-back {
         width: 40px;
         height: 40px;
-        background-image: url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_NavBack.png);
+        background-image: url(../assets/images/back.png);
         background-position: left center;
         background-size: 28px;
         background-repeat: no-repeat;
@@ -894,9 +892,8 @@ export default {
           height: 44px;
           .inputView {
             position: relative;
-            background: #f4f4f4
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Search.png)
-              8px center / 24px no-repeat;
+            background: #f4f4f4 url(../assets/images/search.png) 8px center /
+              24px no-repeat;
             line-height: 44px;
             border-radius: 6px;
             padding: 0 60px 0 38px;
@@ -1063,9 +1060,8 @@ export default {
     .cardThumbView {
       position: relative;
       display: flex;
-      background: #d6c361
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_VIP_Small.png)
-        90% center / 82px no-repeat;
+      background: #d6c361 url(../assets/images/VIPsmall.png) 90% center / 82px
+        no-repeat;
       height: 50px;
       border-radius: 6px 6px 0 0;
       padding: 7px 10px;
@@ -1088,9 +1084,8 @@ export default {
       .btn-reset {
         width: 48px;
         height: 36px;
-        background: transparent
-          url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_ResetCard.png)
-          center / 28px no-repeat;
+        background: transparent url(../assets/images/turn.png) center / 28px
+          no-repeat;
       }
     }
     .tView {
@@ -1181,9 +1176,8 @@ export default {
           }
           &.selectView > .label-val {
             padding-right: 22px;
-            background: transparent
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Right.png)
-              right center / 28px no-repeat;
+            background: transparent url(../assets/images/Icon_Right.png) right
+              center / 28px no-repeat;
           }
         }
         > div:last-child {
@@ -1239,17 +1233,6 @@ export default {
           margin-bottom: 10px;
           &:last-child {
             margin-bottom: 0;
-          }
-          .btn-del {
-            position: absolute;
-            width: 44px;
-            height: auto;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            background: transparent
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Del_Gray.png)
-              center / 28px no-repeat;
           }
         }
       }

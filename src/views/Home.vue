@@ -40,7 +40,7 @@
       <div class="mergeHeaderView">
         <div class="leftView">
           <div class="textView">选择需要合并的单据</div>
-          <div class="tipView">单据合并后不支持撤销！</div>
+          <!-- <div class="tipView">单据合并后不支持撤销！</div> -->
         </div>
         <div class="rightView">
           <button class="btn-audio btn-lightGray" @click="merge = false">取消</button>
@@ -105,7 +105,7 @@
               <div class="normalView overflowText">{{v.member_id!=0?v.member_name:'散客'}}</div>
             </div>
             <div class="creatTimeView">
-              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Order_Time.png" />
+              <img src="../assets/images/Time.png" />
               {{v.dateline|moment}}
             </div>
           </div>
@@ -266,7 +266,6 @@
 
     <!-- 选择服务人员 -->
     <el-dialog
-      :close-on-click-modal="false"
       :visible.sync="showworker"
       width="1024px"
       center
@@ -409,6 +408,9 @@ export default {
   },
   watch: {
     value (val) {
+      if (val != '今日收银') {
+        this.server = '全部'
+      }
       this.getorderlist()
     },
     server (val) {
@@ -844,9 +846,6 @@ export default {
           color: #5a5a5a;
           line-height: 18px;
           padding-left: 25px;
-          background: transparent
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Warning.png)
-            left center / 18px no-repeat;
         }
       }
       .rightView > button {
@@ -1078,9 +1077,8 @@ export default {
         margin: auto;
         height: 17px;
         width: 140px;
-        background: transparent
-          url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_OrderTopImg.png)
-          center top / 140px 17px no-repeat;
+        background: transparent url(../assets/images/OrderTop.png) center top /
+          140px 17px no-repeat;
       }
       .flagView {
         position: absolute;
@@ -1107,9 +1105,8 @@ export default {
             .normalView {
               color: #28282d;
               padding-left: 26px;
-              background: transparent
-                url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_CustomerNormal.png)
-                left center / 24px no-repeat;
+              background: transparent url(../assets/images/people.png) left
+                center / 24px no-repeat;
             }
           }
           .tagView {
@@ -1160,9 +1157,8 @@ export default {
               background: transparent;
             }
             .empView.edit {
-              background: transparent
-                url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Edit_Gray.png)
-                0 center / 20px no-repeat;
+              background: transparent url(../assets/images/edit-hui.png) 0
+                center / 20px no-repeat;
             }
             .priceView {
               text-align: right;
@@ -1226,9 +1222,8 @@ export default {
             height: 36px;
             overflow: hidden;
             border-radius: 5px;
-            background: #f4f4f4
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Edit_Gray.png)
-              3px center / 22px no-repeat;
+            background: #f4f4f4 url(../assets/images/edit-hui.png) 3px center /
+              22px no-repeat;
           }
           .serTimeView {
             margin-top: 12px;
@@ -1266,8 +1261,7 @@ export default {
         height: 100%;
         background: rgba(0, 0, 0, 0.7);
         &.select {
-          background: rgba(0, 0, 0, 0.7)
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_S.png);
+          background: rgba(0, 0, 0, 0.7) url(../assets/images/check-s.png);
           background-size: 24px;
           background-repeat: no-repeat;
           background-position: 260px 312px;
@@ -1357,9 +1351,8 @@ export default {
     button {
       width: 36px;
       height: 32px;
-      background: transparent
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Refresh_White.png)
-        center / 26px no-repeat;
+      background: transparent url(../assets/images/refresh.png) center / 26px
+        no-repeat;
     }
   }
 
@@ -1529,9 +1522,8 @@ export default {
             padding: 20px 0 20px 20px;
             .empItem {
               display: inline-flex;
-              background: #fff
-                url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Check_N.png)
-                200px center / 28px no-repeat;
+              background: #fff url(../assets/images/check-kong.png) 200px center /
+                28px no-repeat;
               padding: 17px 40px 17px 15px;
               border-radius: 6px;
               width: 240px;
@@ -1649,8 +1641,7 @@ export default {
       width: 40px;
       height: 40px;
       z-index: 10;
-      background: url(https://static.bokao2o.com/wisdomCashier/images/Icon_X_Gray.png)
-        center / 28px 28px no-repeat;
+      background: url(../assets/images/Icon_X.png) center / 28px 28px no-repeat;
     }
   }
 

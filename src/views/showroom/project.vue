@@ -61,7 +61,7 @@
             <button class="btn-audio btn-add" @click="additem">添加</button>
           </div>
         </div>
-        <button class="btn-close btn-audio"></button>
+        <button class="el-icon-close btn-audio"></button>
       </div>
     </el-drawer>
 
@@ -100,7 +100,7 @@
                 </div>
               </div>
             </div>
-            <button class="btn-audio btn-del" @click="del(k)"></button>
+            <button class="btn-audio el-icon-delete" @click="del(k)"></button>
           </div>
         </div>
         <div class="bottomView">
@@ -375,7 +375,7 @@ export default {
     .btn-back {
       width: 40px;
       height: 40px;
-      background-image: url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_NavBack.png);
+      background-image: url(../../assets/images/back.png);
       background-position: left center;
       background-size: 28px;
       background-repeat: no-repeat;
@@ -390,9 +390,8 @@ export default {
       width: 40px;
       height: 40px;
       position: relative;
-      background: transparent
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_ShopCart_Black.png)
-        center / 24px no-repeat;
+      background: transparent url(../../assets/images/cartt.png) center / 24px
+        no-repeat;
     }
   }
   .menuView {

@@ -150,10 +150,6 @@
                   <label class="overflowText">{{v.itemname}}</label>
                   <label>{{v.price}}</label>
                   <label>{{v.ccount}}</label>
-                  <!-- <img
-                    src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Sort_1.png"
-                    class="img-index"
-                  />-->
                 </div>
               </div>
             </div>
@@ -322,10 +318,6 @@
                   <label class="overflowText">{{v.itemname}}</label>
                   <label>{{v.price}}</label>
                   <label>{{v.ccount}}</label>
-                  <!-- <img
-                    src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Sort_1.png"
-                    class="img-index"
-                  />-->
                 </div>
               </div>
             </div>
@@ -704,9 +696,8 @@ export default {
 @import '../../assets/css/print.css';
 
 #daily {
-  background: #fff
-    url(https://static.bokao2o.com/wisdomDesk/images/Def_Bc_ReportTopBc.png)
-    70px top / 300px 242px no-repeat;
+  background: #fff url(../../assets/images/blacktop.png) 70px top / 300px 242px
+    no-repeat;
   background-size: 33% 242px;
   .tView {
     color: #999;
@@ -728,9 +719,6 @@ export default {
     cursor: pointer;
     margin-right: 5%;
     padding-right: 25px;
-    // background: #fff
-    //   url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Next.png) right
-    //   center / 28px no-repeat;
   }
   .contentView {
     display: flex;
@@ -770,9 +758,8 @@ export default {
           right: 0;
           width: 110px;
           height: 116px;
-          background: transparent
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Bc_CKXQ.png)
-            center / 110px no-repeat;
+          background: transparent url(../../assets/images/DCKXQ.png) center /
+            110px no-repeat;
         }
         .btn-print {
           position: absolute;
@@ -782,9 +769,8 @@ export default {
           height: 30px;
           font-size: 13px;
           color: #28282d;
-          background: #fff
-            url(https://static.bokao2o.com/wisdomDesk/images/Icon_Def_Print_Black.png)
-            0 center / 19px no-repeat;
+          background: #fff url(../../assets/images/print.png) 0 center / 19px
+            no-repeat;
           padding-left: 20px;
         }
       }

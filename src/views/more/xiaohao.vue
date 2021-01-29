@@ -1,7 +1,7 @@
 <template>
   <div id="projectlist">
     <div class="topView">
-      <button class="btn-close btn-audio" @click="back"></button>
+      <button class="el-icon-close btn-audio" @click="back"></button>
       <!-- <div class="centerView">
         <div class="tView">产品消耗设定</div>
         <div class="dateView">2020年07月08日 至 2020年07月08日</div>
@@ -82,13 +82,7 @@ export default {
       text-align: center;
       height: 45px;
     }
-    .btn-close {
-      width: 40px;
-      height: 40px;
-      background: transparent
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_X_Black.png)
-        left center / 24px no-repeat;
-    }
+
     .tView {
       flex: 1;
       font-size: 24px;

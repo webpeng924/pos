@@ -24,7 +24,7 @@ Vue.filter('time', function (data, type) {
   switch (type) {
     case 'y-m-d':
       return Y + '-' + M + '-' + D
-    case 'ymdhms':
-      return '' + Y + M + D + h + m + s
+    case 'ymdhm':
+      return Y + '-' + M + '-' + D + ' ' + h + ':' + m
   }
 })

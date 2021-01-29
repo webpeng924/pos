@@ -2,7 +2,7 @@
   <div class="orderSerConfigEmpView">
     <div class="topView">
       <button class="btn-showType">
-        <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_OrderAddSer_Job.png" />
+        <img src="../assets/images/order-icon.png" />
       </button>
       <div class="nameView">{{title}}</div>
       <div class="customView">
@@ -294,9 +294,8 @@ export default {
           padding: 20px 0 20px 20px;
           .empItem {
             display: inline-flex;
-            background: #fff
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Check_N.png)
-              200px center / 28px no-repeat;
+            background: #fff url(../assets/images/check-kong.png) 200px center /
+              28px no-repeat;
             padding: 17px 40px 17px 15px;
             border-radius: 6px;
             width: 240px;
@@ -320,9 +319,8 @@ export default {
             }
           }
           .empItem.select {
-            background: #fff
-              url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Check_S.png)
-              200px center / 28px no-repeat;
+            background: #fff url(../assets/images/check-xuan.png) 200px center /
+              28px no-repeat;
           }
         }
       }
@@ -419,8 +417,7 @@ export default {
     width: 40px;
     height: 40px;
     z-index: 10;
-    background: url(https://static.bokao2o.com/wisdomCashier/images/Icon_X_Gray.png)
-      center / 28px 28px no-repeat;
+    background: url(../assets/images/Icon_X.png) center / 28px 28px no-repeat;
   }
 }
 </style>

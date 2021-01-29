@@ -233,9 +233,8 @@ export default {
           display: flex;
           padding-right: 60px;
           min-width: 420px;
-          background: transparent
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_N.png)
-            385px center / 28px no-repeat;
+          background: transparent url(../assets/images/check-kong.png) 385px
+            center / 28px no-repeat;
           > div {
             flex: 1;
             text-align: center;
@@ -254,9 +253,8 @@ export default {
           }
         }
         &.select > .rightView {
-          background: transparent
-            url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_S.png)
-            385px center / 28px no-repeat;
+          background: transparent url(../assets/images/check-s.png) 385px center /
+            28px no-repeat;
         }
       }
     }

@@ -1,7 +1,7 @@
 <template>
   <div id="projectlist">
     <div class="topView">
-      <button class="btn-close btn-audio" @click="back"></button>
+      <button class="el-icon-close btn-audio" @click="back"></button>
       <div class="tView">项目资料</div>
       <button class="btn-audio btn-filter" @click="drawer=true"></button>
       <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="choose='';add=true">新增</button>
@@ -207,13 +207,7 @@ export default {
     line-height: 40px;
     background: #fff;
     text-align: center;
-    .btn-close {
-      width: 40px;
-      height: 40px;
-      background: transparent
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_X_Black.png)
-        left center / 24px no-repeat;
-    }
+
     .tView {
       flex: 1;
       font-size: 24px;
@@ -228,9 +222,8 @@ export default {
     .btn-filter {
       width: 40px;
       height: 40px;
-      background: #fff
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Filter.png)
-        center / 28px no-repeat;
+      background: #fff url(../../assets/images/filter.png) center / 28px
+        no-repeat;
     }
   }
   .bomView {

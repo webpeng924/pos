@@ -115,13 +115,11 @@
                   @click="paytype='zfb'"
                 >
                   <div class="iconView">
-                    <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Pay_ZFB.png" />
+                    <img src="../assets/images/zfb.png" />
                   </div>
                   <div class="textView overflowText">支付宝</div>
                   <div class="selectView">
-                    <img
-                      src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_Black.png"
-                    />
+                    <img src="../assets/images/select.png" />
                   </div>
                 </div>
                 <div
@@ -130,13 +128,11 @@
                   @click="paytype='wx'"
                 >
                   <div class="iconView">
-                    <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Pay_WX.png" />
+                    <img src="../assets/images/wx.png" />
                   </div>
                   <div class="textView overflowText">微信</div>
                   <div class="selectView">
-                    <img
-                      src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_Black.png"
-                    />
+                    <img src="../assets/images/select.png" />
                   </div>
                 </div>
                 <div
@@ -149,9 +145,7 @@
                   </div>
                   <div class="textView overflowText">现金</div>
                   <div class="selectView">
-                    <img
-                      src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_Black.png"
-                    />
+                    <img src="../assets/images/select.png" />
                   </div>
                 </div>
                 <div
@@ -160,13 +154,11 @@
                   @click="paytype='other'"
                 >
                   <div class="iconView">
-                    <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Pay_XJ.png" />
+                    <img src="../assets/images/other.png" />
                   </div>
                   <div class="textView overflowText">其他</div>
                   <div class="selectView">
-                    <img
-                      src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_Black.png"
-                    />
+                    <img src="../assets/images/select.png" />
                   </div>
                 </div>
                 <div
@@ -180,9 +172,7 @@
                   </div>
                   <div class="textView overflowText">会员卡</div>
                   <div class="selectView">
-                    <img
-                      src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_Black.png"
-                    />
+                    <img src="../assets/images/select.png" />
                   </div>
                 </div>
                 <div
@@ -196,9 +186,7 @@
                   <div class="textView overflowText">
                     <label class="label-name">混合支付</label>
                     <div class="selectView">
-                      <img
-                        src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Select_Black.png"
-                      />
+                      <img src="../assets/images/select.png" />
                     </div>
                   </div>
                 </div>
@@ -861,9 +849,6 @@ export default {
             line-height: 25px;
             padding: 0 35px 0 65px;
             text-align: left;
-            // background: #fff
-            //   url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Edit_Green.png)
-            //   35px center / 28px no-repeat;
           }
         }
         .paymentView {

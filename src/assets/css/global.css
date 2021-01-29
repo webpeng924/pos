@@ -64,7 +64,7 @@
     left: 15px;
     width: 40px;
     height: 40px;
-    background-image: url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_NavBack.png);
+    background-image: url(../images/back.png);
     background-position: left center;
     background-size: 28px;
     background-repeat: no-repeat;
@@ -172,7 +172,7 @@
     right: 0;
     top: 0;
     background: transparent
-      url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_InputClean.png)
+      url(../images/close.png)
       center / 18px no-repeat;
   }
   .searchResView .topSearchView button {
@@ -262,10 +262,10 @@
 .carView  .listView > .listItem > .btn-del {
   position: absolute;
   top: 7px;
+  font-size: 24px;
   right: 15px;
   width: 40px;
   height: 40px;
-  background: #fff url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Delete.png) right center / 28px no-repeat;
 }
 
 .carView  .listView > .listItem > .textView{

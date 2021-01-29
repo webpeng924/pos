@@ -19,11 +19,11 @@
           </div>
         </div>
         <div class="menuItem" :class="{p100:!show,active:active=='功能'}" @click="selectOption('功能')">
-          <img src="https://static.bokao2o.com/wisdomDesk/images/Menu_Feature.png" />
+          <img src="../../assets/images/Menu.png" />
           功能
         </div>
         <div class="menuItem" :class="{p100:!show,active:active=='报表'}" @click="selectOption('报表')">
-          <img src="https://static.bokao2o.com/wisdomDesk/images/Menu_Report.png" />
+          <img src="../../assets/images/report.png" />
           报表
         </div>
         <div
@@ -31,7 +31,7 @@
           :class="{p100:!show,active:active=='签到日历'}"
           @click="selectOption('签到日历')"
         >
-          <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Icon_Calendar.png" />
+          <img src="../../assets/images/calendar.png" />
           签到日历
         </div>
         <div
@@ -39,11 +39,11 @@
           :class="{p100:!show,active:active=='管理中心'}"
           @click="selectOption('管理中心')"
         >
-          <img src="https://static.bokao2o.com/wisdomDesk/images/Menu_System.png" />
+          <img src="../../assets/images/system.png" />
           管理中心
         </div>
         <div class="menuItem" :class="{p100:!show}" @click="logOut">
-          <img src="https://static.bokao2o.com/wisdomDesk/images/Menu_S3backend.png" />
+          <img src="../../assets/images/out.png" />
           退出登录
         </div>
       </div>
@@ -91,12 +91,8 @@
               <img src="../../assets/images/xiaofeimingxi.png" />
               <div>消费明细表</div>
             </div>
-            <!-- <div class="listItem btn-audio" @click="openTable('cardSale')" >
-              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Report_JCTJ.png" />
-              <div>会员卡销售统计</div>
-            </div>-->
             <div class="listItem btn-audio" @click="openTable('staffRank')">
-              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Report_JCTJ.png" />
+              <img src="../../assets/images/jCTJ.png" />
               <div>员工销售排行</div>
             </div>
           </div>
@@ -109,7 +105,7 @@
               <div>库存量统计</div>
             </div>
             <div class="listItem btn-audio" @click="openTable('churutongji')">
-              <img src="https://static.bokao2o.com/wisdomDesk/images/Def_Report_JCTJ.png" />
+              <img src="../../assets/images/jCTJ.png" />
               <div>出入库统计表</div>
             </div>
           </div>
@@ -194,6 +190,10 @@
             <div class="listItem btn-audio" @click="panku=true">
               <img src="../../assets/images/kucunpandian1.png" />
               <div>库存盘点</div>
+            </div>
+            <div class="listItem btn-audio" @click="jicun=true">
+              <img src="../../assets/images/chanpin.png" />
+              <div>产品寄存</div>
             </div>
             <div class="listItem btn-audio" @click="dinghuo=true">
               <img src="../../assets/images/mendian1.png" />
@@ -350,6 +350,9 @@
     <div class="set_page" :class="{activePage:panku}">
       <panku @close="panku=false" v-if="panku"></panku>
     </div>
+    <div class="set_page" :class="{activePage:jicun}">
+      <jicun @close="jicun=false" v-if="jicun"></jicun>
+    </div>
     <div class="set_page" :class="{activePage:orderlist}">
       <orderlist @close="orderlist=false" v-if="orderlist"></orderlist>
     </div>
@@ -376,6 +379,7 @@ import msg from '../lqy/index'
 import erweima from '../lqy/erweimaPay'
 import memberView from '../member/index'
 import panku from '../store/panku'
+import jicun from '../store/jicun'
 import cikalist from './cikalist'
 import quanlist from './quanlist'
 import orderlist from '../order/orderlist'
@@ -383,7 +387,7 @@ import churutongji from './churutongji'
 import cardSale from '../table/cardSale'
 import staffRank from '../table/staffSale'
 export default {
-  components: { product, memberlist, projectlist, shopInfo, zhekou, xiaohao, baobiao, kucun, setCard, msg, erweima, memberView, panku, cikalist, quanlist, orderlist, churutongji, cardSale, staffRank },
+  components: { product, memberlist, projectlist, shopInfo, zhekou, xiaohao, baobiao, kucun, setCard, msg, erweima, memberView, panku, cikalist, quanlist, orderlist, churutongji, cardSale, staffRank, jicun },
   props: {},
   data () {
     return {
@@ -406,6 +410,7 @@ export default {
       memberView: false,
       dinghuo: false,
       panku: false,
+      jicun: false,
       churutongji: false,
       cikalist: false,
       quanlist: false,

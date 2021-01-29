@@ -82,7 +82,7 @@ export default {
     .btn-back {
       width: 40px;
       height: 40px;
-      background-image: url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_NavBack.png);
+      background-image: url(../../assets/images/back.png);
       background-position: left center;
       background-size: 28px;
       background-repeat: no-repeat;
@@ -97,9 +97,8 @@ export default {
       width: 40px;
       height: 40px;
       position: relative;
-      background: transparent
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_ShopCart_Black.png)
-        center / 24px no-repeat;
+      background: transparent url(../../assets/images/cartt.png) center / 24px
+        no-repeat;
     }
   }
 }

@@ -82,7 +82,7 @@
                 </div>
               </div>
             </div>
-            <button class="btn-audio btn-del" @click="del(k)"></button>
+            <button class="btn-audio el-icon-delete" @click="del(k)"></button>
           </div>
         </div>
         <div class="bottomView">
@@ -206,9 +206,8 @@ export default {
       position: relative;
       width: 40px;
       height: 40px;
-      background: transparent
-        url(https://static.bokao2o.com/wisdomDesk/images/Def_Icon_ShopCart_White.png)
-        center / 40px no-repeat;
+      background: transparent url(../../assets/images/cart.png) center / 40px
+        no-repeat;
     }
   }
   .top {
