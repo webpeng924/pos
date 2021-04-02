@@ -17,7 +17,7 @@
       <el-table :data="tableData" stripe style="width: 100%" @row-click="chooseOne" height="100%">
         <el-table-column width="70">
           <template slot-scope="scope">
-            <img :src="'https://hb.rgoo.com'+scope.row.avatar" alt style="width:44px;height:44px" />
+            <img :src="scope.row.avatar|imgUrl" alt style="width:44px;height:44px" />
           </template>
         </el-table-column>
         <el-table-column prop="job_no" label="编号" width="150"></el-table-column>

@@ -173,7 +173,7 @@
           <div class="subTView">预约项目</div>
           <div class="listItem" v-if="chosItem">
             <label class="label-name">{{chosItem.name}}</label>
-            <button class="el-icon-delete btn-audio" @click="chosItem=''"></button>
+            <button class="btn-del btn-audio" @click="chosItem=''"></button>
           </div>
         </div>
       </div>
@@ -205,11 +205,7 @@
         <el-table :data="tableData" style="width: 100%" height="500" @row-click="chooseCard">
           <el-table-column prop="address">
             <template slot-scope="scope">
-              <img
-                :src="scope.row.img?scope.row.img:'/upload/shop/moren.jpg'|imgUrl"
-                alt
-                style="width:80px;height:60px"
-              />
+              <img :src="scope.row.img|imgUrl" alt style="width:80px;height:60px" />
             </template>
           </el-table-column>
           <el-table-column prop="card_num" label="卡号" show-overflow-tooltip></el-table-column>
@@ -232,7 +228,7 @@
     >
       <div class="menuView listView">
         <div class="menuItem" :class="{select:chosworker==null}" @click="chosworker=null">全部</div>
-        <div class="menuItem" v-for="(v,k) in workercate" :key="k">{{v}}</div>
+        <!-- <div class="menuItem" v-for="(v,k) in workercate" :key="k">{{v}}</div> -->
       </div>
       <div class="empView listView" style="height: 550px;">
         <div
@@ -243,7 +239,7 @@
           @click="chosworker=v"
         >
           <div class="imgView">
-            <img :src="v.avatar?v.avatar:'/upload/shop/moren.jpg'|imgUrl" />
+            <img :src="v.avatar|imgUrl" />
           </div>
           <div class="nameView">{{v.name}}</div>
           <div class="empIdView">工号：{{v.job_no}}</div>
@@ -296,7 +292,6 @@
 
 <script>
 import moment from 'moment'
-import { format } from 'url';
 export default {
   components: {},
   props: ['choose'],
@@ -325,7 +320,6 @@ export default {
       dateDialog: false,
       workerDialog: false,
       yudate: new Date,
-      workerDialog: false,
       workerlist: [],
       workercate: [],
       workerid: '',
@@ -356,6 +350,7 @@ export default {
         params: {
           storeid: this.storeid,
           is_li: 1,
+          is_yy: 1,
           is_wei: 1
         }
       })
@@ -1251,6 +1246,15 @@ export default {
         font-size: 15px;
         color: #fff;
       }
+    }
+    .btn-del {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+      width: 55px;
+      background: url(../assets/images/close-red.png) center / 24px no-repeat;
     }
   }
   .overflowText {

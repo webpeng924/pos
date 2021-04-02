@@ -40,7 +40,6 @@
 </template>
 
 <script>
-import { validate } from 'json-schema';
 export default {
   components: {},
   props: {},

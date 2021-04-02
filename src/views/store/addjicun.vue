@@ -2,7 +2,8 @@
   <div id="addPan">
     <div class="topView">
       <button class="btn-back" @click="$emit('close',0)"></button>
-      <div class="tView">寄存</div>
+      <div class="tView" v-show="setid">查看</div>
+      <div class="tView" v-show="!setid">寄存</div>
       <div class="btnView">
         <button class="btn-audio btn-green" @click="saveAdd" v-show="!setid">保存</button>
       </div>
@@ -12,7 +13,7 @@
         <div class="tView">单据信息</div>
         <div class="listView">
           <div class="groupView">
-            <div class="subItem textView disView">
+            <div class="subItem textView disView" v-show="!membername">
               <el-button
                 v-show="!member"
                 plain
@@ -28,6 +29,11 @@
                 <span style="margin:0 15px;font-size:13px">{{member.mobile}}</span>
               </el-button>
             </div>
+            <div class="subItem textView disView" v-show="membername">
+              <el-button
+                style="width:100%;background: #d6c361 url(/img/VIPsmall.ac08d099.png) 90% center/82px no-repeat;"
+              >{{membername}}</el-button>
+            </div>
             <div class="subItem textView disView">
               <label>寄存单号</label>
               <div>{{stock_no}}</div>
@@ -38,11 +44,7 @@
             </div>
             <div class="subItem selectView">
               <label>寄存日期</label>
-              <div @click="dateDialog=true">{{date|time('y-m-d')}}</div>
-            </div>
-            <div class="subItem">
-              <label>操作时间</label>
-              <div>{{new Date()|time('ymdhm')}}</div>
+              <div @click="()=>{if(!this.setid){dateDialog=true}}">{{date|time('y-m-d')}}</div>
             </div>
           </div>
         </div>
@@ -51,8 +53,8 @@
         <div class="tView">
           详细信息
           <!-- <button class="btn-add btn-audio">扫码</button> -->
-          <button class="btn-add btn-audio" @click="openadd">选择产品</button>
-          <button style="color:red" v-show="setid" @click="delInstore">删除</button>
+          <button class="btn-add btn-audio" @click="openadd" v-show="!setid">选择产品</button>
+          <!-- <button style="color:red" v-show="setid" @click="delInstore">删除</button> -->
         </div>
         <div class="headerView">
           <div class="nameView">产品名称</div>
@@ -71,8 +73,9 @@
             <div class="priceView">{{v.goods_unit}}</div>
             <div class="priceView">
               <input
-                v-model="v.buyer"
+                v-model="v.staff_name"
                 @click="chooseitem=v;workerDialog=true"
+                placeholder="选择负责员工"
                 readonly
                 suffix-icon="el-icon-arrow-right"
               />
@@ -85,11 +88,11 @@
         <div class="listView" v-show="setid">
           <div class="listItem" v-for="(v,k) in chooselist" :key="k">
             <button></button>
-            <div class="nameView overflowText">{{v.name?v.name:v.goods_no}}</div>
-            <div class="nameView overflowText">{{v.name?v.name:v.goods_name}}</div>
-            <div class="priceView">{{v.old_num}}</div>
-            <div class="priceView">{{v.new_num}}</div>
-            <div class="priceView" style="margin-left:10px">{{v.cha}}</div>
+            <div class="nameView overflowText">{{v.goods_name}}</div>
+            <div class="priceView overflowText">{{v.number}}</div>
+            <div class="priceView">{{v.goods_unit}}</div>
+            <div class="priceView">{{v.staff_name}}</div>
+            <div class="priceView" style="margin-left:10px">{{v.remark}}</div>
           </div>
         </div>
       </div>
@@ -114,14 +117,14 @@
       <div class="headerView">
         <label class="label-code">编号</label>
         <label class="label-name">产品名称</label>
-        <label>库存数量</label>
+        <label>单位</label>
       </div>
       <div class="listView">
         <div class="listItem" v-for="(v,k) in tableData" :key="k" @click="chosCp(v)">
           <label class="label-icon" :class="{select:list.includes(v.id)}"></label>
           <label class="label-code">{{v.goods_no}}</label>
           <label class="label-name">{{v.goods_name}}</label>
-          <label>{{v.number}}</label>
+          <label>{{v.goods_unit}}</label>
         </div>
       </div>
       <span slot="footer" class="dialog-footer">
@@ -137,7 +140,7 @@
       :append-to-body="true"
       custom-class="dialog"
     >
-      <div @click="dateDialog = false">
+      <div @click="choosday">
         <el-calendar v-model="date"></el-calendar>
       </div>
     </el-dialog>
@@ -191,7 +194,7 @@
           v-for="(v,k) in workerlist"
           :key="k"
           class="listItem"
-          :class="{select:chooseitem.buyid==v.id}"
+          :class="{select:chooseitem.staff_id==v.id}"
           @click="chooseStaff(v)"
         >{{v.job_no}}-{{v.name}}</div>
       </div>
@@ -204,7 +207,7 @@ import addPro from '@/components/addpro.vue'
 import qs from 'qs'
 export default {
   components: { addPro },
-  props: ['setid'],
+  props: ['setid', 'membername'],
   data () {
     return {
       addpro: false,
@@ -219,37 +222,29 @@ export default {
       list: [],
       storeid: sessionStorage.getItem('storeid'),
       stock_no: '',
-      way: '正常出库',
-      wayDialog: false,
       dateDialog: false,
       workerDialog: false,
-      getType: '员工',
       typeDialog: false,
       date: new Date,
       workerlist: [],
       chooseitem: '',
       searchtxt: null,
       chooselist: [],
-      prodate: '',
-      chosOne: ''
     }
   },
   watch: {},
-  computed: {
-    totalPrice () {
-      let sum = 0
-      this.chooselist.forEach(item => {
-        sum += Number(item.total)
-      })
-      return sum
-    }
-  },
   methods: {
+    choosday (e) {
+      let flag1 = e.toElement.innerHTML.includes("上个月");
+      let flag2 = e.toElement.innerHTML.includes("下个月");
+      if (!flag1 && !flag2) {
+        this.dateDialog = false      }
+    },
     chooseStaff (v) {
       this.chooselist.forEach(item => {
         if (item.id == this.chooseitem.id) {
-          item.buyid = v.id
-          item.buyer = v.name
+          item.staff_id = v.id
+          item.staff_name = v.name
         }
       })
       this.workerDialog = false
@@ -271,24 +266,18 @@ export default {
       this.memberView = false
     },
     async getinfoByid () {
-      const res = await this.$axios.get('/api?datatype=get_one_stock', {
+      const res = await this.$axios.get('/api?datatype=get_membergoods_list_detail', {
         params: {
-          sign: 3,
-          id: this.setid
+          storeid: this.storeid,
+          jicun_id: this.setid
         }
       })
       if (res.data.code == 1) {
         let data = res.data.data
-        this.stock_no = data.stock_no
-        this.date = data.out_date
-        this.way = data.out_type
-        this.buyer = data.name
-        this.buyid = data.get_userid
-        data.goodsinfo.forEach(item => {
-          this.$set(item, 'new_num', item.number)
-          this.$set(item, 'old_num', Number(item.number) + Number(item.skunum))
-        })
-        this.chooselist = data.goodsinfo
+        this.stock_no = data.info.stock_no
+        this.date = data.info.jicun_date
+
+        this.chooselist = data.list
       }
     },
     delInstore () {
@@ -361,33 +350,34 @@ export default {
       }
     },
     async saveAdd () {
-      if (!this.buyid) return this.$message.error('请选择盘点员工')
+      if (!this.member) return this.$message.error('请选择会员')
       if (!this.chooselist.length) return this.$message.error('缺少产品信息')
       let arr = []
       this.chooselist.forEach(item => {
         let obj = {
           goods_id: item.goods_id,
+          goods_unit: item.goods_unit,
           goods_name: item.goods_name,
-          old_num: item.old_num,
-          in_cost: item.in_cost,
-          new_num: item.new_num,
-          cha: item.cha
+          staff_id: item.staff_id,
+          staff_name: item.staff_name,
+          number: item.num,
+          remark: item.remark
         }
         arr.push(obj)
       })
-      let data = qs.stringify({
+      let data = {
         storeid: this.storeid,
         stock_no: this.stock_no,
-        pan_date: this.formatDate(this.date),
-        // checkman: JSON.parse(sessionStorage.getItem('userInfo')).username,
-        warehouse: '门店仓库',
-        pan_userid: this.buyid,
-        goodsinfo: arr
-      })
-      const res = await this.$axios.post('/api?datatype=insert_pan_stock', data)
+        jicun_date: this.formatDate(this.date),
+        checkman: JSON.parse(sessionStorage.getItem('userInfo')).username,
+        member_id: this.member.member_id,
+        type: '寄存',
+        goodsInfo: arr
+      }
+      const res = await this.$axios.post('/api?datatype=member_goods_add', data)
       // console.log(res)
       if (res.data.code == 1) {
-        this.$message.success('盘点成功')
+        this.$message.success('成功')
         this.$emit('close', 1)
       }
     },
@@ -402,8 +392,8 @@ export default {
         let b = this.chooselist.find(val => val.id == id)
         this.$set(a, 'num', 1)
         this.$set(a, 'remark', '')
-        this.$set(a, 'buyer', '选择负责员工')
-        this.$set(a, 'buyid', '')
+        this.$set(a, 'staff_name', '')
+        this.$set(a, 'staff_id', '')
         Object.assign(a, b)
         // console.log(a, b)
         arr.push(a)
@@ -427,7 +417,7 @@ export default {
       const res = await this.$axios.get('/api?datatype=get_stock_no', {
         params: {
           storeid: this.storeid,
-          type: 3
+          type: 4
         }
       })
       if (res.data.code == 1) {
@@ -436,10 +426,14 @@ export default {
     },
     // 修改数量
     changeNum (v) {
-      // v.new_num = v.new_num.replace(/[^0-9]/g, '')
+      if (v.num) {
+        v.num = parseInt(v.num)
+      }
       this.chooselist.forEach(item => {
         if (item.id == v.id) {
-          item.cha = Number(item.new_num) - Number(item.old_num)
+          if (item.num < 1) {
+            item.num = 1
+          }
         }
       })
     }

@@ -59,7 +59,7 @@
         <div class="listView">
           <div class="listItem serItem" v-for="(v,k) in carlist" :key="k">
             <div class="imgView">
-              <img :src="v.img?v.img:'/upload/shop/moren.jpg'|imgUrl" />
+              <img :src="v.img|imgUrl" />
             </div>
             <div class="textView">
               <div class="nameView">

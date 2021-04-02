@@ -16,6 +16,10 @@
           ></el-date-picker>
         </div>
       </div>
+      <el-input placeholder="请输入产品编号/名称" v-model="searchtxt" style="width:280px">
+        <i slot="prefix" class="el-input__icon el-icon-search"></i>
+        <el-button slot="append" @click="getList">搜索</el-button>
+      </el-input>
     </div>
     <div class="bomView">
       <el-table :data="tableData" height="100%">
@@ -79,6 +83,7 @@ export default {
   data () {
     return {
       date: '',
+      searchtxt: '',
       tableData: [],
       storeid: sessionStorage.getItem('storeid')
     }
@@ -88,6 +93,7 @@ export default {
       const res = await this.$axios.get('/apt?datatype=table_stock', {
         params: {
           storeid: this.storeid,
+          keyword: this.searchtxt,
           start: this.date[0],
           end: this.date[1]
         }

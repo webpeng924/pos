@@ -135,7 +135,15 @@
               <div>{{v.supplier_id}}</div>
             </div>
             <!-- <div class="descView overflowText"></div> -->
-            <div class="dateView selectView" @click="changeDate(v)">{{v.makedate}}</div>
+            <!-- <div class="dateView selectView" @click="changeDate(v)">{{v.makedate}}</div> -->
+            <div class="dateView selectView">
+              <el-date-picker
+                v-model="v.makedate"
+                type="date"
+                placeholder="生产日期"
+                value-format="yyyy-MM-dd"
+              ></el-date-picker>
+            </div>
           </div>
         </div>
         <div class="listView" v-show="setid">
@@ -220,13 +228,13 @@
       :append-to-body="true"
       custom-class="dialog"
     >
-      <div @click="dateDialog = false">
+      <div @click="choosday">
         <el-calendar v-model="date"></el-calendar>
       </div>
     </el-dialog>
 
     <!-- 生产日期 -->
-    <el-dialog
+    <!-- <el-dialog
       :close-on-click-modal="false"
       :visible.sync="makeDay"
       center
@@ -236,7 +244,7 @@
       <div @click="chosMakeDay">
         <el-calendar v-model="prodate"></el-calendar>
       </div>
-    </el-dialog>
+    </el-dialog>-->
 
     <!-- 选择入库产品扫码 -->
     <el-dialog
@@ -306,12 +314,12 @@ export default {
     }
   },
   methods: {
-    // opencode () {
-    //   this.codebar = ''
-    //   this.codeDialog = true
-    //   this.getCPlist()
-    //   this.$nextTick(() => { this.$refs['input'].focus() })
-    // },
+    choosday (e) {
+      let flag1 = e.toElement.innerHTML.includes("上个月");
+      let flag2 = e.toElement.innerHTML.includes("下个月");
+      if (!flag1 && !flag2) {
+        this.dateDialog = false      }
+    },
     getitem (codebar) {
       if (!codebar) return
       this.$axios.get('/api?datatype=get_goods_list', {
@@ -523,19 +531,23 @@ export default {
         }
       })
     },
-    changeDate (v) {
-      this.prodate = v.makedate
-      this.chosOne = v
-      this.makeDay = true
-    },
-    chosMakeDay () {
-      this.chooselist.forEach(item => {
-        if (item.id == this.chosOne.id) {
-          item.makedate = this.formatDate(this.prodate)
-        }
-      })
-      this.makeDay = false
-    },
+    // changeDate (v) {
+    //   this.prodate = v.makedate
+    //   this.chosOne = v
+    //   this.makeDay = true
+    // },
+    // chosMakeDay (e) {
+    //   let flag1 = e.toElement.innerHTML.includes("上个月")
+    //   let flag2 = e.toElement.innerHTML.includes("下个月")
+    //   if (flag1 || flag2) return false
+    //   console.log(this.prodate)
+    //   this.chooselist.forEach(item => {
+    //     if (item.id == this.chosOne.id) {
+    //       item.makedate = this.formatDate(this.prodate)
+    //     }
+    //   })
+    //   this.makeDay = false
+    // },
     async getinfoByid () {
       const res = await this.$axios.get('/api?datatype=get_one_stock', {
         params: {
@@ -646,7 +658,9 @@ export default {
     document.onkeydown = null
     window.onkeydown = null
   },
-  mounted () { }
+  mounted () {
+
+  }
 }
 </script>
 <style lang="scss">

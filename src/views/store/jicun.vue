@@ -2,58 +2,56 @@
   <div id="projectlist">
     <div class="topView">
       <button class="el-icon-close btn-audio" @click="back"></button>
-      <div class="tView">
-        <p>产品寄存</p>
-        <div class="dateView">
-          <el-date-picker
-            v-model="date"
-            type="daterange"
-            prefix-icon="a"
-            :clearable="false"
-            range-separator="-"
-            format="yyyy年MM月dd日"
-            @change="getList"
-          ></el-date-picker>
-          <!-- <i class="el-icon-arrow-right"></i> -->
-        </div>
-      </div>
+      <div class="tView">产品寄存</div>
       <el-input
         v-model="searchtxt"
-        placeholder="请输入产品名称"
-        style="width:180px;margin-right:20px"
+        placeholder="请输入单号/会员编号/姓名/手机号"
+        style="width:280px;margin-right:20px"
         clearable
         @change="getList"
       >
-        <i slot="prefix" class="el-input__icon el-icon-search" @change="getList"></i>
+        <i slot="prefix" class="el-input__icon el-icon-search" @click="getList"></i>
       </el-input>
       <button class="btn-audio" style="font-size:18px;color:#dc670b" @click="add=true">新增</button>
     </div>
     <div class="set_page" :class="{activePage:add}">
-      <add @close="add=false;getList()" :setid="choose" v-if="add"></add>
+      <add
+        @close="add=false;choose='';getList()"
+        :setid="choose.id"
+        v-if="add"
+        :membername="choose.name"
+      ></add>
+    </div>
+    <div class="set_page" :class="{activePage:addOut}">
+      <addOut
+        @close="addOut=false;choose='';type= '',getList()"
+        :setid="choose.id"
+        v-if="addOut"
+        :membername="choose.name"
+        :memberid="choose.member_id"
+        :type="type"
+      ></addOut>
     </div>
     <div class="bomView">
-      <el-table
-        :data="tableData"
-        stripe
-        style="width: 100%"
-        height="100%"
-        @row-click="rowClick"
-        ref="refTable"
-      >
-        <el-table-column prop="stock_no" label="寄存单号"></el-table-column>
-        <el-table-column prop="pan_date" label="会员卡号"></el-table-column>
-        <el-table-column prop="pan_date" label="会员姓名"></el-table-column>
-        <el-table-column prop="pan_time" label="手机号"></el-table-column>
-        <el-table-column prop="pan_time" label="类型"></el-table-column>
-        <el-table-column prop="pan_time" label="日期"></el-table-column>
-        <el-table-column prop="pan_time" label="操作人"></el-table-column>
-        <el-table-column prop="name"></el-table-column>
-
-        <!-- <el-table-column label="操作" width="100">
+      <el-table :data="tableData" stripe style="width: 100%" height="100%" ref="refTable">
+        <el-table-column prop="stock_no" label="单号"></el-table-column>
+        <el-table-column prop="card_num" label="会员卡号"></el-table-column>
+        <el-table-column prop="name" label="会员姓名"></el-table-column>
+        <el-table-column prop="mobile" label="手机号"></el-table-column>
+        <el-table-column prop="type" label="类型"></el-table-column>
+        <el-table-column prop="jicun_date" label="日期"></el-table-column>
+        <el-table-column prop="checkman" label="操作人"></el-table-column>
+        <el-table-column width="100">
           <template slot-scope="scope">
-            <el-button @click="toEdit(scope.row)">详情</el-button>
+            <el-button v-show="scope.row.type=='寄存'" type="primary" @click="toEdit(scope.row)">领取</el-button>
+            <p v-show="scope.row.type!='寄存'"></p>
           </template>
-        </el-table-column>-->
+        </el-table-column>
+        <el-table-column width="120">
+          <template slot-scope="scope">
+            <el-button @click="Open(scope.row)">查看</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
   </div>
@@ -61,14 +59,17 @@
 
 <script>
 import add from './addjicun'
+import addOut from './addlinqu'
 export default {
-  components: { add },
+  components: { add, addOut },
   props: [],
   data () {
     return {
       item: 1,
       tableData: [],
       add: false,
+      type: '',
+      addOut: false,
       status: 0,
       drawer: false,
       cate: '',
@@ -76,7 +77,6 @@ export default {
       searchtxt: '',
       choose: '',
       cateList: [],
-      date: '',
       storeid: sessionStorage.getItem('storeid')
     }
   },
@@ -87,14 +87,10 @@ export default {
       this.$emit('close')
     },
     async getList () {
-      // console.log(this.formatDate(new Date(this.date[0])))
-      const res = await this.$axios.get('/api?datatype=get_stock_list', {
+      const res = await this.$axios.get('/api?datatype=get_membergoods_list', {
         params: {
           storeid: this.storeid,
-          sign: 3,
-          start: this.formatDate(new Date(this.date[0])),
-          end: this.formatDate(new Date(this.date[1])),
-          search: this.searchtxt
+          keyword: this.searchtxt
         }
       })
       // console.log(res)
@@ -107,10 +103,23 @@ export default {
     rowClick (row, index, e) {
       this.$refs.refTable.toggleRowExpansion(row)
     },
+    // 领取
     toEdit (row) {
       // console.log(row)
-      this.choose = row.id
-      this.add = true
+      this.choose = row
+      this.addOut = true
+      this.type = '领取'
+    },
+    // 查看
+    Open (row) {
+      if (row.type == '领取') {
+        this.choose = row
+        this.addOut = true
+      } else {
+        this.choose = row
+        this.add = true
+      }
+      // console.log(row)
     },
     formatDate (date) {
       var y = date.getFullYear()
@@ -119,20 +128,9 @@ export default {
       var d = date.getDate()
       d = d < 10 ? ('0' + d) : d
       return y + '-' + m + '-' + d
-    },
-    handleCommand (command) {
-      this.cate = command
-      if (command == 'null') {
-        this.catetitle = '全部'
-      } else {
-        let a = this.cateList.find(item => item.id == command)
-        this.catetitle = a.title
-      }
     }
   },
   created () {
-    const a = this.formatDate(new Date())
-    this.date = [a, a]
     this.getList()
   },
   mounted () { }

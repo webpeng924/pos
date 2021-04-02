@@ -54,7 +54,7 @@
                 </div>
                 <div class="payableAmt" style="color:#ccc" v-show="isuseCard">
                   优惠金额：
-                  <label>￥&nbsp;{{isuseCard ?(bookinfo.total-bookinfo.dis_total).toFixed(2):0}}</label>
+                  <label>￥&nbsp;{{isuseCard ?(bookinfo.total-bookinfo.dis_total>0?bookinfo.total-bookinfo.dis_total:bookinfo.dis_total-bookinfo.total).toFixed(2):0}}</label>
                 </div>
                 <div class="toPayAmt">
                   待付金额：
@@ -125,6 +125,7 @@
                   </div>
                 </div>
                 <div
+                  v-show="Number(payPrice)>=0"
                   class="paymentItem listItem btn-audio"
                   :class="{select:paytype=='混合支付'}"
                   @click="changepaytype('混合支付')"
@@ -152,10 +153,10 @@
                   </div>
                 </div>
                 <div
+                  v-show="bookinfo.customer_type == 2&&Number(payPrice)>=0"
                   class="paymentItem listItem btn-audio"
                   :class="{select:paytype=='签账'}"
                   @click="changepaytype('签账')"
-                  v-show="bookinfo.customer_type == 2"
                 >
                   <div class="iconView">
                     <img src="../assets/images/qianzhang.png" />
@@ -642,9 +643,9 @@ export default {
       if (this.choosquan) {
         sum = Number(sum) - Number(this.choosquan.v_amount)
       }
-      if (sum < 0) {
-        sum = 0
-      }
+      // if (sum < 0) {
+      //   sum = 0
+      // }
       return sum
     }
   }

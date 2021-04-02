@@ -19,7 +19,7 @@
             <i slot="prefix" class="iconfont icon-lock"></i>
           </el-input>
         </div>
-        <div class="btn" @click="login">登陆</div>
+        <div class="btn" @click="login">登录</div>
       </div>
     </div>
     <signAgreement @close="signPage=false" v-if="signPage"></signAgreement>
@@ -61,10 +61,6 @@ export default {
           localStorage.setItem('userId', res.data.data.id)
           sessionStorage.setItem('userInfo', JSON.stringify(res.data.data));
           this.getInfo(res.data)
-          var a = JSON.stringify({ id: res.data.data.storeid });
-          // console.log(a)
-          javascript: jsSzb.smInit(a);
-          // return false;
         } else {
           this.$message.error(res.data.msg)
         }
@@ -73,7 +69,7 @@ export default {
         // console.log(err)
       }
     },
-    async getInfo (info) {
+    async getInfo (info, id) {
       if (info.sign_photo != null) {
         const res = await this.$axios.get('/api?datatype=more&storeid=' + info.data.storeid)
         if (res.data.code == 1) {
@@ -81,7 +77,13 @@ export default {
           sessionStorage.setItem('shopInfo', JSON.stringify(data))
           sessionStorage.setItem('shoptype', data.type_id)
           localStorage.setItem('logName', this.name)
-          this.$router.push({ name: 'Home' })
+          this.$router.replace({ name: 'Home', params: { from: 'login' } })
+          if (data.is_doublescreen == '1') {
+            var a = JSON.stringify({ id: info.data.storeid });
+            // console.log(a)
+            javascript: jsSzb.smInit(a);
+            // return false;
+          }
         }
       } else {
         this.$router.push({ name: 'signPage' })

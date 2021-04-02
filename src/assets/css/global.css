@@ -344,3 +344,8 @@ span.xing{
   flex: 1;
   margin-right: 50px;
 }
+
+.printTest {
+  position: fixed;
+  bottom: 0;
+}

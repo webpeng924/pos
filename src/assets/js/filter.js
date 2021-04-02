@@ -2,8 +2,10 @@ import Vue from 'vue'
 Vue.filter('imgUrl', function (data) {
   if (data) {
     return 'https://hb.rgoo.com/' + data
+    // return 'https://sz.rgoo.com/' + data
   } else {
     return 'https://hb.rgoo.com/upload/shop/moren.jpg'
+    // return 'https://sz.rgoo.com/upload/shop/moren.jpg'
   }
 })
 

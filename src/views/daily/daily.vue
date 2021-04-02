@@ -27,7 +27,7 @@
             <span>{{total}}</span>
           </div>
           <button class="btn-detail" @click="ysmingxi=true"></button>
-          <button class="btn-audio btn-print" @click="dialogVisible = true">打印小票</button>
+          <button class="btn-audio btn-print" @click="dialogVisible = true;printTest=false">打印小票</button>
         </div>
         <div class="listView">
           <div class="one" v-show="list1.length">
@@ -49,7 +49,7 @@
               <!-- <span>虚</span> -->
             </div>
             <div class="item" v-for="(v,k) in list2" :key="k">
-              <span class="s2">储值账户</span>
+              <span class="s2">会员卡扣款</span>
               <span>￥{{v.stotal}}</span>
               <!-- <span class="s2">39</span> -->
             </div>
@@ -201,7 +201,13 @@
             </div>
           </div>
           <div class="two">
-            <el-progress type="circle" :percentage="percentage" :stroke-width="20" :width="150"></el-progress>
+            <el-progress
+              type="circle"
+              :percentage="percentage > 100 ? 100 : percentage"
+              :stroke-width="20"
+              :width="150"
+              :format="_format(percentage)"
+            ></el-progress>
             <p>业绩完成度</p>
           </div>
         </div>
@@ -222,7 +228,7 @@
                     :text-inside="true"
                     :stroke-width="15"
                     v-if="!isNaN(card/infolist.zong*100)"
-                    :percentage="Number((card/infolist.zong*100).toFixed(0))"
+                    :percentage="Number((card/infolist.zong*100).toFixed(0))>100?100:Number((card/infolist.zong*100).toFixed(0))"
                     status="warning"
                   ></el-progress>
                   <span>{{card}} 人</span>
@@ -232,7 +238,7 @@
                     :text-inside="true"
                     :stroke-width="15"
                     v-if="!isNaN(cardsum/total*100)"
-                    :percentage="Number((cardsum/total*100).toFixed(0))"
+                    :percentage="Number((cardsum/total*100).toFixed(0))>100?100:Number((cardsum/total*100).toFixed(0))"
                     status="success"
                   ></el-progress>
                   <span>{{cardsum}} 元</span>
@@ -351,7 +357,7 @@
         :append-to-body="false"
       >
         <span slot="title" class="dialog-title">打印预览</span>
-        <div id="print">
+        <div id="print1">
           <div id="printContent" class="print-58">
             <div id="print-bcView" ref="print">
               <div class="header">
@@ -377,15 +383,15 @@
                       <td>卡付类:</td>
                       <!-- <td></td> -->
                     </tr>
-                    <tr v-for="(v,k) in list2" :key="k+'a'">
-                      <td>储值账户</td>
+                    <tr v-for="(v,k) in list2" :key="k+'b'">
+                      <td>会员卡扣款</td>
                       <td>{{v.stotal}}</td>
                     </tr>
                     <tr v-show="list3.length">
                       <td>欠款类:</td>
                       <!-- <td></td> -->
                     </tr>
-                    <tr v-for="(v,k) in list3" :key="k+'a'">
+                    <tr v-for="(v,k) in list3" :key="k+'c'">
                       <td>会员签账</td>
                       <td>{{v.stotal}}</td>
                     </tr>
@@ -402,24 +408,23 @@
         </div>
         <span slot="footer" class="dialog-footer">
           <div class="btn gray" @click="dialogVisible = false">关闭</div>
-          <div class="btn green" @click="print1">打印</div>
-          <!-- <el-button @click="dialogVisible = false" class="btn gray">取 消</el-button>
-        <el-button type="primary"
-          @click="dialogVisible = false" class="btn green">确 定</el-button>-->
+          <div class="btn green" @click="print">打印</div>
         </span>
       </el-dialog>
     </div>
     <div class="set_page" :class="{activePage:ysmingxi}">
       <ysmingxi @close="ysmingxi=false" v-if="ysmingxi" :Date="date"></ysmingxi>
     </div>
+    <printPage class="printTest" v-if="printTest" :printList="printList"></printPage>
   </div>
 </template>
 
 <script>
+import printPage from '../../components/print'
 import ysmingxi from './ysmingxi'
 import moment from 'moment'
 export default {
-  components: { ysmingxi },
+  components: { ysmingxi, printPage },
   props: {},
   data () {
     return {
@@ -428,6 +433,7 @@ export default {
       type: 1,
       list: [],
       dialogVisible: false,
+      printTest: false,
       ysmingxi: false,
       storeid: sessionStorage.getItem('storeid'),
       shopInfo: JSON.parse(sessionStorage.getItem('shopInfo')),
@@ -477,9 +483,9 @@ export default {
       return moment(new Date()).format('YYYY-MM')
     },
     percentage () {
-      let percentage = 0
+      let percentage = this.total
       if (this.target != 0) {
-        percentage = Number((this.total / this.target * 100).toFixed(2))
+        percentage = Number(((this.total / this.target) * 100).toFixed(2))
       }
       return percentage
     }
@@ -493,15 +499,25 @@ export default {
           return '支付宝';
         case 'cash':
           return '现金';
+        case 'mixed':
+          return '混合支付';
+        case 'signbill':
+          return '会员签账';
         default:
           return '其他'
       }
     }
   },
   methods: {
+    _format (value) {
+      return () => {
+        return value + '%'
+      }
+    },
     modifyTarget () {
       this.$prompt('', '修改本月营收目标', {
         distinguishCancelAndClose: true,
+        closeOnClickModal: false,
         confirmButtonText: '确定修改',
         cancelButtonText: '取消',
         inputValue: this.target,
@@ -541,10 +557,11 @@ export default {
         this.target = Number(res.data.data)
       }
     },
-    print1 () {
-      this.$print(this.$refs.print)
-    },
     print () {
+      if ((window.navigator.userAgent).indexOf('wv') == -1) {
+        this.printaa()
+        return
+      }
       let arr = [{ "name": JSON.parse(sessionStorage.getItem('shopInfo')).shop_name, "style": "1" }]
       let time = ''
       let type = ''
@@ -576,7 +593,7 @@ export default {
       }
       if (this.list3.length != 0) {
         arr.push({ "name": "" }, { "name": "欠款类:", "value": "" })
-        this.list2.forEach(item => {
+        this.list3.forEach(item => {
           let bb = {
             "name": this.$options.filters['paytype'](item.pay_type), "value": item.stotal
           }
@@ -590,6 +607,79 @@ export default {
       var a = JSON.stringify(arr);
       javascript: jsSzb.smPrint(a);
       return false;
+    },
+    printaa () {
+      let titleList = []
+      // 消费产品
+      let goodsList = []
+
+      // 支付列表
+      let payList = []
+      if (this.list1.length != 0) {
+        payList.push({ "name": "现金类:" })
+        this.list1.forEach(item => {
+          let bb = {
+            "name": this.$options.filters['paytype'](item.pay_type), "val1": item.stotal
+          }
+          payList.push(bb)
+        })
+      }
+      if (this.list2.length != 0) {
+        payList.push({ "name": "" }, { "name": "卡付类:" })
+        this.list2.forEach(item => {
+          let bb = {
+            "name": this.$options.filters['paytype'](item.pay_type), "val1": item.stotal
+          }
+          payList.push(bb)
+        })
+      }
+      if (this.list3.length != 0) {
+        payList.push({ "name": "" }, { "name": "欠款类:" })
+        this.list3.forEach(item => {
+          let bb = {
+            "name": this.$options.filters['paytype'](item.pay_type), "val1": item.stotal
+          }
+          payList.push(bb)
+        })
+      }
+
+      // 折扣信息
+      let discontList = []
+
+      // 会员信息
+      let memeberinfo = []
+
+      // 备注
+      let printTime = '打印时间：' + moment().format('YYYY-MM-DD HH:mm')
+      let checkmen = '操作员：' + JSON.parse(sessionStorage.getItem('userInfo')).username
+      let remarkinfo = [{ "name": printTime }, { "name": checkmen }, { "name": "签名：" }]
+      let time = ''
+      let type = ''
+      if (this.date[0] == this.date[1]) {
+        type = '日结汇总'
+        time = '记账日期：' + this.date[0]
+      } else {
+        type = '营收汇总'
+        time = '记账日期：' + this.date[0] + '至' + this.date[1]
+      }
+      let obj = {
+        shopname: JSON.parse(sessionStorage.getItem('shopInfo')).shop_name,
+        type: type,
+        order_no: '',
+        Othertime: time,
+        titleList: titleList,
+        goodsList: goodsList,
+        discontList: discontList,
+        payList: payList,
+        memeberinfo: memeberinfo,
+        remarkinfo: remarkinfo
+      }
+      this.printList = JSON.stringify(obj)
+      this.printTest = true
+      setTimeout(() => {
+        this.printTest = false
+        this.printList = ''
+      }, 5000);
     },
     async getData () {
       const res = await this.$axios.get('/api?datatype=day_money_index', {

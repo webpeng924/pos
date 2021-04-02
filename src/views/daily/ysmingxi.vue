@@ -7,13 +7,6 @@
           {{ title }}
           <!-- <i class="el-icon-arrow-down el-icon--right"></i> -->
         </span>
-        <!-- <el-dropdown @command="handleCommand">
-         
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="营收明细">营收明细</el-dropdown-item>
-            <el-dropdown-item command="卡项明细">卡项明细</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>-->
       </div>
       <div class="dateView">
         <el-date-picker
@@ -32,7 +25,7 @@
       <h2 slot="title" style="text-align: center;">筛选条件</h2>
       <div class="drawerlist">
         <div class="draweritem">
-          <el-input placeholder="请输入客户名称/手机" v-model="searchphone" clearable>
+          <el-input placeholder="请输入客户名称/手机/单号" v-model="searchphone" clearable>
             <i slot="prefix" class="el-input__icon el-icon-search"></i>
           </el-input>
         </div>
@@ -48,54 +41,24 @@
       <div class="menuItem btn-audio" @click="chos = 3" :class="{ select: chos == 3 }">
         <label>收银</label>
       </div>
-      <div class="menuItem btn-audio" @click="chos = 2" :class="{ select: chos == 2 }">
-        <label>卖卡</label>
-      </div>
       <div class="menuItem btn-audio" @click="chos = 1" :class="{ select: chos == 1 }">
         <label>充值</label>
       </div>
+      <div class="menuItem btn-audio" @click="chos = 2" :class="{ select: chos == 2 }">
+        <label>办卡</label>
+      </div>
     </div>
-    <!-- <div class="menuView" v-show="title == '卡项明细'">
-      <div
-        class="menuItem btn-audio"
-        :class="{ select: chos == 1 }"
-        @click="chos = 1"
-      >
-        <label class="select">全部</label>
-      </div>
-      <div
-        class="menuItem btn-audio"
-        :class="{ select: chos == 3 }"
-        @click="chos = 3"
-      >
-        <label class>开卡</label>
-      </div>
-      <div
-        class="menuItem btn-audio"
-        :class="{ select: chos == 4 }"
-        @click="chos = 4"
-      >
-        <label class>充值</label>
-      </div>
-      <div
-        class="menuItem btn-audio"
-        :class="{ select: chos == 5 }"
-        @click="chos = 5"
-      >
-        <label class>还款</label>
-      </div>
-      <div
-        class="menuItem btn-audio"
-        :class="{ select: chos == 6 }"
-        @click="chos = 6"
-      >
-        <label class>退款</label>
-      </div>
-    </div>-->
-    <div class="bomView">
-      <el-table :data="tableData" stripe style="width: 100%" height="100%">
+    <div class="bomView" v-show="chos==3">
+      <el-table :data="tableData" stripe style="width: 100%" height="100%" ref="table1">
+        <el-table-column prop="name" label="结账时间" width="200">
+          <template slot-scope="scope">
+            {{
+            scope.row.dateline && scope.row.dateline | time
+            }}
+          </template>
+        </el-table-column>
         <el-table-column prop="type" label="类型" width="80"></el-table-column>
-        <el-table-column label="单号" width="150" show-overflow-tooltip>
+        <el-table-column label="单号" width="200" show-overflow-tooltip>
           <template slot-scope="scope">
             {{
             scope.row.pay_sn ? scope.row.pay_sn : scope.row.order_no
@@ -107,36 +70,47 @@
             slot-scope="scope"
           >{{ scope.row.customer_type==2?scope.row.name:'散客' }} ({{ scope.row.customer_type==2?scope.row.mobile:'' }})</template>
         </el-table-column>
-        <el-table-column prop="address" label="消费内容">
+        <el-table-column prop="address" label="消费内容" v-show="chos==3">
           <template slot-scope="scope">
             <p v-if="scope.row.customer_type==1&&!scope.row.iteminfo">快速收银</p>
-            <p v-else v-for="(item, index) in scope.row.iteminfo" :key="index">{{ item.itemname }}</p>
+            <p
+              v-else
+              v-for="(item, index) in scope.row.iteminfo"
+              :key="index"
+            >{{ item.is_usecard=='1'?item.itemname+'-(扣次卡)':item.itemname }}</p>
           </template>
         </el-table-column>
-        <el-table-column prop="address" label="支付方式">
+        <!-- <el-table-column type="expand">
+          <template slot-scope="props">
+            <div v-for="(i,k) in props.row.mixedinfo" :key="k">
+              <span style="margin-left:60%;width:300px;display:inline-block">{{ i.pay_type|paytype}}</span>
+              <span>{{ i.money }}</span>
+            </div>
+          </template>
+        </el-table-column>-->
+        <el-table-column prop="address" label="支付方式" width="100">
           <template slot-scope="scope">
-            <span v-if="scope.row.pay_type">
-              {{
-              scope.row.pay_type | paytype
-              }}
-            </span>
+            <div v-if="scope.row.pay_type">
+              <el-popover placement="right" trigger="click" :disabled="!scope.row.mixedinfo">
+                <el-table :data="scope.row.mixedinfos">
+                  <el-table-column width="150" property="pay_type" label="支付详情"></el-table-column>
+                  <el-table-column width="100" property="money"></el-table-column>
+                </el-table>
+                <span slot="reference">
+                  {{
+                  scope.row.pay_type | paytype
+                  }}
+                </span>
+              </el-popover>
+            </div>
             <span v-else></span>
           </template>
         </el-table-column>
+
         <el-table-column prop="dis_total" label="金额">
-          <template slot-scope="scope">
-            {{
-            scope.row.type=='收银'? scope.row.dis_total : scope.row.change
-            }}
-          </template>
+          <template slot-scope="scope">{{ scope.row.dis_total }}</template>
         </el-table-column>
-        <el-table-column prop="name" label="结账时间" width="200">
-          <template slot-scope="scope">
-            {{
-            scope.row.dateline && scope.row.dateline | time
-            }}
-          </template>
-        </el-table-column>
+        <el-table-column prop="remark" label="备注" show-overflow-tooltip></el-table-column>
         <el-table-column prop="address" label="操作" v-if="chos==3">
           <template slot-scope="scope">
             <span
@@ -147,116 +121,55 @@
         </el-table-column>
       </el-table>
     </div>
-    <div class="bomView" v-show="0">
-      <el-table :data="tableData" stripe style="width: 100%">
-        <el-table-column prop="date" label="名称" width="150"></el-table-column>
-        <el-table-column prop="name" label="数量"></el-table-column>
-        <el-table-column prop="address" label="均价"></el-table-column>
-        <el-table-column prop="address" label="总金额"></el-table-column>
-        <el-table-column prop="address" label="现金金额"></el-table-column>
-        <el-table-column prop="address" label="卡付金额"></el-table-column>
-        <el-table-column prop="address" label="男客"></el-table-column>
-        <el-table-column prop="address" label="女客"></el-table-column>
-        <el-table-column prop="address" label="营业占比"></el-table-column>
-      </el-table>
-    </div>
-    <!-- <div class="bomView" v-show="title == '卡项明细'">
-      <el-table :data="tableData" stripe style="width: 100%">
-        <el-table-column prop="date" label="时间"></el-table-column>
-        <el-table-column prop="name" label="单号"></el-table-column>
-        <el-table-column prop="address" label="姓名"></el-table-column>
-        <el-table-column prop="address" label="手机号"></el-table-column>
-        <el-table-column prop="address" label="卡号"></el-table-column>
-        <el-table-column prop="address" label="卡类别"></el-table-column>
-        <el-table-column prop="address" label="账户类别"></el-table-column>
-        <el-table-column prop="address" label="业务类别"></el-table-column>
-        <el-table-column prop="address" label="总金额"></el-table-column>
-        <el-table-column prop="address" label="操作">
-          <el-button @click="receiptVisible = true">详情</el-button>
+    <div class="bomView" v-show="chos!=3">
+      <el-table :data="tableData" stripe style="width: 100%" height="100%" ref="table1">
+        <el-table-column prop="name" label="结账时间" width="200">
+          <template slot-scope="scope">
+            {{
+            scope.row.dateline && scope.row.dateline | time
+            }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="type" label="类型" width="80"></el-table-column>
+        <el-table-column label="单号" width="200" show-overflow-tooltip>
+          <template slot-scope="scope">
+            {{
+            scope.row.pay_sn ? scope.row.pay_sn : scope.row.order_no
+            }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="name" label="客户信息" show-overflow-tooltip>
+          <template
+            slot-scope="scope"
+          >{{ scope.row.customer_type==2?scope.row.name:'散客' }} ({{ scope.row.customer_type==2?scope.row.mobile:'' }})</template>
+        </el-table-column>
+        <el-table-column prop="address" label="支付方式">
+          <template slot-scope="scope">
+            <div v-if="scope.row.pay_type">
+              <el-popover placement="right" trigger="click" :disabled="!scope.row.mixedinfo">
+                <el-table :data="scope.row.mixedinfos">
+                  <el-table-column width="150" property="pay_type" label="支付详情"></el-table-column>
+                  <el-table-column width="100" property="money"></el-table-column>
+                </el-table>
+                <span slot="reference">
+                  {{
+                  scope.row.pay_type | paytype
+                  }}
+                </span>
+              </el-popover>
+            </div>
+            <span v-else></span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="dis_total" label="金额">
+          <template slot-scope="scope">{{ scope.row.change}}</template>
         </el-table-column>
       </el-table>
-    </div>-->
+    </div>
+
     <div class="set_page" :class="{ activePage: add }">
       <addPro @close="add = false"></addPro>
     </div>
-
-    <!-- 卡项详情 -->
-    <!-- <div class="receipt">
-      <el-dialog
-        :close-on-click-modal="false"
-        :visible.sync="receiptVisible"
-        width="35%"
-        custom-class="receipt-box"
-        :modal-append-to-body="false"
-      >
-        <span slot="title">单据详情</span>
-        <div class="bigLine"></div>
-        <div class="line"></div>
-        <div class="receipt-header">
-          <div class="cell">
-            <span>水单号：</span>
-            <span>2013123123</span>
-          </div>
-          <div class="cell">
-            <span>时间：</span>
-            <span>20200808 09281</span>
-          </div>
-        </div>
-        <div class="receipt-content">
-          <div class="cell">
-            <span>卡类型：</span>
-            <span>会员卡</span>
-          </div>
-          <div class="cell">
-            <span>卡号：</span>
-            <span>12345678</span>
-          </div>
-          <div class="cell">
-            <span>姓名：</span>
-            <span>小明</span>
-          </div>
-          <div class="cell">
-            <span>手机号：</span>
-            <span>138123123123</span>
-          </div>
-        </div>
-        <div class="receipt-bottom">
-          <div class="cell">
-            <span>业务类别：</span>
-            <span>卡销售</span>
-          </div>
-          <div class="cellOnly cell">
-            <span>金额分类：</span>
-            <div class="cell-price">
-              <div class="price-item">
-                <p>储值销售</p>
-                <p>¥0</p>
-              </div>
-              <div class="price-item">
-                <p>储值金额</p>
-                <p>¥0</p>
-              </div>
-              <div class="price-item">
-                <p>品项金额</p>
-                <p>¥4320</p>
-              </div>
-              <div class="price-item">
-                <p>合计金额</p>
-                <p>¥4320</p>
-              </div>
-            </div>
-          </div>
-          <div class="cell">
-            <span>销售人员：</span>
-            <span>李廊坊（1）</span>
-          </div>
-          <div class="cell">
-            <span>支付方式：</span>
-            <span>现金：4320</span>
-          </div>
-        </div>
-      </el-dialog>
-    </div>-->
 
     <!-- 退货窗口 -->
     <el-dialog
@@ -490,11 +403,22 @@ export default {
       });
       if (res.code !== 1 && !res.data.data) return this.tableData = [];
       this.tableData = res.data.data;
-      if (this.chos == 1) {
-        this.tableData.forEach(item => {
+      this.tableData.forEach(item => {
+        if (this.chos != 3) {
           this.$set(item, 'customer_type', 2)
-        })
-      }
+        }
+        if (item.mixedinfo) {
+          let obj = JSON.parse(item.mixedinfo)
+          let arr = []
+          for (var i in obj) {
+            if (obj[i]) {
+              arr.push({ pay_type: this.$options.filters['paytype'](i), money: obj[i] })
+            }
+          }
+          this.$set(item, 'mixedinfos', arr)
+        }
+      })
+      this.$refs.table1.doLayout()
     },
     headerClass () {
       return 'text-align: center'
@@ -526,7 +450,7 @@ export default {
         case "signbill":
           return "会员签账";
         case "card":
-          return "储值账户";
+          return "会员卡扣款";
         default:
           return "其他";
       }
@@ -628,6 +552,11 @@ export default {
         margin-right: 15px;
       }
     }
+  }
+  .btn-filter {
+    width: 40px;
+    height: 40px;
+    background: #fff url(../../assets/images/filter.png) center / 28px no-repeat;
   }
   .drawerlist {
     padding: 0 20px;

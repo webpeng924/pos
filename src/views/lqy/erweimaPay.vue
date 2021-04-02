@@ -7,42 +7,24 @@
     <div class="erweima-pay">
       <div class="pay-item">
         <div class="pay-header">支付宝</div>
-        <!-- <div class="pay-default" @click="updata('zfb')" v-if="!zfb">
-        <i class="el-icon-plus avatar-uploader-icon"></i>
-      </div>
-      <div class="pay-uploader" v-else>
-        <img :src="`http://hb.rgoo.com${zfb}`" alt="" />
-        </div>-->
         <div class="pay-uploader" v-if="zfb">
-          <img :src="`http://hb.rgoo.com${zfb}`" alt />
+          <img :src="zfb|imgUrl" alt />
         </div>
         <el-button type="primary" class="mt20" size="small" @click="updata('zfb')">上传图片</el-button>
       </div>
       <div class="line"></div>
       <div class="pay-item">
         <div class="pay-header">微 信</div>
-        <!-- <div class="pay-default" @click="updata('wx')" v-if="!wx">
-        <i class="el-icon-plus avatar-uploader-icon"></i>
-      </div>
-      <div class="pay-uploader" v-else>
-        <img :src="`http://hb.rgoo.com${wx}`" alt="" />
-        </div>-->
         <div class="pay-uploader" v-if="wx">
-          <img :src="`http://hb.rgoo.com${wx}`" alt />
+          <img :src="wx|imgUrl" alt />
         </div>
         <el-button type="primary" size="small" class="mt20" @click="updata('wx')">上传图片</el-button>
       </div>
       <div class="line"></div>
       <div class="pay-item">
         <div class="pay-header">其 他</div>
-        <!-- <div class="pay-default" @click="updata('wx')" v-if="!wx">
-        <i class="el-icon-plus avatar-uploader-icon"></i>
-      </div>
-      <div class="pay-uploader" v-else>
-        <img :src="`http://hb.rgoo.com${wx}`" alt="" />
-        </div>-->
         <div class="pay-uploader" v-if="other">
-          <img :src="`http://hb.rgoo.com${other}`" alt />
+          <img :src="other|imgUrl" alt />
         </div>
         <el-button type="primary" size="small" class="mt20" @click="updata('other')">上传图片</el-button>
       </div>
@@ -65,7 +47,7 @@ export default {
     updata (type) {
       let option = {
         title: type,
-        msg: "建议图片大小：2M"
+        // msg: "建议图片大小：2M"
       };
       this.$refs.cropper.open(option, data => {
         this[type] = data;

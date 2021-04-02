@@ -36,7 +36,7 @@
               @click="addworker(v)"
             >
               <div class="imgView">
-                <img :src="v.avatar?v.avatar:'/upload/shop/moren.jpg'|imgUrl" />
+                <img :src="v.avatar|imgUrl" />
               </div>
               <div class="textView">
                 <div class="nameView">{{v.name}}</div>

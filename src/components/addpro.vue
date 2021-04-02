@@ -261,7 +261,7 @@ export default {
     openCropper () {
       let option = {
         title: '项目图',
-        msg: '建议图片大小：2M',
+        // msg: '建议图片大小：2M',
         fixedNumber: [3, 2]
       };
       this.$refs.cropper.open(option, (data) => {

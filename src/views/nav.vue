@@ -63,6 +63,13 @@
         <span>积分商城</span>
       </div>
     </router-link>
+    <router-link :to="{name:'service'}">
+      <div class="nav_item">
+        <i style="line-height:60px" class="el-icon-user-solid"></i>
+        <span>联系客服</span>
+      </div>
+    </router-link>
+    <p class="pp">V. 21032500-1</p>
   </div>
 </template>
 
@@ -130,6 +137,12 @@ export default {
       color: #fff;
       background: #dc670b;
     }
+  }
+  .pp {
+    position: fixed;
+    bottom: 0;
+    text-align: center;
+    width: 120px;
   }
 }
 </style>

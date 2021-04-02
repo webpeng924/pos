@@ -173,6 +173,11 @@ export default {
       const res = await this.$axios.get('/api?datatype=more&storeid=' + this.storeid)
       if (res.data.code == 1) {
         this.shopInfo = res.data.data
+        if (this.shopInfo.is_doublescreen == '1') {
+          var a = JSON.stringify({ id: info.data.storeid });
+          javascript: jsSzb.smInit(a);
+          // return false;
+        }
       }
     }
   },

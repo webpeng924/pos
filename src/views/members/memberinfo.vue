@@ -81,9 +81,6 @@
           "
           :class="{select:name =='案例图片'}"
         >案例图片</div>
-        <!-- <div class="menuItem btn-audio">沟通记录</div> -->
-        <!-- <div class="menuItem btn-audio">产品寄存</div> -->
-        <!-- <div class="menuItem btn-audio">皮肤检测</div> -->
         <div
           class="menuItem btn-audio"
           @click="
@@ -137,13 +134,13 @@
         <div class="accInfoView">
           <div class="accItem">
             <div class="valueView balanceView">
-              <label>{{ userinfo.balance-userinfo.gift_money>0?(userinfo.balance-userinfo.gift_money).toFixed(2):userinfo.balance }}</label>
+              <label>{{ (userinfo.balance-userinfo.gift_money).toFixed(2) }}</label>
             </div>
             <div class="nameView">储值账户</div>
           </div>
           <div class="accItem">
             <div class="valueView balanceView">
-              <label>{{ userinfo.balance-userinfo.gift_money>0?userinfo.gift_money:userinfo.balance }}</label>
+              <label>{{ userinfo.gift_money}}</label>
             </div>
             <div class="nameView">赠送账户</div>
           </div>
@@ -265,7 +262,17 @@
       </div>
     </div>
     <div class="contentView" v-show="show == 3">
-      <div class="subTView">{{ name }}</div>
+      <div class="subTView" style="display:flex">
+        <p style="flex:1">{{ name }}</p>
+        <el-input
+          placeholder="搜索消费内容"
+          v-model="searchtxt"
+          v-show="name=='消费记录'"
+          style="width:300px;border:#dc670b;margin:0 10px"
+        >
+          <el-button slot="append" @click="getlist(2)">搜索</el-button>
+        </el-input>
+      </div>
       <div class="listView" style="height: calc(100% - 85px);">
         <el-table
           ref="Table"
@@ -289,7 +296,7 @@
               }}
             </template>
           </el-table-column>
-          <el-table-column label="账户">储值账户</el-table-column>
+          <el-table-column label="账户">会员账户</el-table-column>
           <el-table-column prop="type" label="类别"></el-table-column>
           <el-table-column prop="old_money" label="前次余额"></el-table-column>
           <el-table-column prop="change" label="变动金额"></el-table-column>
@@ -303,6 +310,13 @@
           v-show="name=='消费记录'"
         >
           <el-table-column width="50" type="index"></el-table-column>
+          <el-table-column prop="itemname" label="时间" width="110">
+            <template slot-scope="scope">
+              {{
+              scope.row.dateline | Time
+              }}
+            </template>
+          </el-table-column>
           <el-table-column prop="pay_sn" label="单号" width="200" show-overflow-tooltip>
             <template slot-scope="scope">
               {{
@@ -315,17 +329,31 @@
               <p v-for="(v,k) in scope.row.info" :key="k">{{v.itemname}} X {{v.num}}</p>
             </template>
           </el-table-column>
-          <el-table-column label="支付方式">
-            <template slot-scope="scope">{{scope.row.pay_type |payType}}</template>
-          </el-table-column>
-          <el-table-column prop="change" label="支付金额"></el-table-column>
-          <el-table-column prop="itemname" label="时间">
+          <el-table-column label="支付方式" width="180">
             <template slot-scope="scope">
-              {{
-              scope.row.dateline | Time
-              }}
+              <div v-if="scope.row.pay_type=='mixed'">
+                <el-popover placement="right" trigger="click">
+                  <el-table :data="scope.row.mixedinfos">
+                    <el-table-column width="150" property="pay_type" label="支付详情"></el-table-column>
+                    <el-table-column width="100" property="money"></el-table-column>
+                  </el-table>
+                  <span slot="reference">
+                    {{
+                    scope.row.pay_type | payType
+                    }}
+                  </span>
+                </el-popover>
+              </div>
+              <span v-else>
+                {{
+                scope.row.pay_type | payType
+                }}
+              </span>
             </template>
           </el-table-column>
+          <el-table-column prop="change" label="支付金额" width="180"></el-table-column>
+          <el-table-column prop="balance" label="卡内余额" width="180"></el-table-column>
+          <el-table-column prop="remark" label="备注"></el-table-column>
         </el-table>
       </div>
     </div>
@@ -523,6 +551,7 @@ export default {
   data () {
     return {
       urls: [],
+      searchtxt: '',
       show: 1,
       showedit: false,
       name: "",
@@ -684,7 +713,7 @@ export default {
     openCropper () {
       let option = {
         title: '案例图',
-        msg: '建议图片大小：2M'
+        // msg: '建议图片大小：2M'
       };
       this.$refs.cropper.open(option, (data) => {
         // console.log(data)
@@ -820,13 +849,26 @@ export default {
           params: {
             storeid: this.storeid,
             member_id: this.member_id,
+            searchtxt: type == 2 ? this.searchtxt : null,
             type: type
           }
         }
       )
       if (res.data.code == 1) {
         this.$message.success("加载完成")
-        this.tableData = res.data.data
+        this.tableData = res.data.data ? res.data.data : []
+        this.tableData.forEach(item => {
+          if (item.mixedinfo) {
+            let obj = JSON.parse(item.mixedinfo)
+            let arr = []
+            for (var i in obj) {
+              if (obj[i]) {
+                arr.push({ pay_type: this.$options.filters['payType'](i), money: obj[i] })
+              }
+            }
+            this.$set(item, 'mixedinfos', arr)
+          }
+        })
       }
     }
   },

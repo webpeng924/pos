@@ -2,12 +2,12 @@
   <div id="app" v-cloak>
     <sz-nav></sz-nav>
     <router-view class="page"></router-view>
+    <audio id="audio" src="https://hb.rgoo.com/tishi.mp3" style="display:none;" />
   </div>
 </template>
 
 <script>
 import nav from './views/nav.vue'
-import { setInterval } from 'timers';
 import moment from 'moment'
 
 export default {
@@ -58,6 +58,7 @@ export default {
         params: {
           storeid: sessionStorage.getItem('storeid'),
           sign: 2,
+          noloading: true
         }
       })
       // console.log(res)
@@ -80,20 +81,52 @@ export default {
         })
       }
     },
+    async getyynew () {
+      // console.log('请求预约数据')
+      if (this.$route.path == '/login') return
+      let that = this
+      const res = await this.$axios.get('/api?datatype=get_yylist_read', {
+        params: {
+          storeid: sessionStorage.getItem('storeid'),
+          noloading: true
+        }
+      })
+      // console.log(res)
+      if (res.data.code == 1 && res.data.data) {
+        let list = res.data.data
+        let txt = '</br>'
+        list.forEach(item => {
+          txt += `<p>预约人：${item.name}，手机号：${item.mobile}，预约项目：${item.itemname}，预约时间：${item.yytime}。</p></br>`
+        })
+        that.$alert(txt, '预约提醒', {
+          confirmButtonText: '确认预约',
+          dangerouslyUseHTMLString: true,
+          showClose: false,
+          callback: action => {
+            that.$axios.get('/api?datatype=get_yylist_read_confirm', {
+              params: {
+                storeid: sessionStorage.getItem('storeid'),
+                noloading: true
+              }
+            })
+            this.$message(res.data.msg)
+          }
+        });
+        const audio = document.getElementById('audio')
+        audio.play()
+      }
+    },
     openIn (notify, memberId, v) {
-      // console.log('点击了')
       notify.close()
-      // if (this.$route.path == '/members') {
-      //   sessionStorage.setItem('fromid', memberId)
-      //   this.$router.push({ name: 'Home' })
-      //   // window.history.go(0)
-      // } else {
-      // sessionStorage.setItem('fromid', memberId)
-      // this.$router.push({ name: 'members' })
-      // }
     }
   },
   mounted () {
+    let audio = document.getElementById('audio')
+    audio.play()
+    setTimeout(() => {
+      audio.pause()
+      audio.load()
+    }, 10)
     window.addEventListener('beforeunload', e => this.beforeunloadHandler(e))
     window.addEventListener('unload', e => this.unloadHandler(e))
     window.addEventListener('resize', function () {
@@ -108,6 +141,7 @@ export default {
     let duration = ''
     let newtime = moment().format('YYYY-MM-DD 10:00')
     let member = null
+    let yynew = null
     if (moment(now) > moment(newtime)) {
       // 超过
       this.getList()
@@ -126,8 +160,10 @@ export default {
       member = setInterval(() => {
         this.getList()
       }, 86400000)
-      // console.log(member)
     }, duration)
+    yynew = setInterval(() => {
+      this.getyynew()
+    }, 60000)
   }
 }
 </script>

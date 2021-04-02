@@ -63,15 +63,22 @@
         <button class="btn-comp btn-audio" @click="back">完成</button>
       </div>
     </div>
+    <printPage class="printTest" v-if="printTest" :printList="printList"></printPage>
   </div>
 </template>
 
 <script>
+import print from "print-js"
 import moment from 'moment'
+import printPage from '@/components/print'
 export default {
+  components: {
+    printPage
+  },
   props: ['info', 'money', 'member', 'sign', 'paytype'],
   data () {
     return {
+      printTest: false,
       orderInfo: [],
       storeid: sessionStorage.getItem('storeid'),
       is_doublescreen: JSON.parse(sessionStorage.getItem('shopInfo')).is_doublescreen,
@@ -140,6 +147,10 @@ export default {
       console.log(res)
     },
     print () {
+      if ((window.navigator.userAgent).indexOf('wv') == -1) {
+        this.printaa()
+        return
+      }
       let arr = [{ "name": JSON.parse(sessionStorage.getItem('shopInfo')).shop_name, "style": "1" }, { "name": "收银单", "style": "1" }, { "name": "---" }, { "name": "消费单号：" + this.info.order_no }]
       let time = moment.unix(this.info.paytime).format('YYYY-MM-DD HH:mm')
       arr.push({ "name": "消费日期：" + time }, { "name": "---" }, { "name": "消费明细", "value": "" }, { "name": "标准价", "value": "数量 #A# 金额" }, { "name": "---" })
@@ -170,16 +181,75 @@ export default {
       javascript: jsSzb.smPrint(a);
       return false;
     },
+    printaa () {
+      let titleList = [
+        { name: '消费明细' }, { name: '标准价', val: '数量', val1: '金额' }
+      ]
+      // 消费产品
+      let goodsList = []
+      if (this.sign == 1) {
+        goodsList.push({ name: this.info.cardname })
+      } else if (this.sign == 2) {
+        goodsList.push({ name: this.info.name })
+      } else if (this.sign == 6) {
+        goodsList.push({ name: this.info.name + '（会员卡）' })
+      }
+      goodsList.push({ name: this.info.total, val: 1, val1: this.info.dis_total })
+      // 支付列表
+      let payList = [{ name: "支付方式", val1: "合计" }]
+      if (this.info.pay_type == 'mixed') {
+        let mixedinfo = JSON.parse(this.info.mixedinfo)
+        for (var i in mixedinfo) {
+          if (mixedinfo[i]) {
+            payList.push({ name: this.$options.filters['type'](i), val1: mixedinfo[i] })
+          }
+        }
+      } else {
+        payList.push({ name: this.$options.filters['type'](this.info.pay_type), val1: this.info.dis_total })
+      }
+      // 折扣信息
+      let discontList = []
+      // 会员信息
+      let memeberinfo = []
+      memeberinfo.push({ "name": "会员：" + this.memberInfo.name }, { "name": "卡号：" + this.memberInfo.card_num }, { "name": "手机号：" + this.memberInfo.mobile }, { name: '余额：' + this.memberInfo.balance })
+      // 备注
+      let remark = this.info.remark == null ? '' : this.info.remark
+      let remarkinfo = [{ "name": "备注: " + remark }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" }
+      ]
+      let obj = {
+        shopname: JSON.parse(sessionStorage.getItem('shopInfo')).shop_name,
+        type: '收银单',
+        order_no: this.info.order_no,
+        time: moment.unix(this.info.paytime).format('YYYY-MM-DD HH:mm'),
+        titleList: titleList,
+        goodsList: goodsList,
+        discontList: discontList,
+        payList: payList,
+        memeberinfo: memeberinfo,
+        remarkinfo: remarkinfo
+      }
+
+      this.printList = JSON.stringify(obj)
+      this.printTest = true
+      setTimeout(() => {
+        this.printTest = false
+        this.printList = ''
+      }, 5000);
+    },
+
     print1 () {
+      if ((window.navigator.userAgent).indexOf('wv') == -1) {
+        this.printaa1()
+        return
+      }
       let arr = [{ "name": JSON.parse(sessionStorage.getItem('shopInfo')).shop_name, "style": "1" }, { "name": "收银单", "style": "1" }, { "name": "---" }, { "name": "消费单号：" + this.info.order_no }]
       let time = moment(this.now).format('YYYY-MM-DD HH:mm')
-      arr.push({ "name": "消费日期：" + time }, { "name": "---" })
-      arr.push({ "name": "会员：" + this.memberInfo.name }, { "name": "卡号：" + this.memberInfo.card_num }, { "name": "手机号：" + this.memberInfo.mobile })
+      arr.push({ "name": "消费日期：" + time })
       arr.push({ "name": "---" }, { name: '充值金额', value: Number(this.info.money).toFixed(2) })
       if (this.info.gift_money) {
         arr.push({ name: '赠送金额', value: Number(this.info.gift_money).toFixed(2) })
       }
-      arr.push({ "name": "---" }, { name: '余额', value: this.memberInfo.balance }, { "name": "---" }, { "name": "支付方式", "value": "应收合计" })
+      arr.push({ "name": "---" }, { "name": "会员：" + this.memberInfo.name }, { "name": "卡号：" + this.memberInfo.card_num }, { "name": "手机号：" + this.memberInfo.mobile }, { name: '余额', value: this.memberInfo.balance }, { "name": "---" }, { "name": "支付方式", "value": "支付合计" })
       if (this.paytype == 'mixed') {
         let mixedinfo = JSON.parse(this.newInfo)
         for (var i in mixedinfo) {
@@ -197,7 +267,61 @@ export default {
       javascript: jsSzb.smPrint(a);
       return false;
     },
+    printaa1 () {
+      let titleList = []
+      // 消费产品
+      let goodsList = []
+      goodsList.push({ name: '充值金额', val1: Number(this.info.money).toFixed(2) })
+      if (this.info.gift_money) {
+        goodsList.push({ name: '赠送金额', val1: Number(this.info.gift_money).toFixed(2) })
+      }
+      // 支付列表
+      let payList = [{ name: "支付方式", val1: "支付合计" }]
+      if (this.paytype == 'mixed') {
+        let mixedinfo = JSON.parse(this.newInfo)
+        for (var i in mixedinfo) {
+          if (mixedinfo[i]) {
+            payList.push({ name: this.$options.filters['type'](i), val1: mixedinfo[i] })
+          }
+        }
+      } else {
+        payList.push({ name: this.$options.filters['type'](this.paytype), val1: this.info.money })
+      }
+      // 折扣信息
+      let discontList = []
+      // 会员信息
+      let memeberinfo = []
+      memeberinfo.push({ "name": "会员：" + this.memberInfo.name }, { "name": "卡号：" + this.memberInfo.card_num }, { "name": "手机号：" + this.memberInfo.mobile }, { name: '余额：' + this.memberInfo.balance })
+      // 备注
+      let remark = this.info.remark == null ? '' : this.info.remark
+      let remarkinfo = [{ "name": "备注: " + remark }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" }
+      ]
+      let obj = {
+        shopname: JSON.parse(sessionStorage.getItem('shopInfo')).shop_name,
+        type: '收银单',
+        order_no: this.info.order_no,
+        time: moment(this.now).format('YYYY-MM-DD HH:mm'),
+        titleList: titleList,
+        goodsList: goodsList,
+        discontList: discontList,
+        payList: payList,
+        memeberinfo: memeberinfo,
+        remarkinfo: remarkinfo
+      }
+
+      this.printList = JSON.stringify(obj)
+      this.printTest = true
+      setTimeout(() => {
+        this.printTest = false
+        this.printList = ''
+      }, 5000);
+    },
+
     print2 () {
+      if ((window.navigator.userAgent).indexOf('wv') == -1) {
+        this.printaa2()
+        return
+      }
       let arr = [{ "name": JSON.parse(sessionStorage.getItem('shopInfo')).shop_name, "style": "1" }, { "name": "收银单", "style": "1" }, { "name": "---" }]
       let time = moment(this.now).format('YYYY-MM-DD HH:mm')
       arr.push({ "name": "消费日期：" + time }, { "name": "---" })
@@ -218,6 +342,50 @@ export default {
       console.log(a)
       javascript: jsSzb.smPrint(a);
       return false;
+    },
+    printaa2 () {
+      let titleList = []
+      // 消费产品
+      let goodsList = [{ name: '快速收款', val1: this.money }]
+      // 支付列表
+      let payList = [{ name: "支付方式", val1: "支付合计" }]
+      if (this.info.pay_type == 'mixed') {
+        let mixedinfo = JSON.parse(this.info.mixedinfo)
+        for (var i in mixedinfo) {
+          if (mixedinfo[i]) {
+            payList.push({ name: this.$options.filters['type'](i), val1: mixedinfo[i] })
+          }
+        }
+      } else {
+        payList.push({ name: this.$options.filters['type'](this.info.pay_type), val1: this.money })
+      }
+      // 折扣信息
+      let discontList = []
+      // 会员信息
+      let memeberinfo = []
+      // 备注
+      let remark = this.info.remark == null ? '' : this.info.remark
+      let remarkinfo = [{ "name": "备注: " + remark }, { "name": "门店电话：" + JSON.parse(sessionStorage.getItem('shopInfo')).mobile }, { "name": "门店地址：" + JSON.parse(sessionStorage.getItem('shopInfo')).address }, { "name": "收银员：" + JSON.parse(sessionStorage.getItem('userInfo')).username }, { "name": "签字：" }, { "name": "感谢您的光临！" }
+      ]
+      let obj = {
+        shopname: JSON.parse(sessionStorage.getItem('shopInfo')).shop_name,
+        type: '收银单',
+        order_no: this.info.order_no,
+        time: moment(this.now).format('YYYY-MM-DD HH:mm'),
+        titleList: titleList,
+        goodsList: goodsList,
+        discontList: discontList,
+        payList: payList,
+        memeberinfo: memeberinfo,
+        remarkinfo: remarkinfo
+      }
+
+      this.printList = JSON.stringify(obj)
+      this.printTest = true
+      setTimeout(() => {
+        this.printTest = false
+        this.printList = ''
+      }, 5000);
     }
   },
   created () {

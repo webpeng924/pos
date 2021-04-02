@@ -78,7 +78,7 @@
             @click="changepeo(item)"
           >
             <div class="imgView btn-audio">
-              <img :src="item.avatar?item.avatar:'/upload/shop/moren.jpg'|imgUrl" alt />
+              <img :src="item.avatar|imgUrl" alt />
             </div>
             <div class="textView btn-audio">
               <div class="overflowText btn-audio">{{item.job_no}}</div>
@@ -276,10 +276,18 @@
     </el-dialog>
 
     <!-- 签到 -->
-    <el-dialog :close-on-click-modal="false" :visible.sync="showSign" width="30%">
-      <div style="text-align: center;padding:20px;font-size:16px">今天是 {{new Date()|moment1}}</div>
-      <div style="text-align: center;padding:20px">
-        <el-button type="primary" @click="toSign" style="width:80%">点击签到</el-button>
+    <el-dialog
+      custom-class="backurl"
+      :close-on-click-modal="false"
+      :visible.sync="showSign"
+      width="30%"
+    >
+      <div
+        style="text-align: center;padding:20px;font-size:18px;color:#fff"
+      >今天是 {{new Date()|moment1}}</div>
+      <div style="height:180px;text-align: center;width:100%" @click="toSign">
+        <!-- <el-button circle type="primary" @click="toSign">点击签到</el-button> -->
+        <img src="../assets/images/backurl.png" style="height:100%" alt />
       </div>
     </el-dialog>
 
@@ -479,7 +487,6 @@ export default {
     async getorderlist () {
       this.orderlist = []
       let status = this.$options.filters['Server'](this.server)
-      const loading = this.$loading({ lock: true, text: '数据加载中...', spinner: 'el-icon-loading', background: 'rgba(0, 0, 0, 0.7)' });
       const res = await this.$axios.get('/api?datatype=get_orderlist', {
         params: {
           storeid: this.storeid,
@@ -723,6 +730,38 @@ export default {
         this.showMemo = false
         this.getorderlist()
       }
+    },
+    async getmember () {
+      let that = this
+      const res = await this.$axios.get('/api?datatype=get_memberlist', {
+        params: {
+          storeid: sessionStorage.getItem('storeid'),
+          sign: 2,
+          noloading: true
+        }
+      })
+      // console.log(res)
+      if (res.data.code == 1 && res.data.data) {
+        let tableData = res.data.data
+        let now = moment().format('YYYY-MM-DD')
+        tableData.forEach(v => {
+          if ((v.birthday1 || v.birthday2) && (v.birthday1 == now || v.birthday2 == now)) {
+            v.notify = this.$notify({
+              title: '提示',
+              message: '今天是会员 ' + v.name + ' 的生日。    我知道了',
+              type: 'warning',
+              showClose: false,
+              duration: 0,
+              offset: 80,
+              onClick: () => { that.openIn(v.notify, v.member_id, v) },
+              position: 'top-right'
+            });
+          }
+        })
+      }
+    },
+    openIn (notify, memberId, v) {
+      notify.close()
     }
   },
   created () {
@@ -737,6 +776,9 @@ export default {
     }
     this.getworkerlist()
     this.getorderlist()
+    if (this.from == 'login') {
+      this.getmember()
+    }
   },
   // mounted () {
   //   let now = moment().format('YYYY-MM-DD')
@@ -813,6 +855,15 @@ export default {
 }
 .el-dialog.popView-contentView .el-dialog__header {
   display: none;
+}
+
+.backurl.el-dialog,
+.el-dialog__header,
+.backurl .el-dialog__body {
+  /* background: url(../assets/images/backurl.png) no-repeat center 64px;
+  background-size: 80%; */
+  background: transparent;
+  box-shadow: none;
 }
 </style>
 

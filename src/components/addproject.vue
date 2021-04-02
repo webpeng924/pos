@@ -2,7 +2,8 @@
   <div id="addpro">
     <div class="topView">
       <button class="btn-back" @click="back"></button>
-      <div class="tView">{{step==1?'添加':'次卡'}}</div>
+      <div class="tView">添加</div>
+      <!-- <div class="tView">{{step==1?'添加':'次卡'}}</div> -->
       <!-- <button class="btn-audio btn-shopCart" @click="step=2" v-show="step==1">下一步</button>
       <button class="btn-audio btn-shopCart" @click="step=1" v-show="step==2">上一步</button>-->
       <button class="btn-audio btn-shopCart" @click="submit">保存</button>
@@ -190,6 +191,11 @@ export default {
   watch: {},
   computed: {},
   methods: {
+    getItemNo () {
+      this.$axios.get('/api?datatype=get_item_autono&storeid=' + this.storeid).then(res => {
+        this.item_no = res.data.data
+      })
+    },
     async getCate () {
       const res = await this.$axios.get('/api?datatype=get_itemcate', {
         params: {
@@ -208,7 +214,7 @@ export default {
     openCropper () {
       let option = {
         title: '项目图',
-        msg: '建议图片大小：2M'
+        // msg: '建议图片大小：2M'
       };
       this.$refs.cropper.open(option, (data) => {
         // console.log(data)
@@ -271,6 +277,8 @@ export default {
       this.belong_job = this.choose.belong_job
       this.is_stop = this.choose.is_stop == 1 ? true : false
       this.remark = this.choose.remark
+    } else {
+      this.getItemNo()
     }
   },
   mounted () { }

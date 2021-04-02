@@ -10,10 +10,7 @@
       <div class="logoView">
         <div class="shopLogo">
           <div @click="openCropper">
-            <img
-              :src="shopInfo.avatar?shopInfo.avatar:'/upload/shop/moren.jpg'|imgUrl"
-              v-show="!src"
-            />
+            <img :src="shopInfo.avatar|imgUrl" v-show="!src" />
             <img :src="src" v-show="src" />
           </div>
         </div>
@@ -119,11 +116,11 @@ export default {
     openCropper () {
       let option = {
         title: '更换头像',
-        msg: '建议图片大小：2M'
+        // msg: '建议图片大小：2M'
       };
       this.$refs.cropper.open(option, (data) => {
         // console.log(data)
-        this.src = 'https://hb.rgoo.com' + data
+        this.src = data
         this.shopInfo.avatar = data
         this.changeLogo(data)
       })

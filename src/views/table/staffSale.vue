@@ -62,6 +62,7 @@ export default {
       }).then(res => {
         if (res.data.code == 1 && res.data.list) {
           res.data.list.forEach(item => {
+            item.job_no = '<' + item.job_no + '>'
             item['xm_num'] = 0
             item['cp_num'] = 0
             item['xm_sub'] = 0

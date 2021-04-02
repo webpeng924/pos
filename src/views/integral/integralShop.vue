@@ -4,6 +4,7 @@
       <div class="tView">积分兑换</div>
       <div class="record" @click="showRecord">兑换记录</div>
       <div>我的积分：{{integral}}</div>
+      <div class="record" @click="showInlist">积分明细</div>
     </div>
     <div class="shopinfo">
       <el-row>
@@ -65,7 +66,7 @@
     </el-dialog>
     <!-- 右侧 -->
     <el-drawer title="兑换记录" :visible.sync="showrecord" direction="rtl">
-      <el-table :data="gridData">
+      <el-table :data="gridData" height="100%">
         <el-table-column property="adt" label="日期" width="100"></el-table-column>
         <el-table-column property="goods_name" label="产品"></el-table-column>
         <el-table-column property="order_num" label="数量" width="70"></el-table-column>
@@ -75,6 +76,13 @@
             <span :style="'color:'+color(row.status_name)">{{row.status_name}}</span>
           </template>
         </el-table-column>
+      </el-table>
+    </el-drawer>
+    <el-drawer title="积分明细" :visible.sync="showinlist" direction="rtl">
+      <el-table :data="integralList" height="100%">
+        <el-table-column property="adt" label="日期时间"></el-table-column>
+        <el-table-column property="integral" label="变动积分" width="80"></el-table-column>
+        <el-table-column property="remark" label="事由"></el-table-column>
       </el-table>
     </el-drawer>
   </div>
@@ -89,12 +97,14 @@ export default {
     return {
       choose: '',
       gridData: [],
+      integralList: [],
       max: 2,
       tableData: [],
       num: 1,
       currentDate: new Date(),
       storeid: sessionStorage.getItem('storeid'),
       showinfo: false,
+      showinlist: false,
       showrecord: false,
       integral: 0,
       shopinfo: JSON.parse(sessionStorage.getItem('shopInfo')),
@@ -181,6 +191,22 @@ export default {
       this.getList()
       this.showrecord = true
     },
+    // 展开并查询记录
+    showInlist () {
+      this.getdata()
+      this.showinlist = true
+    },
+    getdata () {
+      this.$axios.get('/api?datatype=get_integral_list', {
+        params: {
+          storeid: this.storeid
+        }
+      }).then(res => {
+        if (res.data.code == 1) {
+          this.integralList = res.data.data
+        }
+      })
+    },
     getintegral () {
       let month = moment().format('YYYY-MM')
       this.$axios.get('/api?datatype=get_sign_list', {
@@ -223,7 +249,7 @@ export default {
 #integral {
   height: 100%;
   .record {
-    margin-right: 20px;
+    margin: 0 20px;
     cursor: pointer;
     color: #dc670b;
   }
@@ -251,6 +277,9 @@ export default {
       }
     }
   }
+}
+.el-drawer {
+  overflow: scroll;
 }
 
 .bottom {

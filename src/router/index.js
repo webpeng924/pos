@@ -69,6 +69,11 @@ const routes = [
     path: '/integralShop',
     name: 'integralShop',
     component: () => import('@/views/integral/integralShop.vue')
+  },
+  {
+    path: '/service',
+    name: 'service',
+    component: () => import('@/views/integral/service.vue')
   }
 ]
 
@@ -89,7 +94,11 @@ router.beforeEach((to, from, next) => {
   if (to.path == '/login') {
     document.title = '登录'
   }
-  if ((user && shop) || to.path == '/login' || to.path == '/signPage' || to.path == '/sign') {
+  if (user && shop && to.path == '/') {
+    next({
+      path: '/home'
+    })
+  } else if ((user && shop) || to.path == '/login' || to.path == '/signPage' || to.path == '/sign') {
     if (shop) {
       let shop_type = JSON.parse(shop).type_id
       if (shop_type == 1) {

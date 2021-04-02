@@ -26,16 +26,16 @@
               <div class="categoryItem btn-audio" v-for="(v,k) in catelist" :key="k">
                 <label :class="{select:active==v.id}" @click="changeActive(v.id)">
                   {{v.title}}
-                  <i
+                  <!-- <i
                     class="el-icon-remove-outline"
                     @click.stop="delActive(v.id)"
                     style="color:red"
                     v-show="delcate&&v.storeid!=0"
-                  ></i>
+                  ></i>-->
                 </label>
               </div>
             </div>
-            <div class="itemadd" v-if="!delcate">
+            <!-- <div class="itemadd" v-if="!delcate">
               <label @click="addcate=true">
                 <i class="el-icon-circle-plus-outline"></i>
                 添加
@@ -46,7 +46,7 @@
             </div>
             <div class="itemadd" v-else>
               <label @click="delcate=false">完成</label>
-            </div>
+            </div>-->
           </div>
         </div>
         <div class="bview">
@@ -59,9 +59,12 @@
             >
               <div
                 class="nameView"
-                :style="`background:url('http://hb.rgoo.com${v.img?v.img:'/upload/shop/moren.jpg'}') no-repeat 0 0 /100% 100%;`"
+                :style="`background:url('${$options.filters['imgUrl'](v.img)}') no-repeat 0 0 /100% 100%;`"
               ></div>
-              <div class="priceView">{{id==1?v.name:v.goods_name}}</div>
+              <div
+                class="priceView"
+                style="font-size:12px;word-wrap:break-word;height:34px"
+              >{{id==1?v.name:v.goods_name}}</div>
               <div class="priceView">￥{{v.price}}</div>
             </div>
           </div>
@@ -179,7 +182,7 @@
                 >未设置服务人员</label>
               </div>
               <div class="empItem" v-if="v.worker">
-                <img :src="v.worker.avatar?v.worker.avatar:'/upload/shop/moren.jpg'|imgUrl" />
+                <img :src="v.worker.avatar|imgUrl" />
                 <label
                   class="label-name overflowText"
                   @click="openworker(v,k,2)"
@@ -279,6 +282,7 @@
         <div style="display:flex;margin-bottom:35px">
           <span style="width:80px">原价：</span>
           <span>{{editprice}}</span>
+          <span style="padding-left:20px;color:red">（ 特殊折扣产品不予更改！）</span>
         </div>
         <div style="display:flex;margin-bottom:20px">
           <span style="width:80px">折扣：</span>
@@ -331,7 +335,6 @@
 
     <!-- 选择服务人员 -->
     <el-dialog
-      :close-on-click-modal="false"
       :visible.sync="showworker"
       width="1024px"
       center
@@ -352,7 +355,6 @@ import closeBook from '@/components/closeBook.vue'
 import chooseworker from '@/components/choosmember.vue'
 import moment from 'moment'
 import qs from 'qs'
-import { userInfo } from 'os';
 export default {
   components: { chooseworker, closeBook },
   props: ['info', 'from'],
@@ -443,7 +445,8 @@ export default {
     //   this.editdiscount = this.editprice / val
     // },
     yyitem (val, oldValue) {
-      if ((this.info || this.bookinfo) && oldValue) return false
+      let flag = this.info.orderinfo.every(j => j.typeid != 3)
+      if ((this.info || this.bookinfo) && !flag) return false
       this.chooslist = this.chooslist.filter(item => item.typeid != 3)
       if (val != '') {
         let item = {
@@ -480,20 +483,25 @@ export default {
     checkdiscount () {
       if (!this.member) return false
       let ids = []
+      this.newprice = 0
       this.chooslist.forEach(item => {
         if (item.is_usecard == 0) {
           if (this.member.itemInfo && (item.typeid == 1 || item.typeid == 3)) {
             let obj = this.member.itemInfo.find(j => j.itemid == item.itemid)
-            if (obj) { item['discount'] = obj.discount }
-
+            if (obj) {
+              item['discount'] = obj.discount
+              item.subtotal = item.discount * item.price * item.num
+            }
           }
           if (this.member.goodsInfo && item.typeid == 2) {
             let obj = this.member.goodsInfo.find(j => j.itemid == item.itemid)
-            if (obj) { item['discount'] = obj.discount }
-
+            if (obj) {
+              item['discount'] = obj.discount
+              item.subtotal = item.discount * item.price * item.num
+            }
           }
         }
-        item.subtotal = item.discount * item.price * item.num
+        this.newprice += Number(item.subtotal)
       })
     },
     scanCode () {
@@ -582,9 +590,15 @@ export default {
       this.editdisprice = (v.subtotal / v.num).toFixed(2)
     },
     changeDisprice () {
+      // if (Number(this.editdisprice) > Number(this.editprice)) {
+      //   this.editdisprice = this.editprice
+      // }
       this.editdiscount = (this.editdisprice / this.editprice).toFixed(2)
     },
     changeDiscount () {
+      // if (this.editdiscount > 1) {
+      //   this.editdiscount = 1
+      // }
       this.editdisprice = Number(this.editprice * this.editdiscount).toFixed(2)
     },
     modifyPrice () {
@@ -674,7 +688,7 @@ export default {
         this.member = Object.assign(this.member, res.data.data)
         if (this.yyitem) {
           if (this.member.item_discount) {
-            this.yyitem.discount = Number(this.member.item_discount) / 10
+            this.yyitem.discount = (Number(this.member.item_discount) / 10).toFixed(2)
           } else {
             this.yyitem.discount = 1
           }
@@ -684,9 +698,9 @@ export default {
           this.chooslist.forEach(item => {
             if (item.discount == 1 && this.member.goods_discount) {
               if (item.typeid == 2) {
-                item.discount = Number(this.member.goods_discount) / 10
+                item.discount = (Number(this.member.goods_discount) / 10).toFixed(2)
               } else {
-                item.discount = Number(this.member.item_discount) / 10
+                item.discount = (Number(this.member.item_discount) / 10).toFixed(2)
               }
               item.subtotal = item.discount * item.price * item.num
             }
@@ -809,7 +823,7 @@ export default {
         // if (!this.member || this.member.member_id != v.member_id) {
         this.member = this.tableData.find(item => item.member_id == v.member_id)
         this.getmembercount().then(res => {
-          this.$set(v, 'discount', Number(this.member.item_discount) / 10)
+          this.$set(v, 'discount', (Number(this.member.item_discount) / 10).toFixed(2))
           // console.log(v)
           let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
           let worker
@@ -827,7 +841,7 @@ export default {
             cancelButtonText: '取消',
             type: 'warning'
           }).then(() => {
-            this.$set(v, 'discount', Number(this.member.item_discount) / 10)
+            this.$set(v, 'discount', (Number(this.member.item_discount) / 10).toFixed(2))
             let workerlist = JSON.parse(sessionStorage.getItem('workerlist'))
             if (workerlist) {
               let worker = workerlist.find(j => j.id == v.staffid)
@@ -1011,7 +1025,7 @@ export default {
       that.$prompt('', '请输入优惠后价格', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
-        inputPattern: /^[0-9]\d*(.\d{1,2})?$/,
+        inputPattern: /^([-+])?[0-9]\d*(.\d{1,2})?$/,
         inputPlaceholder: that.newprice ? that.newprice : that.sumprice,
         inputErrorMessage: '价格为整数或最多保留2位小数'
       }).then(({ value }) => {
@@ -1094,7 +1108,7 @@ export default {
       if (!v.goods_no) {
         this.$set(v, 'typeid', 1)
         if (this.member && this.member.item_discount) {
-          this.$set(v, 'discount', Number(this.member.item_discount) / 10)
+          this.$set(v, 'discount', (Number(this.member.item_discount) / 10).toFixed(2))
         } else {
           this.$set(v, 'discount', 1)
         }
@@ -1102,7 +1116,7 @@ export default {
       } else {
         this.$set(v, 'typeid', 2)
         if (this.member && this.member.goods_discount) {
-          this.$set(v, 'discount', Number(this.member.goods_discount) / 10)
+          this.$set(v, 'discount', (Number(this.member.goods_discount) / 10).toFixed(2))
         } else {
           this.$set(v, 'discount', 1)
         }
@@ -1178,13 +1192,14 @@ export default {
               }
             })
             this.chooslist = this.info.orderinfo
+            // console.log(this.chooslist)
             this.chooslist.forEach(item => {
               if (!item.discount) {
                 if (this.member && this.member.goods_discount) {
                   if (item.typeid == 2) {
-                    this.$set(item, 'discount', Number(this.member.goods_discount) / 10)
+                    this.$set(item, 'discount', (Number(this.member.goods_discount) / 10).toFixed(2))
                   } else {
-                    this.$set(item, 'discount', Number(this.member.item_discount) / 10)
+                    this.$set(item, 'discount', (Number(this.member.item_discount) / 10).toFixed(2))
                   }
                 } else {
                   this.$set(item, 'discount', 1)
@@ -1371,7 +1386,7 @@ export default {
           position: relative;
           height: 44px;
           line-height: 44px;
-          padding: 0 130px 0 10px;
+          padding: 0 10px 0 10px;
           transition: transform 0.7s, background 0.7s, height 0.7s;
           border-radius: 5px;
           background: #f8f8f8;
@@ -1422,8 +1437,8 @@ export default {
             position: relative;
             float: left;
             width: 136px;
-            height: 128px;
-            background: #f8f8f8;
+            height: 132px;
+            background: #fefefe;
             border-radius: 6px;
             text-align: center;
             margin: 0 15px 15px 0;
@@ -1441,8 +1456,9 @@ export default {
             .priceView {
               height: 28px;
               overflow: hidden;
-              line-height: 28px;
-              background: #f4f4f4;
+              // line-height: 28px;
+              padding: 0 5px;
+              background: #fafafa;
               color: #28282d;
               font-size: 16px;
               border-bottom-left-radius: 6px;

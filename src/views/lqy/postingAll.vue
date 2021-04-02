@@ -39,10 +39,9 @@
         <div class="edit-content">
           <textarea
             v-model="smstxt"
-            readonly
             cols="30"
             rows="10"
-            placeholder="请从右侧短信模板选择"
+            placeholder="请从右侧短信模板选择（可自定义编辑）"
             class="edit-write"
             :maxlength="maxLength"
           ></textarea>
@@ -86,11 +85,16 @@
         style="background: linear-gradient(to right, #f3e7e9 0%, #e3eeff 100%)"
       >
         <div class="topSearchView">
+          <el-select v-model="datetype" class="selectday" placeholder="会员关怀" @change="getList">
+            <el-option label="全部会员" value="0"></el-option>
+            <el-option label="本月生日会员" value="1"></el-option>
+            <el-option label="三天内生日会员" value="2"></el-option>
+            <el-option label="本月未消费会员" value="3"></el-option>
+            <el-option label="7天未消费会员" value="4"></el-option>
+            <el-option label="储值余额不足100" value="5"></el-option>
+            <el-option label="查看欠款会员" value="6"></el-option>
+          </el-select>
           <div class="inputView">
-            <el-select v-model="type" placeholder="请选择">
-              <el-option label="号码" value="号码"></el-option>
-              <el-option label="姓名" value="姓名"></el-option>
-            </el-select>
             <input placeholder="请输入会员名或手机号" v-model="keyword" @keyup.enter="getList" />
             <button class="btn-close btn-audio" @click="keyword=''"></button>
           </div>
@@ -105,7 +109,9 @@
           <el-table-column prop="card_num" label="卡号" width="180" show-overflow-tooltip></el-table-column>
           <el-table-column prop="name" label="姓名"></el-table-column>
           <el-table-column prop="mobile" label="手机号"></el-table-column>
+          <el-table-column prop="birthday1" label="会员生日"></el-table-column>
           <el-table-column prop="balance" label="储值余额"></el-table-column>
+          <el-table-column prop="signbill" label="欠款金额"></el-table-column>
         </el-table>
       </div>
       <span slot="footer" class="dialog-footer">
@@ -160,6 +166,7 @@ export default {
       smstxt: '',
       title: '短信群发',
       checkedOne: false,
+      datetype: '',
       checkedTwo: false,
       checkedThree: false,
       check: [],
@@ -200,7 +207,7 @@ export default {
         ids: this.check,
         content: this.smstxt
       }
-      this.$axios.post('http://saas.4001801812.com/index.php/sysmanage/Sms/sms_send_pos_api/', data).then(res => {
+      this.$axios.post('https://hb.rgoo.com/index.php/sysmanage/Sms/sms_send_pos_api/', data).then(res => {
         if (res.data.code == 1) {
           this.$message.success(res.data.msg)
           this.checksms()
@@ -234,6 +241,7 @@ export default {
         params: {
           storeid: this.storeid,
           sign: 2,
+          datetype: this.datetype,
           search: this.keyword
         }
       })
@@ -303,6 +311,9 @@ export default {
 }
 </style>
 <style lang="scss" scoped>
+.topSearchView {
+  width: 450px;
+}
 .lqy-postingAll {
   /deep/.el-button + .el-button {
     margin-left: 0;

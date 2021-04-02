@@ -6,6 +6,7 @@
           <el-option value="库存-入库单">库存-入库单</el-option>
           <el-option value="库存-出库单">库存-出库单</el-option>
         </el-select>
+        <el-button @click="checkOrder" size="small" type="success">查询订单</el-button>
       </div>
       <div class="dateView">
         <el-date-picker
@@ -109,6 +110,32 @@
     <div class="set_page" :class="{activePage:pageOut}">
       <stroeOut @close="setInfo" v-if="pageOut" :setid="setid"></stroeOut>
     </div>
+
+    <!-- 会员卡弹窗 -->
+    <el-dialog
+      :close-on-click-modal="false"
+      title="待入库列表"
+      :visible.sync="showOrder"
+      width="60%"
+      center
+      :modal-append-to-body="false"
+      custom-class="cardDialog quickmoney"
+    >
+      <el-table ref="cardTable" :data="OrderList" style="width: 100%" @row-click="choosed">
+        <el-table-column width="55">
+          <template slot-scope="{row}">
+            <div class="seleted" :class="{active:chooseids.includes(row.order_id)}"></div>
+          </template>
+        </el-table-column>
+        <el-table-column prop="order_no" label="订单编号"></el-table-column>
+        <el-table-column prop="number" label="产品数量"></el-table-column>
+        <el-table-column prop="adt" label="订货日期"></el-table-column>
+      </el-table>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="showOrder = false">取 消</el-button>
+        <el-button type="primary" @click="chooseSubmit">一键入库</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -117,12 +144,14 @@ import stroeIn from './storeIn'
 import storeIndb from './storeIndb'
 import stroeOut from './storeOut'
 import moment from 'moment'
-import { deflate } from 'zlib';
 export default {
   components: { stroeIn, stroeOut, storeIndb },
   props: {},
   data () {
     return {
+      showOrder: false,
+      OrderList: [],
+      chooseids: [],
       value: '库存-入库单',
       date: '',
       type: 1,
@@ -166,6 +195,48 @@ export default {
   computed: {
   },
   methods: {
+    checkOrder () {
+      let params = {
+        storeid: this.storeid
+      }
+      this.$axios.get('/apt?datatype=get_store_order', { params }).then(res => {
+        console.log(res)
+        if (res.data.list && res.data.list.length > 0) {
+          this.OrderList = res.data.list
+          this.showOrder = true
+        } else {
+          this.$message.error('暂无待入库订单')
+        }
+      })
+    },
+    chooseSubmit () {
+      if (!this.chooseids.length) return this.$message.error('未选择入库订单')
+      let params = {
+        storeid: this.storeid,
+        ids: this.chooseids,
+        into_userid: JSON.parse(sessionStorage.getItem('userInfo')).id,
+        checkman: JSON.parse(sessionStorage.getItem('userInfo')).username
+      }
+      this.$axios.get('/apt?datatype=import_store_order', {
+        params
+      }).then(res => {
+        console.log(res)
+        if (res.data.msg == '成功') {
+          this.$message.success('成功')
+          this.showOrder = false
+          this.getDate()
+        } else {
+          this.$message.error('失败')
+        }
+      })
+    },
+    choosed (row) {
+      if (this.chooseids.includes(row.order_id)) {
+        this.chooseids = this.chooseids.filter(v => v != row.order_id)
+      } else {
+        this.chooseids.push(row.order_id)
+      }
+    },
     async getDate () {
       const res = await this.$axios.get('/api?datatype=get_stock_list', {
         params: {
@@ -306,6 +377,15 @@ export default {
 </style>
 <style lang="scss" scoped>
 #store {
+  .seleted {
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ccc;
+  }
+  .active {
+    background-color: rgb(133, 206, 97);
+  }
   .topView {
     border-bottom: 0.5px solid rgba(220, 220, 220, 0.7);
   }

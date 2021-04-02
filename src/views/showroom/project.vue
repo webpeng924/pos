@@ -26,7 +26,7 @@
         @click="chooseItem=v;drawer=true"
       >
         <div class="imgView">
-          <img :src="v.pic?v.pic:'/upload/shop/moren.jpg'|imgUrl" />
+          <img :src="v.img|imgUrl" />
         </div>
         <div class="textView">
           <div class="nameView overflowText">{{title == '产品介绍'?v.goods_name:v.name}}</div>
@@ -46,10 +46,10 @@
     >
       <div class="contentView">
         <div class="imgView">
-          <img :src="chooseItem.img?chooseItem.img:'/upload/shop/moren.jpg'|imgUrl" />
+          <img :src="chooseItem.img|imgUrl" />
         </div>
         <div class="textView">
-          <div class="nameView">{{chooseItem.name}}</div>
+          <div class="nameView">{{chooseItem.name?chooseItem.name:chooseItem.goods_name}}</div>
           <div class="descView">介绍：无</div>
           <div class="stepView">
             <div class="tView">服务流程</div>
@@ -61,7 +61,7 @@
             <button class="btn-audio btn-add" @click="additem">添加</button>
           </div>
         </div>
-        <button class="el-icon-close btn-audio"></button>
+        <button class="el-icon-close btn-audio" @click="drawer=false"></button>
       </div>
     </el-drawer>
 
@@ -77,7 +77,7 @@
         <div class="listView">
           <div class="listItem serItem" v-for="(v,k) in carlist" :key="k">
             <div class="imgView">
-              <img :src="v.img?v.img:'/upload/shop/moren.jpg'|imgUrl" />
+              <img :src="v.img|imgUrl" />
             </div>
             <div class="textView">
               <div class="nameView">

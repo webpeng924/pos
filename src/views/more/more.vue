@@ -7,11 +7,11 @@
       <div class="listView">
         <div
           class="userInfoItem menuItem btn-audio"
-          :class="{p100:!show,active:active=='登陆信息'}"
-          @click="selectOption('登陆信息')"
+          :class="{p100:!show,active:active=='登录信息'}"
+          @click="selectOption('登录信息')"
         >
           <div class="imgView">
-            <img :src="userInfo.avatar?userInfo.avatar:'/upload/shop/moren.jpg'|imgUrl" />
+            <img :src="userInfo.avatar|imgUrl" />
           </div>
           <div class="textView">
             <div class="userNameView overflowText">{{userInfo.username}}</div>
@@ -52,10 +52,10 @@
       <div class="topView">
         <p class="title">{{active}}</p>
       </div>
-      <div class="userInfoView" v-show="active=='登陆信息'">
+      <div class="userInfoView" v-show="active=='登录信息'">
         <div class="headerView">
           <div class="avatarView">
-            <img :src="shopInfo.avatar?shopInfo.avatar:'/upload/shop/moren.jpg'|imgUrl" />
+            <img :src="shopInfo.avatar|imgUrl" />
           </div>
           <div class="nameView">{{userInfo.username}}</div>
         </div>
@@ -94,6 +94,10 @@
             <div class="listItem btn-audio" @click="openTable('staffRank')">
               <img src="../../assets/images/jCTJ.png" />
               <div>员工销售排行</div>
+            </div>
+            <div class="listItem btn-audio" @click="openTable('signbill')">
+              <img src="../../assets/images/xiaofeimingxi.png" />
+              <div>会员签帐汇总</div>
             </div>
           </div>
         </div>
@@ -161,9 +165,9 @@
               <img src="../../assets/images/kucunpandian.png" />
               <div>次卡设置</div>
             </div>
-            <div class="listItem btn-audio" @click="$message('暂未开放')">
+            <div class="listItem btn-audio" @click="catelist=true">
               <img src="../../assets/images/xiaohao.png" />
-              <div>产品消耗设定</div>
+              <div>项目/产品分类</div>
             </div>
             <div class="listItem btn-audio" @click="zhekou=true">
               <img src="../../assets/images/taocan.png" />
@@ -323,6 +327,9 @@
     <div class="set_page" :class="{activePage:xiaohao}">
       <xiaohao @close="xiaohao=false" v-if="xiaohao"></xiaohao>
     </div>
+    <div class="set_page" :class="{activePage:catelist}">
+      <catelist @close="catelist=false" v-if="catelist"></catelist>
+    </div>
     <div class="set_page" :class="{activePage:memberlist}">
       <memberlist @close="memberlist=false" v-if="memberlist"></memberlist>
     </div>
@@ -360,6 +367,7 @@
       <churutongji @close="showTable=false;tableName=''" v-if="tableName=='churutongji'"></churutongji>
       <cardSale @close="showTable=false;tableName=''" v-if="tableName=='cardSale'"></cardSale>
       <staffRank @close="showTable=false;tableName=''" v-if="tableName=='staffRank'"></staffRank>
+      <signbill @close="showTable=false;tableName=''" v-if="tableName=='signbill'"></signbill>
     </div>
   </div>
 </template>
@@ -371,6 +379,7 @@ import shopInfo from './shopInfo'
 import projectlist from './projectList'
 import memberlist from '../members/memberList'
 import zhekou from './zhekou'
+import catelist from './catelist'
 import xiaohao from './xiaohao'
 import baobiao from '@/components/baobiao'
 import kucun from './kucunliang'
@@ -386,8 +395,9 @@ import orderlist from '../order/orderlist'
 import churutongji from './churutongji'
 import cardSale from '../table/cardSale'
 import staffRank from '../table/staffSale'
+import signbill from '../table/signbillList'
 export default {
-  components: { product, memberlist, projectlist, shopInfo, zhekou, xiaohao, baobiao, kucun, setCard, msg, erweima, memberView, panku, cikalist, quanlist, orderlist, churutongji, cardSale, staffRank, jicun },
+  components: { product, memberlist, projectlist, shopInfo, zhekou, catelist, xiaohao, baobiao, kucun, setCard, msg, erweima, memberView, panku, cikalist, quanlist, orderlist, churutongji, cardSale, staffRank, jicun, signbill },
   props: {},
   data () {
     return {
@@ -395,6 +405,7 @@ export default {
       active: '',
       storeid: sessionStorage.getItem('storeid'),
       is_doublescreen: JSON.parse(sessionStorage.getItem('shopInfo')).is_doublescreen,
+      catelist: false,
       product: false,
       memberlist: false,
       projectlist: false,

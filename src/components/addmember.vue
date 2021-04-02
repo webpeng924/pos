@@ -11,7 +11,7 @@
           <div class="left">员工头像（选填）</div>
           <div class="right">
             <div class="imgView">
-              <img :src="'https://hb.rgoo.com'+avatar" alt />
+              <img :src="avatar|imgUrl" alt />
               <span @click="openCropper">点击上传</span>
             </div>
           </div>
@@ -283,13 +283,13 @@
           </div>
         </div>
         <div class="item">
-          <div class="left">登陆账号（非必填）</div>
+          <div class="left">登录账号（非必填）</div>
           <div class="right">
             <input type="text" placeholder="请输入" v-model="username" @input="change" />
           </div>
         </div>
         <div class="item">
-          <div class="left">登陆密码（非必填）</div>
+          <div class="left">登录密码（非必填）</div>
           <div class="right">
             <input type="text" placeholder="请输入" v-model="password" />
           </div>
@@ -341,6 +341,11 @@ export default {
   watch: {},
   computed: {},
   methods: {
+    getAutoNo () {
+      this.$axios.get('/api?datatype=get_staff_autono&storeid=' + this.storeid).then(res => {
+        this.jobNo = res.data.data
+      })
+    },
     back () {
       this.$emit('close')
     },
@@ -351,7 +356,7 @@ export default {
     openCropper () {
       let option = {
         title: '员工头像',
-        msg: '建议图片大小：2M'
+        // msg: '建议图片大小：2M'
       };
       this.$refs.cropper.open(option, (data) => {
         // console.log(data)
@@ -424,6 +429,8 @@ export default {
       this.username = this.choose.username
       this.password = this.choose.password
       this.remark = this.choose.remark
+    } else {
+      this.getAutoNo()
     }
   },
   mounted () { }

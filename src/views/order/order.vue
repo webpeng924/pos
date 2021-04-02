@@ -34,7 +34,7 @@
             v-for="(v,k) in workerlist"
             :key="k"
             class="a_item"
-            :style="`background:url(${imgurl(v.avatar)});background-size:100% 100%`"
+            :style="`background:url(${$options.filters['imgUrl'](v.avatar)});background-size:100% 100%`"
           >
             <p>{{v.name}}</p>
             <p class="one-txt-cut">{{v.service_job}}({{v.job_no}})</p>
@@ -200,7 +200,6 @@
 <script>
 import addyuyue from '@/components/addyuyue'
 import moment from 'moment'
-import { cornsilk } from 'color-name';
 export default {
   components: { addyuyue },
   props: {},
@@ -267,6 +266,7 @@ export default {
         params: {
           storeid: this.storeid,
           is_li: 1,
+          is_yy: 1,
           is_wei: 1
         }
       })
@@ -439,13 +439,11 @@ export default {
       const day1 = new Date(this.date)
       day1.setTime(day1.getTime() - 24 * 60 * 60 * 1000)
       this.date = this.formatDate(day1)
-      // this.getworkerlist()
     },
     daynext () {
       const day1 = new Date(this.date)
       day1.setTime(day1.getTime() + 24 * 60 * 60 * 1000)
       this.date = this.formatDate(day1)
-      // this.getworkerlist()
     },
     handleClose () {
       this.listDialog = false
@@ -454,7 +452,6 @@ export default {
     }
   },
   created () {
-    // this.getworkerlist()
     for (let i = 10; i < 22; i++) {
       for (let j = 0; j < 2; j++) {
         if (j == 0) {

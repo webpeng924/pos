@@ -64,7 +64,7 @@
       ref="uploads"
       style="position:absolute; clip:rect(0 0 0 0);"
       accept="image/png, image/jpeg, image/gif, image/jpg"
-      @click="$event.target.value=''"
+      @click="openPIc"
       @change="uploadImg($event,1)"
     />
   </el-dialog>
@@ -76,6 +76,7 @@ export default {
   data () {
     return {
       cropperVisible: false,
+
       title: '',
       msg: '',
       callback: null,
@@ -92,6 +93,16 @@ export default {
     }
   },
   methods: {
+    openPIc (e) {
+      if ((window.navigator.userAgent).indexOf('wv') == -1) {
+        e.target.value = '';
+      } else {
+        javascript: jsSzb.smPhoto();
+      }
+      // this.$message('DIANJI')
+      // javascript: jsSzb.smPhoto();
+      // jsSzb.smPhoto();
+    },
     open (option, callback) {
       this.title = option.title;
       this.msg = option.msg;
@@ -110,14 +121,17 @@ export default {
       }
       let reader = new FileReader();
       reader.onload = (e) => {
+        console.log(typeof e.target.result === 'object')
         let data;
         if (typeof e.target.result === 'object') {
           // 把Array Buffer转化为blob 如果是base64不需要
           data = window.URL.createObjectURL(new Blob([e.target.result]))
+          console.log(data)
         } else {
           data = e.target.result
         }
         if (num === 1) {
+          console.log(data)
           this.option.img = data
         }
       };
@@ -126,6 +140,39 @@ export default {
       // 转化为blob
       reader.readAsArrayBuffer(file)
     },
+    onJaveImageResJs (e) {
+      window.URL = window.URL || window.webkitURL;
+      var url = window.URL.createObjectURL(this.dataURLtoBlob('data:image/png;base64,' + e));
+      this.option.img = url
+    },
+    // base64转blob
+    dataURLtoBlob (base64Data) {
+      this.$message('开始转换')
+      try {
+        var byteString;
+        if (base64Data.split(',')[0].indexOf('base64') >= 0)
+          byteString = atob(base64Data.split(',')[1]);
+        else
+          byteString = unescape(base64Data.split(',')[1]);
+        var mimeString = base64Data.split(',')[0].split(':')[1].split(';')[0];
+        var ia = new Uint8Array(byteString.length);
+        for (var i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+        this.$message('转换完成')
+        return new Blob([ia], {
+          type: mimeString
+        });
+      }
+      catch (err) {
+        this.$notify({
+          title: '提示',
+          message: err,
+          duration: 0
+        });
+      }
+    },
+
     //缩放
     changeScale (num) {
       num = num || 1;
@@ -146,7 +193,16 @@ export default {
     proImgData () {
       this.$refs.cropper.getCropBlob((data) => {
         if (data.size < 1024 * 1024 * 2) {
-          this.updata(data);
+          try {
+            this.updata(data);
+          }
+          catch (err) {
+            this.$notify({
+              title: '提示',
+              message: err,
+              duration: 0
+            });
+          }
           // console.log(data, data.size)
         } else {
           this.cutImg(data)
@@ -185,7 +241,6 @@ export default {
       var that = this
       const isLt40k = data.size / 1024 < 40
       if (isLt40k) return this.$message.error('上传文件大小不能小于40k!')
-      let loading = this.$loading({ lock: true, text: '数据加载中...', spinner: 'el-icon-loading', background: 'rgba(0, 0, 0, 0.7)' });
       let a = new FileReader();
       a.onload = function (e) {
         // let data = {
@@ -210,6 +265,10 @@ export default {
       }
       a.readAsDataURL(data);
     },
+  },
+  mounted () {
+    window.onJaveImageResJs = this.onJaveImageResJs
+    // console.log(window.onJaveImageResJs)
   },
   components: {
     VueCropper,

@@ -4,14 +4,16 @@
       <div class="tView">短信营销</div>
       <button class="btn-back btn-audio" @click="$emit('close')"></button>
     </div>
-    <el-tabs tab-position="left">
+    <el-tabs tab-position="left" @tab-click="handleClick">
       <el-tab-pane label="短信群发">
         <div class="box">
           <lqyPosting></lqyPosting>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="短信历史">
-        <div class="box">
+      <el-tab-pane label="短信历史" style="
+    height: calc(100% - 85px);
+">
+        <div class="box" v-if="show">
           <history></history>
         </div>
       </el-tab-pane>
@@ -29,7 +31,22 @@ import lqyPosting from "./postingAll.vue";
 import lqyRecharge from "./recharge.vue";
 import history from './history'
 export default {
+  data () {
+    return {
+      show: false
+    }
+  },
   created () { },
+  methods: {
+    handleClick (tab, event) {
+      console.log(tab, event);
+      if (tab.label == '短信历史') {
+        this.show = true
+      } else {
+        this.show = false
+      }
+    }
+  },
   components: {
     lqyPosting,
     lqyRecharge,

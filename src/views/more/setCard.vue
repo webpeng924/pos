@@ -259,7 +259,7 @@ export default {
       this.add = false
       let option = {
         title: '卡图片',
-        msg: '建议图片大小：2M',
+        // msg: '建议图片大小：2M',
         fixedNumber: [3, 2]
       };
       this.$refs.cropper.open(option, (data) => {
@@ -357,7 +357,7 @@ export default {
         item_discount: this.form.item_discount * 10,
         goods_discount: this.form.goods_discount * 10
       }
-      const res = await this.$axios.post('http://saas.4001801812.com/api/api.php?datatype=insert_card_list', data)
+      const res = await this.$axios.post('/api?datatype=insert_card_list', data)
       // console.log(res)
       if (res.data.code == 1) {
         this.$message.success(res.data.msg)

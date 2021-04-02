@@ -236,7 +236,7 @@
       :append-to-body="true"
       custom-class="dialog"
     >
-      <div @click="dateDialog = false">
+      <div @click="choosday">
         <el-calendar v-model="date"></el-calendar>
       </div>
     </el-dialog>
@@ -342,6 +342,12 @@ export default {
     }
   },
   methods: {
+    choosday (e) {
+      let flag1 = e.toElement.innerHTML.includes("上个月");
+      let flag2 = e.toElement.innerHTML.includes("下个月");
+      if (!flag1 && !flag2) {
+        this.dateDialog = false      }
+    },
     getShop () {
       if (!this.shopCode) return this.$message.error('请输入门店编码')
       this.$axios.get('/api?datatype=get_shoplist', {

@@ -10,6 +10,7 @@
         <el-option label="三天内生日会员" value="2"></el-option>
         <el-option label="本月未消费会员" value="3"></el-option>
         <el-option label="7天未消费会员" value="4"></el-option>
+        <el-option label="储值余额不足100" value="5"></el-option>
       </el-select>
       <div class="topSearchView">
         <div class="inputView">
@@ -26,11 +27,7 @@
       <el-table :data="tableData" style="width: 100%" @row-click="openInfo" height="100%">
         <el-table-column width="120">
           <template slot-scope="scope">
-            <img
-              :src="scope.row.img?scope.row.img:'/upload/shop/moren.jpg'|imgUrl"
-              alt
-              style="width:100px;height:75px"
-            />
+            <img :src="scope.row.img|imgUrl" alt style="width:100px;height:75px" />
           </template>
         </el-table-column>
         <el-table-column prop="card_num" label="卡号" width="180"></el-table-column>
